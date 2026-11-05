@@ -14,6 +14,14 @@ final class DeepLinkRouter {
     var pendingDestination: PushDestination?
 
     func handle(_ url: URL) {
+        // Widget links: letsraffle://reveal/<code>, letsraffle://draw/<code>
+        if url.scheme == InviteLink.scheme, let code = url.pathComponents.dropFirst().first {
+            switch url.host {
+            case "reveal": pendingDestination = .reveal(inviteCode: code); return
+            case "draw": pendingDestination = .drawDetail(inviteCode: code); return
+            default: break
+            }
+        }
         if let code = InviteLink.code(from: url) {
             pendingInviteCode = code
         }

@@ -29,6 +29,7 @@ final class DrawsStore {
         do {
             draws = try await api.send(API.draws())
             phase = .loaded
+            WidgetSync.shared.update(draws: draws)
         } catch is CancellationError {
             // View went away; keep the current state.
         } catch {
@@ -38,6 +39,7 @@ final class DrawsStore {
 
     func reset() {
         draws = []
+        WidgetSync.shared.update(draws: [])
         phase = .idle
     }
 }

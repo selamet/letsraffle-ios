@@ -28,7 +28,13 @@ struct SantasDrawApp: App {
                 .task { await setUpPush() }
                 .onChange(of: session.state) { _, _ in Task { await push.sync() } }
                 .onChange(of: settings.notificationsEnabled) { _, enabled in Task { await push.setEnabled(enabled) } }
-                .onChange(of: settings.language) { _, _ in Task { await push.sync() } }
+                .onChange(of: settings.language, initial: true) { _, language in
+                    WidgetSync.shared.update(language: language)
+                    Task { await push.sync() }
+                }
+                .onChange(of: session.isSignedIn) { _, signedIn in
+                    if !signedIn { WidgetSync.shared.update(draws: []) }
+                }
                 .fullScreenCover(isPresented: $push.isPromptPresented) {
                     PushPromptView(push: push)
                         .environment(\.strings, settings.strings)

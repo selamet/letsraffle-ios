@@ -61,9 +61,11 @@ final class ParticipationStore {
         guard let data = Keychain.read(service: service, account: account),
               let decoded = try? JSONCoding.decoder.decode([Participation].self, from: data) else { return }
         items = decoded
+        WidgetSync.shared.update(participations: items)
     }
 
     private func save() {
+        WidgetSync.shared.update(participations: items)
         if let data = try? JSONCoding.encoder.encode(items) {
             Keychain.write(data, service: service, account: account)
         }
