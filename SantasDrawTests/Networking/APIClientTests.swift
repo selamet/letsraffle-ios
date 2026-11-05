@@ -23,13 +23,13 @@ final class APIClientTests: XCTestCase {
             return .init(status: 200, body: Fixtures.tokenResponse(access: "a1", refresh: "r1"))
         }
 
-        let response = try await client.send(API.login(email: "hakan@example.com", password: "secret1"))
+        let response = try await client.send(API.login(email: "test.user@example.com", password: "secret1"))
 
         XCTAssertEqual(response.accessToken, "a1")
-        XCTAssertEqual(response.user.email, "hakan@example.com")
+        XCTAssertEqual(response.user.email, "test.user@example.com")
         let body = try XCTUnwrap(MockURLProtocol.requests.first?.httpBody)
         let json = try JSONSerialization.jsonObject(with: body) as? [String: String]
-        XCTAssertEqual(json, ["email": "hakan@example.com", "password": "secret1"])
+        XCTAssertEqual(json, ["email": "test.user@example.com", "password": "secret1"])
     }
 
     func testDrawListDecodesCamelCaseAndStatuses() async throws {
@@ -61,7 +61,7 @@ final class APIClientTests: XCTestCase {
             phoneNumberRequired: false,
             language: "TR",
             drawDate: date,
-            participants: [ParticipantInput(firstName: "Hakan", lastName: "Budak", email: "h@x.com", address: "Kadıköy")]
+            participants: [ParticipantInput(firstName: "Ayşe", lastName: "Demir", email: "ayse@example.com", address: "Kadıköy")]
         )
 
         let response = try await client.send(API.createDynamicDraw(request))
@@ -73,7 +73,7 @@ final class APIClientTests: XCTestCase {
         XCTAssertEqual(json["addressRequired"] as? Bool, true)
         XCTAssertEqual(json["drawDate"] as? String, "2026-12-24T20:00:00Z")
         let participant = try XCTUnwrap((json["participants"] as? [[String: Any]])?.first)
-        XCTAssertEqual(participant["firstName"] as? String, "Hakan")
+        XCTAssertEqual(participant["firstName"] as? String, "Ayşe")
         XCTAssertNil(participant["phone"], "nil optionals must be omitted")
         XCTAssertNil(participant["id"], "local identifier must not be sent")
     }
@@ -174,7 +174,7 @@ enum Fixtures {
     static func tokenResponse(access: String, refresh: String) -> String {
         """
         {"access_token":"\(access)","refresh_token":"\(refresh)","token_type":"bearer",
-         "user":{"id":1,"email":"hakan@example.com","created_at":"2026-11-01T10:00:00.123456Z","updated_at":"2026-11-01T10:00:00.123456Z"}}
+         "user":{"id":1,"email":"test.user@example.com","created_at":"2026-11-01T10:00:00.123456Z","updated_at":"2026-11-01T10:00:00.123456Z"}}
         """
     }
 
