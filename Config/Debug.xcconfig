@@ -1,0 +1,3 @@
+#include "Base.xcconfig"
+API_BASE_URL = http:$(SLASH)/localhost:8000/api/v1
+#include? "Secrets.xcconfig"

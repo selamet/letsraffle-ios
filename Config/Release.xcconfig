@@ -1,0 +1,3 @@
+#include "Base.xcconfig"
+API_BASE_URL = https:$(SLASH)/api.letsraffle.com/api/v1
+#include? "Secrets.xcconfig"

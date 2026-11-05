@@ -1,0 +1,66 @@
+name: SantasDraw
+options:
+  bundleIdPrefix: com.letsraffle
+  deploymentTarget:
+    iOS: "17.0"
+  developmentLanguage: tr
+  createIntermediateGroups: true
+configs:
+  Debug: debug
+  Release: release
+configFiles:
+  Debug: Config/Debug.xcconfig
+  Release: Config/Release.xcconfig
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+targets:
+  SantasDraw:
+    type: application
+    platform: iOS
+    sources:
+      - SantasDraw
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.letsraffle.ios
+        PRODUCT_NAME: "Santa's Draw"
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: "Santa's Draw"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        CODE_SIGN_STYLE: Automatic
+    info:
+      path: SantasDraw/Resources/Info.plist
+      properties:
+        API_BASE_URL: $(API_BASE_URL)
+        WEB_BASE_URL: $(WEB_BASE_URL)
+        CFBundleLocalizations: [tr, en]
+  SantasDrawTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - SantasDrawTests
+    dependencies:
+      - target: SantasDraw
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        BUNDLE_LOADER: $(TEST_HOST)
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Santa's Draw.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Santa's Draw"
+schemes:
+  SantasDraw:
+    build:
+      targets:
+        SantasDraw: all
+        SantasDrawTests: [test]
+    test:
+      targets:
+        - SantasDrawTests
