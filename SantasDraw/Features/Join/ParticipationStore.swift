@@ -5,7 +5,8 @@ import Observation
 struct Participation: Codable, Identifiable, Equatable, Hashable {
     var id: String { inviteCode }
     let inviteCode: String
-    let participantId: Int
+    /// Unknown for the organizer's own entry (create response has no participant id).
+    let participantId: Int?
     let drawId: Int
     let displayName: String
     var drawDate: Date?
@@ -13,6 +14,8 @@ struct Participation: Codable, Identifiable, Equatable, Hashable {
     var participantToken: String?
     var wantsNotification: Bool
     let joinedAt: Date
+    /// Cached once revealed so the result (and widget) work offline.
+    var result: MatchResult?
 }
 
 /// Persists joined draws in the Keychain (they contain participant tokens).
@@ -31,6 +34,16 @@ final class ParticipationStore {
     func add(_ participation: Participation) {
         items.removeAll { $0.inviteCode == participation.inviteCode }
         items.insert(participation, at: 0)
+        save()
+    }
+
+    func participation(for inviteCode: String) -> Participation? {
+        items.first { $0.inviteCode == inviteCode }
+    }
+
+    func storeResult(_ result: MatchResult, for inviteCode: String) {
+        guard let index = items.firstIndex(where: { $0.inviteCode == inviteCode }) else { return }
+        items[index].result = result
         save()
     }
 
