@@ -14,12 +14,19 @@ final class KeychainTokenStore: TokenStore {
         self.service = service
     }
 
+    /// In-memory copy so the session keeps working even if a Keychain write fails.
+    private var cache: AuthTokens??
+
     var tokens: AuthTokens? {
         get {
-            guard let data = Keychain.read(service: service, account: account) else { return nil }
-            return try? JSONDecoder().decode(AuthTokens.self, from: data)
+            if let cache { return cache }
+            let stored = Keychain.read(service: service, account: account)
+                .flatMap { try? JSONDecoder().decode(AuthTokens.self, from: $0) }
+            cache = .some(stored)
+            return stored
         }
         set {
+            cache = .some(newValue)
             if let newValue, let data = try? JSONEncoder().encode(newValue) {
                 Keychain.write(data, service: service, account: account)
             } else {
