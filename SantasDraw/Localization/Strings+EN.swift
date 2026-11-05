@@ -177,6 +177,7 @@ extension Strings {
         genericError: "Something went wrong. Please try again.",
         networkError: "Couldn't reach the server. Check your connection.",
         sessionExpired: "Your session expired. Please log in again.",
+        pastDate: "The draw date must be in the future",
         retry: "Try again"
     )
 }

@@ -177,6 +177,7 @@ extension Strings {
         genericError: "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
         networkError: "Sunucuya ulaşılamadı. İnternet bağlantını kontrol et.",
         sessionExpired: "Oturumun sona erdi. Lütfen tekrar giriş yap.",
+        pastDate: "Çekiliş tarihi ileri bir saat olmalı",
         retry: "Tekrar dene"
     )
 }
