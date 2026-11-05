@@ -163,6 +163,9 @@ extension Strings {
         logout: "Log Out",
         deleteAccount: "Delete Account",
         deleteAccountConfirm: "Your account and personal data will be permanently deleted. Are you sure?",
+        openSource: "Open Source",
+        widgetsHowTo: "Long-press an empty area on your Home Screen, tap + in the top corner and choose Santa's Draw.",
+        deleteAccountFailed: "Couldn't delete account",
         appleLinked: "Linked with Apple",
         guest: "Guest",
 

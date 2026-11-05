@@ -5,6 +5,15 @@ enum AppConfig {
     static let apiBaseURL: URL = url(forKey: "API_BASE_URL", fallback: "http://localhost:8000/api/v1")
     static let webBaseURL: URL = url(forKey: "WEB_BASE_URL", fallback: "https://letsraffle.com")
 
+    static let sourceCodeURL = URL(string: "https://github.com/selamet/letsraffle-ios")!
+
+    static var version: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+        let build = info?["CFBundleVersion"] as? String ?? "1"
+        return "\(short) (\(build))"
+    }
+
     /// Public invite link that opens the join form (web route `/draw/join/:inviteCode`).
     static func inviteURL(for code: String) -> URL {
         webBaseURL.appending(path: "draw/join/\(code)")

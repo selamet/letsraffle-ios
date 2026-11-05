@@ -163,6 +163,9 @@ extension Strings {
         logout: "Çıkış Yap",
         deleteAccount: "Hesabı Sil",
         deleteAccountConfirm: "Hesabın ve kişisel verilerin kalıcı olarak silinecek. Emin misin?",
+        openSource: "Açık kaynak",
+        widgetsHowTo: "Widget eklemek için ana ekranda boş bir alana basılı tut, sol üstteki + simgesine dokun ve Santa's Draw'u seç.",
+        deleteAccountFailed: "Hesap silinemedi",
         appleLinked: "Apple ile bağlı",
         guest: "Misafir",
 
