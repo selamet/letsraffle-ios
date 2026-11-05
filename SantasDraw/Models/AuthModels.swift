@@ -43,6 +43,18 @@ struct Credentials: Encodable {
     let password: String
 }
 
+struct AppleSignInRequest: Encodable {
+    let identityToken: String
+    let firstName: String?
+    let lastName: String?
+
+    enum CodingKeys: String, CodingKey {
+        case identityToken = "identity_token"
+        case firstName = "first_name"
+        case lastName = "last_name"
+    }
+}
+
 struct RefreshRequest: Encodable {
     let refreshToken: String
 

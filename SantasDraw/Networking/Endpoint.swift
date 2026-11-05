@@ -36,6 +36,14 @@ enum API {
         Endpoint(method: .post, path: "auth/register", body: Credentials(email: email, password: password))
     }
 
+    static func signInWithApple(_ credential: AppleCredential) -> Endpoint<AuthResponse> {
+        Endpoint(
+            method: .post,
+            path: "auth/apple",
+            body: AppleSignInRequest(identityToken: credential.identityToken, firstName: credential.firstName, lastName: credential.lastName)
+        )
+    }
+
     static func refresh(token: String) -> Endpoint<AuthResponse> {
         Endpoint(method: .post, path: "auth/refresh", body: RefreshRequest(refreshToken: token))
     }

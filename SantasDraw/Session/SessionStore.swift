@@ -68,6 +68,11 @@ final class SessionStore {
         await complete(response)
     }
 
+    func signInWithApple(_ credential: AppleCredential) async throws {
+        let response = try await api.send(API.signInWithApple(credential))
+        await complete(response)
+    }
+
     func requestPasswordReset(email: String, language: AppLanguage) async throws {
         _ = try await api.send(API.forgotPassword(email: normalized(email), language: language))
     }
