@@ -40,11 +40,11 @@ struct MainTabView: View {
             JoinTabView()
                 .tag(MainTab.join)
                 .toolbar(.hidden, for: .tabBar)
-            ProfilePlaceholderView()
+            ProfileView()
                 .tag(MainTab.profile)
                 .toolbar(.hidden, for: .tabBar)
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
+        .overlay(alignment: .bottom) {
             if !tabBar.isHidden {
                 FloatingTabBar(selection: $selection)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -58,7 +58,16 @@ struct MainTabView: View {
     }
 }
 
+extension View {
+    /// Keeps scrollable tab-root content clear of the floating tab bar.
+    func floatingTabBarInset() -> some View {
+        safeAreaPadding(.bottom, FloatingTabBar.reservedHeight)
+    }
+}
+
 struct FloatingTabBar: View {
+    static let reservedHeight: CGFloat = 80
+
     @Binding var selection: MainTab
     @Environment(\.strings) private var t
 
@@ -96,22 +105,5 @@ struct FloatingTabBar: View {
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
         .animation(.spring(duration: 0.3), value: selection)
-    }
-}
-
-/// Replaced by the Profile tab in #8.
-private struct ProfilePlaceholderView: View {
-    @Environment(\.strings) private var t
-    @Environment(SessionStore.self) private var session
-
-    var body: some View {
-        VStack(spacing: 16) {
-            ScreenHeader(title: t.tabProfile, subtitle: session.user?.email ?? t.guest)
-            Button(t.logout) { Task { await session.signOut() } }
-                .buttonStyle(.primary)
-        }
-        .padding(24)
-        .frame(maxHeight: .infinity, alignment: .top)
-        .background(Palette.page)
     }
 }
