@@ -53,9 +53,7 @@ struct LoginView: View {
 
                     OrDivider(title: t.or)
 
-                    Button {} label: { AppleLabel(title: t.apple) }
-                        .buttonStyle(.inverted)
-                        .disabled(true) // Wired in #9.
+                    AppleSignInButton(title: t.apple) { serverError = $0 }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 24)

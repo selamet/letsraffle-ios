@@ -71,3 +71,26 @@ final class SessionStoreTests: XCTestCase {
         XCTAssertNil(Validation.passwordError("123456", t))
     }
 }
+
+@MainActor
+final class AppleSignInSessionTests: XCTestCase {
+    func testAppleSignInPostsSnakeCaseBodyAndSignsIn() async throws {
+        MockURLProtocol.reset()
+        MockURLProtocol.handler = { _ in .init(status: 200, body: Fixtures.tokenResponse(access: "a", refresh: "r")) }
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+        let store = InMemoryTokenStore()
+        let api = APIClient(baseURL: URL(string: "https://api.test/api/v1")!, session: MockURLProtocol.makeSession(), tokenStore: store)
+        let session = SessionStore(api: api, defaults: defaults)
+
+        try await session.signInWithApple(AppleCredential(identityToken: "jwt", firstName: "Ayşe", lastName: nil))
+
+        XCTAssertTrue(session.isSignedIn)
+        let request = try XCTUnwrap(MockURLProtocol.requests.first)
+        XCTAssertEqual(request.url?.path, "/api/v1/auth/apple")
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: request.httpBody!) as? [String: Any])
+        XCTAssertEqual(json["identity_token"] as? String, "jwt")
+        XCTAssertEqual(json["first_name"] as? String, "Ayşe")
+        XCTAssertNil(json["last_name"])
+    }
+}
