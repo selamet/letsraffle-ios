@@ -129,6 +129,8 @@ struct Strings {
     let joinSubmit: String
     let myJoinedDraws: String
     let cameraDenied: String
+    let joinNotFound: String
+    let drawNotActive: String
 
     // Success & reveal
     let successTitle: String
