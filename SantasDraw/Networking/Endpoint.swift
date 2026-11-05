@@ -94,6 +94,16 @@ enum API {
         Endpoint(method: .post, path: "draws/\(drawId)/execute", auth: .required)
     }
 
+    // MARK: Devices (push)
+
+    static func registerDevice(_ registration: DeviceRegistration) -> Endpoint<DeviceRegistrationResponse> {
+        Endpoint(method: .post, path: "devices", body: registration, auth: .optional)
+    }
+
+    static func unregisterDevice(token: String) -> Endpoint<EmptyResponse> {
+        Endpoint(method: .delete, path: "devices/\(token.urlPathEncoded)")
+    }
+
     // MARK: Join (public)
 
     static func publicDraw(inviteCode: String) -> Endpoint<DrawPublicInfo> {
