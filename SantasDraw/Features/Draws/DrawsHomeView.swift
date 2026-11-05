@@ -3,6 +3,7 @@ import SwiftUI
 enum DrawsRoute: Hashable {
     case allDraws
     case createInvite
+    case inviteDetails
     case manual
     case detail(inviteCode: String)
 }
@@ -13,6 +14,8 @@ struct DrawsHomeView: View {
     @Environment(SessionStore.self) private var session
     @State private var store: DrawsStore?
     @State private var path: [DrawsRoute] = []
+    @State private var inviteDraft: InviteDraft?
+    @Environment(TabBarVisibility.self) private var tabBar
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -40,12 +43,29 @@ struct DrawsHomeView: View {
         .task(id: session.user?.id) {
             guard session.isSignedIn else { store = nil; return }
             if store == nil { store = DrawsStore(api: session.api) }
+            #if DEBUG
+            applyDebugRoute()
+            #endif
             await store?.load(t)
         }
     }
 
+    #if DEBUG
+    private func applyDebugRoute() {
+        guard path.isEmpty, let route = DebugRoute.current else { return }
+        if route == "invite" { open(.createInvite) }
+        if route == "invite2" { open(.createInvite); path.append(.inviteDetails) }
+        if route == "manual" { open(.manual) }
+        if route.hasPrefix("detail:") { path = [.detail(inviteCode: String(route.dropFirst(7)))] }
+        tabBar.isHidden = !path.isEmpty
+    }
+    #endif
+
     private func open(_ route: DrawsRoute) {
         if session.isSignedIn {
+            if route == .createInvite {
+                inviteDraft = InviteDraft(email: session.user?.email ?? "")
+            }
             path.append(route)
         } else {
             session.exitGuestMode()
@@ -109,9 +129,20 @@ struct DrawsHomeView: View {
         switch route {
         case .allDraws:
             AllDrawsView(store: store, rowLink: drawLink)
-        case .createInvite, .manual, .detail:
-            // Implemented in #5 (invite) and #6 (manual).
-            Text(t.genericError).toolbarRole(.editor)
+        case .createInvite:
+            if let inviteDraft { InviteSettingsView(path: $path, draft: inviteDraft) }
+        case .inviteDetails:
+            if let inviteDraft {
+                InviteOrganizerView(path: $path, draft: inviteDraft) { response in
+                    self.inviteDraft = nil
+                    path = [.detail(inviteCode: response.inviteCode)]
+                }
+            }
+        case let .detail(inviteCode):
+            DrawDetailView(inviteCode: inviteCode, api: session.api)
+        case .manual:
+            // Implemented in #6.
+            EmptyView()
         }
     }
 }
