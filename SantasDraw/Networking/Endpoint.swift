@@ -48,6 +48,14 @@ enum API {
         )
     }
 
+    static func me() -> Endpoint<User> {
+        Endpoint(method: .get, path: "auth/me", auth: .required)
+    }
+
+    static func deleteAccount() -> Endpoint<EmptyResponse> {
+        Endpoint(method: .delete, path: "auth/me", auth: .required)
+    }
+
     // MARK: Draws (organizer)
 
     static func draws() -> Endpoint<[DrawListItem]> {
