@@ -42,6 +42,7 @@ targets:
       path: SantasDraw/Resources/SantasDraw.entitlements
       properties:
         com.apple.developer.applesignin: [Default]
+        aps-environment: development
     info:
       path: SantasDraw/Resources/Info.plist
       properties:

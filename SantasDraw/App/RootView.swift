@@ -4,6 +4,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(DeepLinkRouter.self) private var router
+    @Environment(PushManager.self) private var push
 
     var body: some View {
         Group {
@@ -29,6 +30,7 @@ struct RootView: View {
             await session.restore()
             #if DEBUG
             if !session.isSignedIn { await session.debugAutoLogin() }
+            if DebugRoute.current == "push" { push.isPromptPresented = true }
             if let route = DebugRoute.current, route.hasPrefix("join:") {
                 router.handle(InviteLink.deepLink(for: String(route.dropFirst(5))))
             }
