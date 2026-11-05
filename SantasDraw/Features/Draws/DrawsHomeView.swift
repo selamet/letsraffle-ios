@@ -141,8 +141,7 @@ struct DrawsHomeView: View {
         case let .detail(inviteCode):
             DrawDetailView(inviteCode: inviteCode, api: session.api)
         case .manual:
-            // Implemented in #6.
-            EmptyView()
+            ManualDrawView { path.removeAll() }
         }
     }
 }
