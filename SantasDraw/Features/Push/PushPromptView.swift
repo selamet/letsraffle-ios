@@ -57,6 +57,7 @@ struct PushPromptView: View {
             }
         }
         .interactiveDismissDisabled()
+        .statusBarStyle(.lightContent)
     }
 
     private func item(_ symbol: String, _ background: Color, _ title: String, separator: Bool = false) -> some View {

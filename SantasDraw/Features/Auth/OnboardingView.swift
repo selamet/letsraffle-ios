@@ -12,7 +12,7 @@ struct OnboardingView: View {
     var body: some View {
         GeometryReader { geo in
             let compact = geo.size.height < 760
-            ZStack(alignment: .top) {
+            ZStack {
                 ChristmasBackdrop()
 
                 VStack(spacing: 0) {
@@ -25,22 +25,32 @@ struct OnboardingView: View {
                     .shadow(color: Color(hex: 0x5A0A0F, alpha: 0.45), radius: 0, y: 4)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(t.happyNewYear)
-                    .padding(.top, compact ? 70 : 92)
+                    .padding(.top, compact ? 28 : 44)
 
-                    SantaAvatar(size: compact ? 230 : 280, mood: .draw)
-                        .padding(.top, compact ? 6 : 16)
+                    // Santa fills the space between the title and the sheet and
+                    // stands on the snow wave instead of sinking behind it.
+                    SantaAvatar(size: compact ? 210 : 260, mood: .draw)
+                        .frame(maxHeight: .infinity, alignment: .bottom)
+                        .padding(.top, 18)
+                        .background {
+                            RadialGradient(
+                                colors: [Palette.goldLight.opacity(0.35), Palette.goldLight.opacity(0.1), .clear],
+                                center: .center, startRadius: 0, endRadius: compact ? 150 : 180
+                            )
+                            .offset(y: 20)
+                        }
+                        .scaleEffect(appeared ? 1 : 0.92, anchor: .bottom)
                         .opacity(appeared ? 1 : 0)
+                        .padding(.bottom, -20)
+                        .zIndex(0)
 
-                    Spacer(minLength: 0)
-                }
-
-                VStack(spacing: 0) {
-                    Spacer(minLength: 0)
                     sheet(compact: compact)
+                        .zIndex(1)
                 }
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .statusBarStyle(.lightContent)
         .onAppear { withAnimation(.easeOut(duration: 0.6)) { appeared = true } }
     }
 

@@ -70,6 +70,7 @@ struct ProfileView: View {
             .floatingTabBarInset()
             .background(Palette.page)
             .toolbar(.hidden, for: .navigationBar)
+            .statusBarStyle(.darkContent)
         }
         .confirmationDialog(t.deleteAccount, isPresented: $confirmDelete, titleVisibility: .visible) {
             Button(t.deleteAccount, role: .destructive) { Task { await deleteAccount() } }

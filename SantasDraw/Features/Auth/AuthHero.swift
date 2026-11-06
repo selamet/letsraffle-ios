@@ -75,6 +75,7 @@ struct AuthScaffold<Content: View>: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .statusBarStyle(.lightContent)
     }
 }
 

@@ -28,6 +28,7 @@ struct RevealView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .statusBarStyle(.lightContent)
         .task {
             await store.load(t)
             #if DEBUG

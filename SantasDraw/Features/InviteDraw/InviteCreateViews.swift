@@ -56,6 +56,7 @@ struct StepScaffold<Content: View, Bottom: View>: View {
         }
         .background(Palette.page.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
+        .statusBarStyle(.darkContent)
     }
 }
 

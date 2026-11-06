@@ -60,6 +60,7 @@ struct JoinTabView: View {
             }
             .background(Palette.page.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
+            .statusBarStyle(.lightContent)
             .navigationDestination(for: JoinRoute.self) { route in
                 switch route {
                 case let .form(inviteCode):
@@ -222,6 +223,7 @@ struct JoinFormView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .statusBarStyle(.lightContent)
         .task { await load() }
         .overlay {
             if success, let info {

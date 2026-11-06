@@ -103,7 +103,7 @@ extension ButtonStyle where Self == PrimaryButtonStyle {
 
     /// White outlined button used for Google sign-in.
     static var outlinedWhite: PrimaryButtonStyle {
-        PrimaryButtonStyle(background: .white, foreground: Color(hex: 0x1F1F1F), edge: Color(hex: 0xD6D6D6), rim: Color(hex: 0x747775), height: 54)
+        PrimaryButtonStyle(background: .white, foreground: Color(hex: 0x1F1F1F), edge: .clear, rim: Color(hex: 0x747775), height: 54)
     }
 }
 

@@ -120,6 +120,7 @@ struct JoinCodeScreen: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .statusBarStyle(.lightContent)
         .fullScreenCover(isPresented: $scanning) {
             QRScannerSheet { scanned in
                 code = scanned

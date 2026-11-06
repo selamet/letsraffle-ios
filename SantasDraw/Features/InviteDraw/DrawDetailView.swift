@@ -27,9 +27,12 @@ struct DrawDetailView: View {
         }
         .background(Palette.page.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
+        .statusBarStyle(.darkContent)
         .task { await store.load(t) }
         .fullScreenCover(isPresented: $showDrawing) {
             ManualSuccessView { showDrawing = false }
+                .statusBarStyle(.lightContent)
+                .onDisappear { StatusBar.set(.darkContent) }
         }
         .sheet(isPresented: $showSchedule) {
             ScheduleSheet(store: store)

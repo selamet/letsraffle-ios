@@ -21,6 +21,7 @@ struct ManualDrawView: View {
         }
         .background(Palette.page.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
+        .statusBarStyle(model.completedDrawId == nil ? .darkContent : .lightContent)
         .sheet(item: $editing) { participant in
             ParticipantSheet(model: model, participant: participant)
         }

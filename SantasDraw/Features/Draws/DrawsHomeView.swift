@@ -53,6 +53,7 @@ struct DrawsHomeView: View {
             .refreshable { await store?.load(t) }
             }
             .toolbar(.hidden, for: .navigationBar)
+            .statusBarStyle(.lightContent)
             .navigationDestination(for: DrawsRoute.self, destination: destination)
         }
         .task(id: session.user?.id) {
