@@ -2,7 +2,6 @@
 build/
 DerivedData/
 *.xcodeproj/
-!*.xcodeproj/project.pbxproj
 xcuserdata/
 *.xcuserstate
 *.xcscmblueprint
