@@ -1,6 +1,6 @@
 extension Strings {
     static let tr = Strings(
-        brandEyebrow: "Santa's Edition",
+        brandEyebrow: "SANTA'S EDITION",
         onbSub: "Yılbaşı çekilişini davet linkiyle topla ya da hemen başlat.",
         apple: "Apple ile Giriş Yap",
         appleSignup: "Apple ile Kayıt Ol",
@@ -67,8 +67,8 @@ extension Strings {
         yourDetailsSub: "Organizatör olarak sen de çekilişe katılırsın.",
         firstName: "İsim",
         lastName: "Soyisim",
-        firstNamePh: "Örn. Hakan",
-        lastNamePh: "Örn. Budak",
+        firstNamePh: "Örn. Ayşe",
+        lastNamePh: "Örn. Demir",
         address: "Adres",
         addressPh: "Hediye göndermek için adres",
         phone: "Telefon",

@@ -25,6 +25,8 @@ actor APIClient {
 
     var isAuthenticated: Bool { tokenStore.tokens != nil }
 
+    var refreshToken: String? { tokenStore.tokens?.refreshToken }
+
     func storeTokens(_ tokens: AuthTokens?) {
         tokenStore.tokens = tokens
     }

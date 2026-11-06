@@ -1,6 +1,6 @@
 extension Strings {
     static let en = Strings(
-        brandEyebrow: "Santa's Edition",
+        brandEyebrow: "SANTA'S EDITION",
         onbSub: "Gather participants with an invite link or kick things off instantly.",
         apple: "Sign in with Apple",
         appleSignup: "Sign up with Apple",
