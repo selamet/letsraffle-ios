@@ -1,6 +1,6 @@
 extension Strings {
     static let tr = Strings(
-        brandEyebrow: "Santa's Edition",
+        brandEyebrow: "SANTA'S EDITION",
         onbSub: "Yılbaşı çekilişini davet linkiyle topla ya da hemen başlat.",
         apple: "Apple ile Giriş Yap",
         appleSignup: "Apple ile Kayıt Ol",
@@ -67,8 +67,8 @@ extension Strings {
         yourDetailsSub: "Organizatör olarak sen de çekilişe katılırsın.",
         firstName: "İsim",
         lastName: "Soyisim",
-        firstNamePh: "Örn. Hakan",
-        lastNamePh: "Örn. Budak",
+        firstNamePh: "Örn. Ayşe",
+        lastNamePh: "Örn. Demir",
         address: "Adres",
         addressPh: "Hediye göndermek için adres",
         phone: "Telefon",
@@ -119,6 +119,8 @@ extension Strings {
         joinSubmit: "Kayıt Ol",
         myJoinedDraws: "Katıldığım çekilişler",
         cameraDenied: "Kamera izni verilmedi. Ayarlar'dan izin verebilirsin.",
+        joinNotFound: "Bu davet koduyla bir çekiliş bulunamadı.",
+        drawNotActive: "Bu çekilişe artık katılım yapılamıyor.",
 
         successTitle: "Tebrikler!",
         joinSuccessMsg: "Harika! Çekilişe katıldın! Artık sıranın gelmesini bekle 🎁✨",
@@ -161,6 +163,9 @@ extension Strings {
         logout: "Çıkış Yap",
         deleteAccount: "Hesabı Sil",
         deleteAccountConfirm: "Hesabın ve kişisel verilerin kalıcı olarak silinecek. Emin misin?",
+        openSource: "Açık kaynak",
+        widgetsHowTo: "Widget eklemek için ana ekranda boş bir alana basılı tut, sol üstteki + simgesine dokun ve Santa's Draw'u seç.",
+        deleteAccountFailed: "Hesap silinemedi",
         appleLinked: "Apple ile bağlı",
         guest: "Misafir",
 
@@ -177,6 +182,7 @@ extension Strings {
         genericError: "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
         networkError: "Sunucuya ulaşılamadı. İnternet bağlantını kontrol et.",
         sessionExpired: "Oturumun sona erdi. Lütfen tekrar giriş yap.",
+        pastDate: "Çekiliş tarihi ileri bir saat olmalı",
         retry: "Tekrar dene"
     )
 }

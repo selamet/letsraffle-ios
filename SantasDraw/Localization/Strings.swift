@@ -129,6 +129,8 @@ struct Strings {
     let joinSubmit: String
     let myJoinedDraws: String
     let cameraDenied: String
+    let joinNotFound: String
+    let drawNotActive: String
 
     // Success & reveal
     let successTitle: String
@@ -174,6 +176,9 @@ struct Strings {
     let logout: String
     let deleteAccount: String
     let deleteAccountConfirm: String
+    let openSource: String
+    let widgetsHowTo: String
+    let deleteAccountFailed: String
     let appleLinked: String
     let guest: String
 
@@ -192,6 +197,7 @@ struct Strings {
     let genericError: String
     let networkError: String
     let sessionExpired: String
+    let pastDate: String
     let retry: String
 }
 

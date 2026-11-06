@@ -35,16 +35,23 @@ final class AppSettings {
         didSet { defaults.set(appearance.rawValue, forKey: Keys.appearance) }
     }
 
+    /// User-level switch for push notifications (registration happens in #10).
+    var notificationsEnabled: Bool {
+        didSet { defaults.set(notificationsEnabled, forKey: Keys.notifications) }
+    }
+
     var strings: Strings { language.strings }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         language = defaults.string(forKey: Keys.language).flatMap(AppLanguage.init) ?? .deviceDefault
         appearance = defaults.string(forKey: Keys.appearance).flatMap(AppearancePreference.init) ?? .system
+        notificationsEnabled = defaults.object(forKey: Keys.notifications) as? Bool ?? true
     }
 
     private enum Keys {
         static let language = "settings.language"
         static let appearance = "settings.appearance"
+        static let notifications = "settings.notifications"
     }
 }

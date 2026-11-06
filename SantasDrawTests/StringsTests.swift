@@ -40,3 +40,15 @@ final class StringsTests: XCTestCase {
         re.matches(in: s, range: NSRange(s.startIndex..., in: s)).map { (s as NSString).substring(with: $0.range) }
     }
 }
+
+final class AppConfigTests: XCTestCase {
+    func testVersionIncludesBuildNumber() {
+        XCTAssertTrue(AppConfig.version.contains("("))
+    }
+
+    func testNotificationsDefaultToEnabled() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+        XCTAssertTrue(AppSettings(defaults: defaults).notificationsEnabled)
+    }
+}

@@ -1,6 +1,6 @@
 extension Strings {
     static let en = Strings(
-        brandEyebrow: "Santa's Edition",
+        brandEyebrow: "SANTA'S EDITION",
         onbSub: "Gather participants with an invite link or kick things off instantly.",
         apple: "Sign in with Apple",
         appleSignup: "Sign up with Apple",
@@ -119,6 +119,8 @@ extension Strings {
         joinSubmit: "Join",
         myJoinedDraws: "Draws I joined",
         cameraDenied: "Camera access was denied. You can allow it in Settings.",
+        joinNotFound: "No draw was found with this invite code.",
+        drawNotActive: "This draw is no longer accepting participants.",
 
         successTitle: "Congrats!",
         joinSuccessMsg: "Great! You've entered the draw! Now just wait for your turn. 🎁✨",
@@ -161,6 +163,9 @@ extension Strings {
         logout: "Log Out",
         deleteAccount: "Delete Account",
         deleteAccountConfirm: "Your account and personal data will be permanently deleted. Are you sure?",
+        openSource: "Open Source",
+        widgetsHowTo: "Long-press an empty area on your Home Screen, tap + in the top corner and choose Santa's Draw.",
+        deleteAccountFailed: "Couldn't delete account",
         appleLinked: "Linked with Apple",
         guest: "Guest",
 
@@ -177,6 +182,7 @@ extension Strings {
         genericError: "Something went wrong. Please try again.",
         networkError: "Couldn't reach the server. Check your connection.",
         sessionExpired: "Your session expired. Please log in again.",
+        pastDate: "The draw date must be in the future",
         retry: "Try again"
     )
 }
