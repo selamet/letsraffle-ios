@@ -192,6 +192,7 @@ struct Strings {
     let genericError: String
     let networkError: String
     let sessionExpired: String
+    let pastDate: String
     let retry: String
 }
 

@@ -49,13 +49,13 @@ enum DrawDateFormat {
     /// "24 Aralık 2026 20:00" / "Dec 24, 2026 at 20:00"
     static func long(_ date: Date, language: AppLanguage) -> String {
         date.formatted(
-            .dateTime.day().month(.wide).year().hour(.twoDigits(amPM: .omitted)).minute()
+            .dateTime.day().month(.wide).year().hour(.twoDigits(amPM: .omitted)).minute(.twoDigits)
                 .locale(language.locale)
         )
     }
 
     static func short(_ date: Date, language: AppLanguage) -> String {
-        date.formatted(.dateTime.day().month(.abbreviated).hour(.twoDigits(amPM: .omitted)).minute().locale(language.locale))
+        date.formatted(.dateTime.day().month(.abbreviated).hour(.twoDigits(amPM: .omitted)).minute(.twoDigits).locale(language.locale))
     }
 }
 

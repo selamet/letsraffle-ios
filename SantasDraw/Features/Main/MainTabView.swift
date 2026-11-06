@@ -20,9 +20,16 @@ enum MainTab: Hashable, CaseIterable {
     }
 }
 
+/// Lets pushed screens hide the floating tab bar.
+@Observable
+final class TabBarVisibility {
+    var isHidden = false
+}
+
 /// Root of the signed-in / guest experience with the floating capsule tab bar.
 struct MainTabView: View {
     @State private var selection: MainTab = .draws
+    @State private var tabBar = TabBarVisibility()
 
     var body: some View {
         TabView(selection: $selection) {
@@ -37,8 +44,13 @@ struct MainTabView: View {
                 .toolbar(.hidden, for: .tabBar)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            FloatingTabBar(selection: $selection)
+            if !tabBar.isHidden {
+                FloatingTabBar(selection: $selection)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
+        .animation(.easeInOut(duration: 0.2), value: tabBar.isHidden)
+        .environment(tabBar)
     }
 }
 
