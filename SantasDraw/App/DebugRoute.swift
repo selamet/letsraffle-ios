@@ -10,3 +10,14 @@ enum DebugRoute {
         #endif
     }
 }
+
+#if DEBUG
+extension SessionStore {
+    /// Signs in with `-debugEmail` / `-debugPassword` launch arguments (visual QA only).
+    func debugAutoLogin() async {
+        let args = UserDefaults.standard
+        guard let email = args.string(forKey: "debugEmail"), let password = args.string(forKey: "debugPassword") else { return }
+        try? await login(email: email, password: password)
+    }
+}
+#endif
