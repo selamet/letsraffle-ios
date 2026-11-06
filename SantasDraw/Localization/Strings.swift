@@ -176,6 +176,9 @@ struct Strings {
     let logout: String
     let deleteAccount: String
     let deleteAccountConfirm: String
+    let openSource: String
+    let widgetsHowTo: String
+    let deleteAccountFailed: String
     let appleLinked: String
     let guest: String
 

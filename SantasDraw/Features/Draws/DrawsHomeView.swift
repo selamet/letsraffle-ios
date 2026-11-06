@@ -35,6 +35,7 @@ struct DrawsHomeView: View {
             }
             .background(Palette.page)
             .ignoresSafeArea(edges: .top)
+            .floatingTabBarInset()
             .refreshable { await store?.load(t) }
             }
             .toolbar(.hidden, for: .navigationBar)
@@ -160,7 +161,7 @@ private struct HomeHero: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                 .offset(x: 30, y: 40)
             SnowDots(dots: [
-                .init(x: 0.4, y: 0.3, size: 5, opacity: 0.7),
+                .init(x: 0.58, y: 0.66, size: 5, opacity: 0.7),
                 .init(x: 0.82, y: 0.5, size: 4, opacity: 0.6),
             ])
 

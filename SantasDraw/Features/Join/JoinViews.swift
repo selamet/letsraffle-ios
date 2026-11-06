@@ -42,6 +42,7 @@ struct JoinTabView: View {
                 .padding(.bottom, 24)
             }
             .scrollDismissesKeyboard(.interactively)
+            .floatingTabBarInset()
             .background(alignment: .top) {
                 Palette.heroGradient.frame(height: 560).ignoresSafeArea()
             }

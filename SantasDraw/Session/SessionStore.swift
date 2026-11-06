@@ -90,6 +90,12 @@ final class SessionStore {
         state = .signedOut
     }
 
+    /// Permanently deletes the account (App Store guideline 5.1.1(v)).
+    func deleteAccount() async throws {
+        _ = try await api.send(API.deleteAccount())
+        await signOut()
+    }
+
     func dismissExpiredMessage() {
         expiredMessageVisible = false
     }
