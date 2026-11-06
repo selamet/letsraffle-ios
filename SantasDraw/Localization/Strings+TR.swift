@@ -119,6 +119,8 @@ extension Strings {
         joinSubmit: "Kayıt Ol",
         myJoinedDraws: "Katıldığım çekilişler",
         cameraDenied: "Kamera izni verilmedi. Ayarlar'dan izin verebilirsin.",
+        joinNotFound: "Bu davet koduyla bir çekiliş bulunamadı.",
+        drawNotActive: "Bu çekilişe artık katılım yapılamıyor.",
 
         successTitle: "Tebrikler!",
         joinSuccessMsg: "Harika! Çekilişe katıldın! Artık sıranın gelmesini bekle 🎁✨",

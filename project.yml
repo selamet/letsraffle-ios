@@ -36,6 +36,7 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_NSCameraUsageDescription: "Used to scan invite QR codes."
         CODE_SIGN_STYLE: Automatic
     info:
       path: SantasDraw/Resources/Info.plist
@@ -43,6 +44,9 @@ targets:
         API_BASE_URL: $(API_BASE_URL)
         WEB_BASE_URL: $(WEB_BASE_URL)
         CFBundleLocalizations: [tr, en]
+        CFBundleURLTypes:
+          - CFBundleURLName: com.letsraffle.ios
+            CFBundleURLSchemes: [letsraffle]
   SantasDrawTests:
     type: bundle.unit-test
     platform: iOS

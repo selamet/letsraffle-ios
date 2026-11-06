@@ -28,15 +28,16 @@ final class TabBarVisibility {
 
 /// Root of the signed-in / guest experience with the floating capsule tab bar.
 struct MainTabView: View {
-    @State private var selection: MainTab = .draws
+    @State private var selection: MainTab = DebugRoute.current == "tab:join" ? .join : (DebugRoute.current == "tab:profile" ? .profile : .draws)
     @State private var tabBar = TabBarVisibility()
+    @Environment(DeepLinkRouter.self) private var router
 
     var body: some View {
         TabView(selection: $selection) {
             DrawsHomeView()
                 .tag(MainTab.draws)
                 .toolbar(.hidden, for: .tabBar)
-            JoinPlaceholderView()
+            JoinTabView()
                 .tag(MainTab.join)
                 .toolbar(.hidden, for: .tabBar)
             ProfilePlaceholderView()
@@ -51,6 +52,9 @@ struct MainTabView: View {
         }
         .animation(.easeInOut(duration: 0.2), value: tabBar.isHidden)
         .environment(tabBar)
+        .onChange(of: router.pendingInviteCode, initial: true) { _, code in
+            if code != nil { selection = .join }
+        }
     }
 }
 
@@ -92,18 +96,6 @@ struct FloatingTabBar: View {
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
         .animation(.spring(duration: 0.3), value: selection)
-    }
-}
-
-/// Replaced by the Join tab in #7.
-private struct JoinPlaceholderView: View {
-    @Environment(\.strings) private var t
-
-    var body: some View {
-        ScreenHeader(title: t.joinTitle, subtitle: t.joinSub)
-            .padding(24)
-            .frame(maxHeight: .infinity, alignment: .top)
-            .background(Palette.page)
     }
 }
 

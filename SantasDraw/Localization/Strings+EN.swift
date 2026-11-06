@@ -119,6 +119,8 @@ extension Strings {
         joinSubmit: "Join",
         myJoinedDraws: "Draws I joined",
         cameraDenied: "Camera access was denied. You can allow it in Settings.",
+        joinNotFound: "No draw was found with this invite code.",
+        drawNotActive: "This draw is no longer accepting participants.",
 
         successTitle: "Congrats!",
         joinSuccessMsg: "Great! You've entered the draw! Now just wait for your turn. 🎁✨",
