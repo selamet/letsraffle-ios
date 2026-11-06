@@ -24,6 +24,10 @@ targets:
     platform: iOS
     sources:
       - SantasDraw
+      - Shared
+    dependencies:
+      - target: SantasDrawWidgets
+        embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.letsraffle.ios
@@ -43,6 +47,7 @@ targets:
       properties:
         com.apple.developer.applesignin: [Default]
         aps-environment: development
+        com.apple.security.application-groups: [group.com.letsraffle.ios]
     info:
       path: SantasDraw/Resources/Info.plist
       properties:
@@ -52,6 +57,32 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: com.letsraffle.ios
             CFBundleURLSchemes: [letsraffle]
+  SantasDrawWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - SantasDrawWidgets
+      - Shared
+      - SantasDraw/DesignSystem/Theme.swift
+      - SantasDraw/DesignSystem/Illustrations/ChristmasTree.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.letsraffle.ios.widgets
+        PRODUCT_NAME: SantasDrawWidgets
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: "Santa's Draw"
+        SKIP_INSTALL: YES
+        CODE_SIGN_STYLE: Automatic
+    info:
+      path: SantasDrawWidgets/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: SantasDrawWidgets/SantasDrawWidgets.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.letsraffle.ios]
   SantasDrawTests:
     type: bundle.unit-test
     platform: iOS
@@ -69,6 +100,7 @@ schemes:
     build:
       targets:
         SantasDraw: all
+        SantasDrawWidgets: all
         SantasDrawTests: [test]
     test:
       targets:
