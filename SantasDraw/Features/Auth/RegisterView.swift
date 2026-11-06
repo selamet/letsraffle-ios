@@ -42,9 +42,7 @@ struct RegisterView: View {
 
                     OrDivider(title: t.or)
 
-                    Button {} label: { AppleLabel(title: t.appleSignup) }
-                        .buttonStyle(.inverted)
-                        .disabled(true) // Wired in #9.
+                    AppleSignInButton(title: t.appleSignup) { serverError = $0 }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 24)

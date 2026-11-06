@@ -89,7 +89,7 @@ struct PillButton: View {
     }
 }
 
-/// Apple logo + title button. Wired to Sign in with Apple in issue #9.
+/// Apple logo + title label used by `AppleSignInButton`.
 struct AppleLabel: View {
     let title: String
 

@@ -4,6 +4,7 @@ struct OnboardingView: View {
     @Binding var path: [AuthRoute]
     @Environment(\.strings) private var t
     @Environment(SessionStore.self) private var session
+    @State private var appleError: String?
 
     var body: some View {
         GeometryReader { geo in
@@ -47,13 +48,10 @@ struct OnboardingView: View {
                     Spacer(minLength: 0)
 
                     VStack(spacing: 10) {
-                        Button {
-                            path.append(.login)
-                        } label: {
-                            AppleLabel(title: t.apple)
+                        if let appleError {
+                            Banner(text: appleError, style: .error)
                         }
-                        .buttonStyle(PrimaryButtonStyle(background: .black, foreground: .white))
-                        .accessibilityIdentifier("onboarding.apple")
+                        AppleSignInButton(title: t.apple, style: .black) { appleError = $0 }
 
                         Button(t.emailContinue) { path.append(.login) }
                             .buttonStyle(PrimaryButtonStyle(background: .white, foreground: Palette.heroB))
