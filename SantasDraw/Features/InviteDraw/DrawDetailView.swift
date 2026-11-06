@@ -12,8 +12,11 @@ struct DrawDetailView: View {
     @State private var confirmExecute = false
     @State private var executed = false
 
-    init(inviteCode: String, api: APIClient) {
+    private let onReveal: () -> Void
+
+    init(inviteCode: String, api: APIClient, onReveal: @escaping () -> Void = {}) {
         _store = State(initialValue: DrawDetailStore(inviteCode: inviteCode, api: api))
+        self.onReveal = onReveal
     }
 
     var body: some View {
@@ -206,7 +209,13 @@ struct DrawDetailView: View {
             if executed || draw.status == .inProgress {
                 Banner(text: t.drawStarted, style: .success)
             } else if draw.status == .completed {
-                Banner(text: t.statusCompleted, style: .success)
+                Button {
+                    onReveal()
+                } label: {
+                    Label(t.yourMatch, systemImage: "gift.fill")
+                }
+                .buttonStyle(.primary)
+                .accessibilityIdentifier("detail.reveal")
             } else {
                 Button(store.canExecute ? t.readyForDraw : t.runDraw) { confirmExecute = true }
                     .buttonStyle(PrimaryButtonStyle(background: Palette.green, isLoading: store.isWorking))

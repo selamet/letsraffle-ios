@@ -94,6 +94,16 @@ enum API {
         Endpoint(method: .post, path: "draws/\(drawId)/execute", auth: .required)
     }
 
+    // MARK: Results
+
+    static func participantResult(token: String) -> Endpoint<MatchResult> {
+        Endpoint(method: .get, path: "participants/me/result", headers: ["X-Participant-Token": token])
+    }
+
+    static func organizerResult(inviteCode: String) -> Endpoint<MatchResult> {
+        Endpoint(method: .get, path: "draws/\(inviteCode.urlPathEncoded)/my-result", auth: .required)
+    }
+
     // MARK: Devices (push)
 
     static func registerDevice(_ registration: DeviceRegistration) -> Endpoint<DeviceRegistrationResponse> {

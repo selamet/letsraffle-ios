@@ -139,3 +139,19 @@ struct ExecuteDrawResponse: Decodable, Equatable {
     let success: Bool
     let message: String
 }
+
+/// `GET /participants/me/result` and `GET /draws/{code}/my-result` (letsraffle-api#60).
+struct MatchResult: Codable, Equatable, Hashable {
+    struct Receiver: Codable, Equatable, Hashable {
+        let firstName: String
+        let lastName: String
+        let address: String?
+        let phone: String?
+
+        var fullName: String { "\(firstName) \(lastName)" }
+    }
+
+    let drawId: Int
+    let inviteCode: String?
+    let receiver: Receiver
+}

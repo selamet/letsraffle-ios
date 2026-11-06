@@ -6,6 +6,7 @@ enum DrawsRoute: Hashable {
     case inviteDetails
     case manual
     case detail(inviteCode: String)
+    case reveal(inviteCode: String)
 }
 
 /// Tab 1: hero header, draw mode cards and the organizer's draws.
@@ -18,6 +19,7 @@ struct DrawsHomeView: View {
     @Environment(TabBarVisibility.self) private var tabBar
     @Environment(DeepLinkRouter.self) private var router
     @Environment(PushManager.self) private var push
+    @Environment(ParticipationStore.self) private var participations
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -147,13 +149,26 @@ struct DrawsHomeView: View {
         case .inviteDetails:
             if let inviteDraft {
                 InviteOrganizerView(path: $path, draft: inviteDraft) { response in
+                    // The organizer takes part too; keep their token for the in-app result.
+                    participations.add(Participation(
+                        inviteCode: response.inviteCode,
+                        participantId: nil,
+                        drawId: response.drawId,
+                        displayName: inviteDraft.firstName,
+                        drawDate: inviteDraft.scheduleEnabled ? InviteDraft.exactHour(inviteDraft.drawDate) : nil,
+                        participantToken: response.participantToken,
+                        wantsNotification: true,
+                        joinedAt: .now
+                    ))
                     self.inviteDraft = nil
                     path = [.detail(inviteCode: response.inviteCode)]
                     push.promptIfAppropriate()
                 }
             }
         case let .detail(inviteCode):
-            DrawDetailView(inviteCode: inviteCode, api: session.api)
+            DrawDetailView(inviteCode: inviteCode, api: session.api) { path.append(.reveal(inviteCode: inviteCode)) }
+        case let .reveal(inviteCode):
+            RevealView(inviteCode: inviteCode, api: session.api, participations: participations, isSignedIn: session.isSignedIn)
         case .manual:
             ManualDrawView { path.removeAll() }
         }

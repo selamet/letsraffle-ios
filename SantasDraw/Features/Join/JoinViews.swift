@@ -2,6 +2,7 @@ import SwiftUI
 
 enum JoinRoute: Hashable {
     case form(inviteCode: String)
+    case reveal(inviteCode: String)
 }
 
 /// Pending invite code coming from a deep link or universal link.
@@ -26,6 +27,7 @@ struct JoinTabView: View {
     @Environment(ParticipationStore.self) private var participations
     @Environment(TabBarVisibility.self) private var tabBar
     @Environment(AppSettings.self) private var settings
+    @Environment(SessionStore.self) private var session
 
     @State private var path: [JoinRoute] = []
     @State private var code = ""
@@ -54,6 +56,8 @@ struct JoinTabView: View {
                 switch route {
                 case let .form(inviteCode):
                     JoinFormView(inviteCode: inviteCode) { path.removeAll() }
+                case let .reveal(inviteCode):
+                    RevealView(inviteCode: inviteCode, api: session.api, participations: participations, isSignedIn: session.isSignedIn)
                 }
             }
         }
@@ -65,6 +69,11 @@ struct JoinTabView: View {
             guard let pending else { return }
             router.pendingInviteCode = nil
             path = [.form(inviteCode: pending)]
+        }
+        .onChange(of: router.pendingDestination, initial: true) { _, destination in
+            guard case let .reveal(code)? = destination else { return }
+            router.pendingDestination = nil
+            path = [.reveal(inviteCode: code)]
         }
     }
 
@@ -143,6 +152,7 @@ struct JoinTabView: View {
                     .foregroundStyle(Palette.text)
                     .padding(.horizontal, 4)
                 ForEach(participations.items) { item in
+                    NavigationLink(value: JoinRoute.reveal(inviteCode: item.inviteCode)) {
                     HStack(spacing: 12) {
                         Image(systemName: "gift.fill")
                             .foregroundStyle(Palette.brandText)
@@ -154,10 +164,15 @@ struct JoinTabView: View {
                                 .font(.system(size: 13)).foregroundStyle(Palette.sub)
                         }
                         Spacer()
+                        Image(systemName: item.result == nil ? "gift" : "gift.fill")
+                            .foregroundStyle(Palette.brandText)
+                        Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.ter)
                     }
                     .padding(14)
                     .background(Palette.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Palette.sep))
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, 16)
