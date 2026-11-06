@@ -16,6 +16,8 @@ struct DrawsHomeView: View {
     @State private var path: [DrawsRoute] = []
     @State private var inviteDraft: InviteDraft?
     @Environment(TabBarVisibility.self) private var tabBar
+    @Environment(DeepLinkRouter.self) private var router
+    @Environment(PushManager.self) private var push
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -48,6 +50,16 @@ struct DrawsHomeView: View {
             applyDebugRoute()
             #endif
             await store?.load(t)
+        }
+        .onChange(of: path, initial: true) { _, newPath in
+            tabBar.isHidden = !newPath.isEmpty
+            // Refresh after returning from create / detail / manual flows.
+            if newPath.isEmpty { Task { await store?.load(t) } }
+        }
+        .onChange(of: router.pendingDestination, initial: true) { _, destination in
+            guard case let .drawDetail(code)? = destination, session.isSignedIn else { return }
+            router.pendingDestination = nil
+            path = [.detail(inviteCode: code)]
         }
     }
 
@@ -137,6 +149,7 @@ struct DrawsHomeView: View {
                 InviteOrganizerView(path: $path, draft: inviteDraft) { response in
                     self.inviteDraft = nil
                     path = [.detail(inviteCode: response.inviteCode)]
+                    push.promptIfAppropriate()
                 }
             }
         case let .detail(inviteCode):

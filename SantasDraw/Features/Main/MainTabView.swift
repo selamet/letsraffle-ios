@@ -55,6 +55,13 @@ struct MainTabView: View {
         .onChange(of: router.pendingInviteCode, initial: true) { _, code in
             if code != nil { selection = .join }
         }
+        .onChange(of: router.pendingDestination, initial: true) { _, destination in
+            switch destination {
+            case .drawDetail: selection = .draws
+            case .reveal: selection = .join
+            case nil: break
+            }
+        }
     }
 }
 

@@ -9,6 +9,8 @@ enum JoinRoute: Hashable {
 @Observable
 final class DeepLinkRouter {
     var pendingInviteCode: String?
+    /// Destination from a tapped push notification.
+    var pendingDestination: PushDestination?
 
     func handle(_ url: URL) {
         if let code = InviteLink.code(from: url) {
@@ -185,6 +187,7 @@ struct JoinFormView: View {
     @Environment(AppSettings.self) private var settings
     @Environment(SessionStore.self) private var session
     @Environment(ParticipationStore.self) private var participations
+    @Environment(PushManager.self) private var push
 
     @State private var info: DrawPublicInfo?
     @State private var loadError: String?
@@ -222,7 +225,10 @@ struct JoinFormView: View {
         .task { await load() }
         .overlay {
             if success, let info {
-                JoinSuccessOverlay(drawDate: info.drawDate) { onFinish() }
+                JoinSuccessOverlay(drawDate: info.drawDate) {
+                    onFinish()
+                    if notify { push.promptIfAppropriate() }
+                }
                     .transition(.opacity)
             }
         }
@@ -361,6 +367,7 @@ struct JoinFormView: View {
                 joinedAt: .now
             ))
             success = true
+            await push.sync()
         } catch {
             submitError = error.userMessage(t)
         }
