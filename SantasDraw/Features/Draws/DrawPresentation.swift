@@ -15,8 +15,8 @@ extension DrawStatus {
         switch self {
         case .active: Palette.greenText
         case .inProgress: Palette.amberText
-        case .completed: Palette.blueText
-        case .cancelled, .unknown: Palette.sub
+        case .completed: Palette.sub
+        case .cancelled, .unknown: Palette.ter
         }
     }
 
@@ -24,7 +24,7 @@ extension DrawStatus {
         switch self {
         case .active: Palette.greenSoft
         case .inProgress: Palette.amberSoft
-        case .completed: Palette.blueSoft
+        case .completed: Color(light: 0xF1E6DC, dark: 0x3A2A2A)
         case .cancelled, .unknown: Palette.sep
         }
     }
@@ -36,8 +36,8 @@ extension DrawType {
     }
 
     var icon: String { self == .dynamic ? "link" : "person.3.fill" }
-    var iconForeground: Color { self == .dynamic ? Palette.blueText : Palette.brandText }
-    var iconBackground: Color { self == .dynamic ? Palette.blueSoft : Palette.chip }
+    var iconForeground: Color { self == .dynamic ? Palette.brandText : Palette.greenText }
+    var iconBackground: Color { self == .dynamic ? Palette.chip : Palette.greenSoft }
 }
 
 extension DrawListItem {
@@ -68,16 +68,16 @@ struct DrawRow: View {
             Image(systemName: draw.drawType.icon)
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(draw.drawType.iconForeground)
-                .frame(width: 44, height: 44)
-                .background(draw.drawType.iconBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .frame(width: 46, height: 46)
+                .background(draw.drawType.iconBackground, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(draw.displayName)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(AppFont.display(17))
                     .foregroundStyle(Palette.text)
                     .lineLimit(1)
                 Text("\(draw.drawType.title(t)) · \(t.participantCount(draw.participantCount))")
-                    .font(.system(size: 13))
+                    .font(AppFont.body(13, .semibold))
                     .foregroundStyle(Palette.sub)
             }
 
@@ -92,9 +92,8 @@ struct DrawRow: View {
                 }
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .background(Palette.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Palette.sep, lineWidth: 1))
+        .padding(14)
+        .background(Palette.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
     }
 }

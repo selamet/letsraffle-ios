@@ -60,7 +60,7 @@ private struct SplashView: View {
     var body: some View {
         ZStack {
             Palette.heroGradient.ignoresSafeArea()
-            SantaAvatar(size: 120)
+            SantaAvatar(size: 160, mood: .draw)
         }
     }
 }

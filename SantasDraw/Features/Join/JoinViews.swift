@@ -56,9 +56,9 @@ struct JoinTabView: View {
             .scrollDismissesKeyboard(.interactively)
             .floatingTabBarInset()
             .background(alignment: .top) {
-                Palette.heroGradient.frame(height: 560).ignoresSafeArea()
+                ChristmasBackdrop(garland: true, pines: false).frame(height: 420)
             }
-            .background(Palette.page)
+            .background(Palette.page.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: JoinRoute.self) { route in
                 switch route {
@@ -86,69 +86,38 @@ struct JoinTabView: View {
     }
 
     private var hero: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(t.joinTitle).font(.system(size: 34, weight: .bold)).foregroundStyle(.white)
-            Text(t.joinSub).font(.system(size: 15)).foregroundStyle(.white.opacity(0.85))
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(.horizontal, 24)
-        .padding(.top, 16)
-        .frame(height: 210)
-        .background(alignment: .topLeading) {
-            ZStack(alignment: .topLeading) {
-                ChristmasTree(variant: .large).opacity(0.3).offset(x: -50, y: 90)
-                ChristmasTree(variant: .small).opacity(0.25)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .offset(x: 30, y: 120)
+        HStack(alignment: .bottom, spacing: 0) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(t.haveInvite)
+                    .font(AppFont.script(42))
+                    .foregroundStyle(Palette.goldLight)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Text(t.haveInviteSub)
+                    .font(AppFont.body(14, .bold))
+                    .foregroundStyle(Palette.snow.opacity(0.92))
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            .padding(.bottom, 34)
+            Spacer(minLength: 4)
+            SantaAvatar(size: 150, mood: .invite)
         }
-        .overlay(alignment: .bottom) {
-            SantaAvatar(size: 150).offset(y: 56)
-        }
-        .zIndex(0)
+        .padding(.leading, 22)
+        .padding(.trailing, 6)
+        .padding(.top, 70)
+        .frame(height: 270, alignment: .bottom)
     }
 
     private var codeCard: some View {
-        VStack(spacing: 14) {
-            VStack(spacing: 4) {
-                Text(t.enterCode).font(.system(size: 22, weight: .bold)).foregroundStyle(Palette.text)
-                Text(t.enterCodeSub).font(.system(size: 14)).foregroundStyle(Palette.sub).multilineTextAlignment(.center)
-            }
-            TextField("", text: $code, prompt: Text("jolly-reindeer-742").foregroundStyle(Palette.ter))
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .multilineTextAlignment(.center)
-                .foregroundStyle(Palette.text)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .keyboardType(.asciiCapable)
-                .submitLabel(.go)
-                .focused($codeFocused)
-                .onSubmit { open(code) }
-                .frame(height: 54)
-                .background(Palette.page, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(codeError != nil || codeFocused ? Palette.brand : Palette.fieldBorder, lineWidth: codeFocused ? 1.5 : 1))
-                .accessibilityIdentifier("join.code")
-            if let codeError {
-                Text(codeError).font(.system(size: 12)).foregroundStyle(Palette.brandText)
-            }
-            Button(t.continueTitle) { open(code) }
-                .buttonStyle(.primary)
-                .disabled(code.trimmed.isEmpty)
-            OrDivider(title: t.or)
-            Button { scanning = true } label: {
-                Label(t.scanQr, systemImage: "qrcode.viewfinder")
-            }
-            .buttonStyle(PrimaryButtonStyle(background: Palette.chip, foreground: Palette.brandText))
-            Text(t.deepLinkHint).font(.system(size: 12)).foregroundStyle(Palette.ter).multilineTextAlignment(.center)
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 72)
-        .padding(.bottom, 20)
-        .background(Palette.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: .black.opacity(0.25), radius: 25, y: 20)
-        .padding(.horizontal, 16)
-        .zIndex(1)
+        JoinCodeCard(code: $code, error: codeError, focused: $codeFocused, onSubmit: { open(code) }, onScan: { scanning = true })
+            .padding(.horizontal, 24)
+            .padding(.top, 26)
+            .padding(.bottom, 20)
+            .background(
+                UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous)
+                    .fill(Palette.page)
+                    .shadow(color: Color(hex: 0x320000, alpha: 0.3), radius: 22, y: -8)
+            )
     }
 
     @ViewBuilder
@@ -156,20 +125,20 @@ struct JoinTabView: View {
         if !participations.items.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 Text(t.myJoinedDraws)
-                    .font(.system(size: 20, weight: .bold))
+                    .font(AppFont.display(19))
                     .foregroundStyle(Palette.text)
                     .padding(.horizontal, 4)
                 ForEach(participations.items) { item in
                     NavigationLink(value: JoinRoute.reveal(inviteCode: item.inviteCode)) {
                     HStack(spacing: 12) {
-                        Image(systemName: "gift.fill")
+                        Image(systemName: "envelope.open.fill")
                             .foregroundStyle(Palette.brandText)
-                            .frame(width: 44, height: 44)
-                            .background(Palette.chip, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .frame(width: 46, height: 46)
+                            .background(Palette.chip, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         VStack(alignment: .leading, spacing: 3) {
-                            Text(item.inviteCode).font(.system(size: 17, weight: .semibold)).foregroundStyle(Palette.text).lineLimit(1)
+                            Text(item.inviteCode).font(AppFont.display(17)).foregroundStyle(Palette.text).lineLimit(1)
                             Text(item.drawDate.map { DrawDateFormat.long($0, language: settings.language) } ?? t.noDrawDate)
-                                .font(.system(size: 13)).foregroundStyle(Palette.sub)
+                                .font(AppFont.body(13, .semibold)).foregroundStyle(Palette.sub)
                         }
                         Spacer()
                         Image(systemName: item.result == nil ? "gift" : "gift.fill")
@@ -177,14 +146,15 @@ struct JoinTabView: View {
                         Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.ter)
                     }
                     .padding(14)
-                    .background(Palette.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Palette.sep))
+                    .background(Palette.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 24)
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+            .background(Palette.page)
         }
     }
 
@@ -222,28 +192,35 @@ struct JoinFormView: View {
     @State private var success = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                CircleIconButton { dismiss() }
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-
-            if let info {
-                form(info)
-            } else if let loadError {
-                VStack(spacing: 12) {
-                    Banner(text: loadError, style: .error)
-                    Button(t.retry) { Task { await load() } }.foregroundStyle(Palette.brandText)
+        ZStack(alignment: .top) {
+            ChristmasBackdrop(garland: true, pines: false)
+            VStack(spacing: 0) {
+                header
+                Group {
+                    if let info {
+                        form(info)
+                    } else if let loadError {
+                        VStack(spacing: 12) {
+                            Banner(text: loadError, style: .error)
+                            Button(t.retry) { Task { await load() } }
+                                .font(AppFont.body(15, .bold))
+                                .foregroundStyle(Palette.brandText)
+                        }
+                        .padding(24)
+                        .frame(maxHeight: .infinity, alignment: .top)
+                    } else {
+                        ProgressView().tint(Palette.brand).frame(maxHeight: .infinity)
+                    }
                 }
-                .padding(20)
-                Spacer()
-            } else {
-                ProgressView().frame(maxHeight: .infinity)
+                .frame(maxWidth: .infinity)
+                .background(
+                    UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous)
+                        .fill(Palette.page)
+                        .shadow(color: Color(hex: 0x320000, alpha: 0.3), radius: 22, y: -8)
+                        .ignoresSafeArea(edges: .bottom)
+                )
             }
         }
-        .background(Palette.page.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .task { await load() }
         .overlay {
@@ -261,14 +238,57 @@ struct JoinFormView: View {
         }
     }
 
+    private var header: some View {
+        HStack(alignment: .bottom, spacing: 0) {
+            VStack(alignment: .leading, spacing: 6) {
+                CircleIconButton(onDark: true) { dismiss() }
+                    .padding(.leading, -10)
+                    .padding(.bottom, 6)
+                Text(t.youreInvited)
+                    .font(AppFont.script(40))
+                    .foregroundStyle(Palette.goldLight)
+                Text(t.joinHeading)
+                    .font(AppFont.display(28))
+                    .foregroundStyle(Palette.snow)
+                if let info {
+                    HStack(spacing: 6) {
+                        if let date = info.drawDate {
+                            chip(icon: "calendar", DrawDateFormat.long(date, language: settings.language))
+                        }
+                        chip(icon: "person.2.fill", t.participantCount(info.participantCount))
+                    }
+                    .padding(.top, 4)
+                }
+            }
+            .padding(.bottom, 26)
+            Spacer(minLength: 0)
+            SantaAvatar(size: 128, mood: .invite)
+        }
+        .padding(.leading, 22)
+        .padding(.trailing, 4)
+        .padding(.top, 50)
+    }
+
+    private func chip(icon: String, _ text: String) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon).font(.system(size: 11, weight: .bold))
+            Text(text).lineLimit(1)
+        }
+        .font(AppFont.body(12, .bold))
+        .foregroundStyle(Palette.snow)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Color.white.opacity(0.16), in: Capsule())
+        .overlay(Capsule().strokeBorder(Color.white.opacity(0.35), lineWidth: 1.5))
+    }
+
     private func form(_ info: DrawPublicInfo) -> some View {
         let errors = showErrors ? validation(info) : [:]
         return ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 drawCard(info)
 
-                ScreenHeader(title: t.joinHeading, subtitle: t.joinSubheading, titleSize: 30)
-                    .padding(.horizontal, 8)
+                ScreenHeader(title: t.joinHeading, subtitle: t.joinSubheading, titleSize: 24)
 
                 if info.status != .active {
                     Banner(text: t.drawNotActive, style: .error)
@@ -284,27 +304,30 @@ struct JoinFormView: View {
                     }
                     FormField(label: t.email, text: $participant.email, placeholder: t.emailPh, kind: .email, isRequired: true, error: errors[.email])
                     if info.requireAddress {
-                        FormField(label: t.address, text: optional(\.address), placeholder: t.addressPh, isRequired: true, error: errors[.address])
+                        FormField(label: t.address, text: optional(\.address), placeholder: t.addressPh, isRequired: true, error: errors[.address], icon: "mappin.and.ellipse")
                     }
                     if info.requirePhone {
                         FormField(label: t.phone, text: optional(\.phone), placeholder: t.phonePh, kind: .phone, isRequired: true, error: errors[.phone])
                     }
                     Toggle(isOn: $notify) {
-                        Text(t.notifyMe).font(.system(size: 14)).foregroundStyle(Palette.text)
+                        Text(t.notifyMe).font(AppFont.body(14, .bold)).foregroundStyle(Palette.text)
                     }
                     .toggleStyle(CheckboxToggleStyle())
                     .padding(.vertical, 6)
-                    .padding(.horizontal, 4)
+                    .padding(.horizontal, 2)
 
-                    Button(t.joinSubmit) { Task { await submit(info) } }
-                        .buttonStyle(.primary(loading: isSubmitting))
-                        .disabled(isSubmitting || info.status != .active)
-                        .accessibilityIdentifier("join.submit")
+                    Button {
+                        Task { await submit(info) }
+                    } label: {
+                        Label(t.joinSubmit, systemImage: "gift.fill")
+                    }
+                    .buttonStyle(.primary(loading: isSubmitting))
+                    .disabled(isSubmitting || info.status != .active)
+                    .accessibilityIdentifier("join.submit")
                 }
-                .padding(.horizontal, 4)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
+            .padding(.horizontal, 22)
+            .padding(.top, 24)
             .padding(.bottom, 24)
         }
         .scrollDismissesKeyboard(.interactively)
@@ -317,24 +340,23 @@ struct JoinFormView: View {
         let details = [
             info.organizerName.map { "\(t.hostedBy) \($0)" },
             t.participantCount(info.participantCount),
-            info.drawDate.map { DrawDateFormat.long($0, language: settings.language) },
         ].compactMap { $0 }.joined(separator: " · ")
         return HStack(spacing: 12) {
             Text(initials)
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(.white)
-                .frame(width: 40, height: 40)
-                .background(LinearGradient(colors: [Color(hex: 0xFF6467), Color(hex: 0xE7000B)], startPoint: .topLeading, endPoint: .bottomTrailing),
-                            in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .font(AppFont.display(15))
+                .foregroundStyle(Palette.cranberryDark)
+                .frame(width: 42, height: 42)
+                .background(Palette.goldGradient, in: Circle())
             VStack(alignment: .leading, spacing: 2) {
-                Text(inviteCode).font(.system(size: 15, weight: .semibold)).foregroundStyle(Palette.text)
-                Text(details).font(.system(size: 13)).foregroundStyle(Palette.sub)
+                Text(inviteCode).font(AppFont.display(16)).foregroundStyle(Palette.text)
+                Text(details).font(AppFont.body(13, .semibold)).foregroundStyle(Palette.sub)
             }
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(Palette.card2, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Palette.card2, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Palette.gold.opacity(0.6), lineWidth: 1.5))
     }
 
     private func optional(_ keyPath: WritableKeyPath<ParticipantInput, String?>) -> Binding<String> {
@@ -403,9 +425,9 @@ struct CheckboxToggleStyle: ToggleStyle {
         Button { configuration.isOn.toggle() } label: {
             HStack(spacing: 10) {
                 RoundedRectangle(cornerRadius: 7, style: .continuous)
-                    .fill(configuration.isOn ? Palette.brand : .clear)
-                    .strokeBorder(configuration.isOn ? Palette.brand : Palette.fieldBorder, lineWidth: 1.5)
-                    .frame(width: 22, height: 22)
+                    .fill(configuration.isOn ? Palette.brand : Palette.field)
+                    .strokeBorder(configuration.isOn ? Palette.gold : Palette.fieldBorder, lineWidth: 2)
+                    .frame(width: 24, height: 24)
                     .overlay {
                         if configuration.isOn {
                             Image(systemName: "checkmark").font(.system(size: 12, weight: .heavy)).foregroundStyle(.white)
@@ -425,45 +447,55 @@ struct JoinSuccessOverlay: View {
     var onDone: () -> Void
     @Environment(\.strings) private var t
     @Environment(AppSettings.self) private var settings
+    @State private var shown = false
 
     private let confetti: [(CGFloat, CGFloat, UInt32, Double)] = [
-        (0.15, 0.16, 0xEF4444, 20), (0.40, 0.13, 0x10B981, -30), (0.80, 0.20, 0x3B82F6, 45), (0.62, 0.10, 0xF59E0B, 10),
-        (0.27, 0.25, 0x8B5CF6, -15), (0.60, 0.23, 0xEF4444, 60), (0.12, 0.75, 0xF59E0B, -50), (0.85, 0.78, 0x10B981, 25),
+        (0.15, 0.10, 0xF6D98A, 20), (0.40, 0.06, 0x4FB87E, -30), (0.80, 0.14, 0xFFFFFF, 45), (0.62, 0.04, 0xF6D98A, 10),
+        (0.27, 0.20, 0xFFFFFF, -15), (0.70, 0.22, 0x4FB87E, 60), (0.10, 0.30, 0xF6D98A, -50), (0.88, 0.30, 0x4FB87E, 25),
     ]
 
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                Color.black.opacity(0.55).ignoresSafeArea()
+                RadialGradient(colors: [Color(hex: 0xA3171C), Color(hex: 0x3D0609)], center: .center, startRadius: 0, endRadius: 520)
+                    .opacity(0.96)
+                    .ignoresSafeArea()
                 ForEach(confetti.indices, id: \.self) { i in
                     let c = confetti[i]
                     RoundedRectangle(cornerRadius: 2)
                         .fill(Color(hex: c.2))
-                        .frame(width: 8, height: 14)
-                        .rotationEffect(.degrees(c.3))
-                        .position(x: geo.size.width * c.0, y: geo.size.height * c.1)
+                        .frame(width: 9, height: 14)
+                        .rotationEffect(.degrees(c.3 + (shown ? 180 : 0)))
+                        .position(x: geo.size.width * c.0, y: geo.size.height * c.1 + (shown ? 60 : 0))
                 }
-                VStack(spacing: 12) {
-                    Text("🎉").font(.system(size: 64))
-                    Text(t.successTitle).font(.system(size: 26, weight: .bold)).foregroundStyle(Palette.brandText)
-                    Text(t.joinSuccessMsg).font(.system(size: 16)).foregroundStyle(Palette.text)
+                VStack(spacing: 10) {
+                    Text(t.congrats).font(AppFont.script(54)).foregroundStyle(Color(hex: 0xB8892B))
+                    Text(t.successTitle).font(AppFont.display(25)).foregroundStyle(Palette.brandText)
+                    CandyStripe(width: 80)
+                    Text(t.joinSuccessMsg).font(AppFont.body(15, .medium)).foregroundStyle(Palette.text)
                     if let drawDate {
                         Text(String(format: t.drawDateInfo, DrawDateFormat.long(drawDate, language: settings.language)))
-                            .font(.system(size: 14)).foregroundStyle(Palette.sub)
+                            .font(AppFont.body(14, .semibold)).foregroundStyle(Palette.sub)
                     }
-                    Banner(text: t.successPush)
-                    Text(t.happyHolidays).font(.system(size: 15, weight: .semibold)).foregroundStyle(Palette.brandText)
-                    Button(t.ok, action: onDone).buttonStyle(.primary).padding(.top, 6)
+                    Banner(text: t.successPush, style: .success)
+                    Button(t.ok, action: onDone).buttonStyle(.primary).padding(.top, 4)
+                    Text("★ \(t.happyHolidays) ★").font(AppFont.body(14, .bold)).foregroundStyle(Palette.greenText)
                 }
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
-                .padding(.top, 32)
-                .padding(.bottom, 24)
-                .background(Palette.card, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                .shadow(color: .black.opacity(0.4), radius: 40, y: 30)
-                .padding(24)
+                .padding(.top, 104)
+                .padding(.bottom, 22)
+                .foilCard(radius: 32)
+                .overlay(alignment: .top) {
+                    SantaAvatar(size: 210, mood: .celebrate).offset(y: -158)
+                }
+                .padding(.horizontal, 22)
+                .padding(.top, 120)
+                .scaleEffect(shown ? 1 : 0.9)
+                .opacity(shown ? 1 : 0)
             }
         }
-        .sensoryFeedback(.success, trigger: true)
+        .onAppear { withAnimation(.spring(duration: 0.6, bounce: 0.35)) { shown = true } }
+        .sensoryFeedback(.success, trigger: shown)
     }
 }

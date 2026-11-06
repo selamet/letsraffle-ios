@@ -52,28 +52,17 @@ struct RevealView: View {
 
     private var background: some View {
         ZStack {
-            Palette.heroGradient
-            RadialGradient(colors: [Color(hex: 0xFFDF20, alpha: 0.28), .clear], center: UnitPoint(x: 0.5, y: 0.35), startRadius: 0, endRadius: 260)
-            SnowDots(dots: [
-                .init(x: 0.1, y: 0.17, size: 6, opacity: 0.7),
-                .init(x: 0.87, y: 0.29, size: 4, opacity: 0.6),
-                .init(x: 0.17, y: 0.46, size: 5, opacity: 0.5),
-            ])
+            ChristmasBackdrop(garland: true, pines: true)
+            RadialGradient(colors: [Palette.goldLight.opacity(0.3), .clear], center: UnitPoint(x: 0.5, y: 0.42), startRadius: 0, endRadius: 240)
+                .ignoresSafeArea()
         }
-        .ignoresSafeArea()
     }
 
     private var topBar: some View {
         HStack {
-            Button { dismiss() } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 44, height: 44)
-                    .background(.white.opacity(0.2), in: Circle())
-            }
+            CircleIconButton(onDark: true) { dismiss() }
             Spacer()
-            Text(store.inviteCode).font(.system(size: 13, weight: .semibold)).foregroundStyle(.white.opacity(0.85))
+            Text(store.inviteCode).font(AppFont.body(13, .black)).tracking(1.2).foregroundStyle(Palette.goldLight)
             Spacer()
             Color.clear.frame(width: 44, height: 44)
         }
@@ -85,13 +74,11 @@ struct RevealView: View {
     private var content: some View {
         VStack(spacing: 20) {
             Text(t.yourMatch)
-                .font(.eyebrow)
-                .tracking(3.6)
-                .textCase(.uppercase)
-                .foregroundStyle(.white.opacity(0.8))
+                .font(AppFont.script(40))
+                .foregroundStyle(Palette.goldLight)
             Text(t.revealTitle)
-                .font(.system(size: 30, weight: .bold))
-                .foregroundStyle(.white)
+                .font(AppFont.display(28))
+                .foregroundStyle(Palette.snow)
                 .multilineTextAlignment(.center)
 
             switch store.phase {
@@ -104,7 +91,7 @@ struct RevealView: View {
             case let .failed(message):
                 GiftBox(opened: false).opacity(0.6)
                 infoText(message)
-                Button(t.retry) { Task { await store.load(t) } }.foregroundStyle(.white).fontWeight(.semibold)
+                Button(t.retry) { Task { await store.load(t) } }.foregroundStyle(Palette.goldLight).font(AppFont.body(15, .bold))
             case let .revealed(result):
                 Button {
                     withAnimation(.spring(duration: 0.6, bounce: 0.35)) { opened = true }
@@ -130,30 +117,28 @@ struct RevealView: View {
     private func receiverCard(_ receiver: MatchResult.Receiver) -> some View {
         HStack(spacing: 14) {
             Text(Participant.initials(receiver.firstName, receiver.lastName))
-                .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(.white)
-                .frame(width: 52, height: 52)
-                .background(LinearGradient(colors: [Color(hex: 0xFF6467), Color(hex: 0xE7000B)], startPoint: .topLeading, endPoint: .bottomTrailing), in: Circle())
-                .overlay(Circle().strokeBorder(.white.opacity(0.7), lineWidth: 2))
+                .font(AppFont.display(19))
+                .foregroundStyle(Palette.cranberryDark)
+                .frame(width: 54, height: 54)
+                .background(Palette.goldGradient, in: Circle())
             VStack(alignment: .leading, spacing: 3) {
-                Text(receiver.fullName).font(.system(size: 22, weight: .bold)).foregroundStyle(.white)
+                Text(receiver.fullName).font(AppFont.display(22)).foregroundStyle(Palette.brandText)
                 let details = [receiver.address.map { "📍 \($0)" }, receiver.phone.map { "📞 \($0)" }].compactMap { $0 }
                 if !details.isEmpty {
-                    Text(details.joined(separator: " · ")).font(.system(size: 13)).foregroundStyle(.white.opacity(0.85))
+                    Text(details.joined(separator: " · ")).font(AppFont.body(13, .semibold)).foregroundStyle(Palette.sub)
                 }
             }
             Spacer(minLength: 0)
         }
-        .padding(16)
-        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(.white.opacity(0.3)))
+        .padding(18)
+        .foilCard(radius: 24)
         .accessibilityIdentifier("reveal.receiver")
     }
 
     private func infoText(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 13))
-            .foregroundStyle(.white.opacity(0.75))
+            .font(AppFont.body(14, .bold))
+            .foregroundStyle(Palette.snow.opacity(0.85))
             .multilineTextAlignment(.center)
             .frame(maxWidth: 280)
     }
@@ -161,12 +146,14 @@ struct RevealView: View {
     private var actions: some View {
         VStack(spacing: 10) {
             if opened {
-                Button(t.addReminder) { showReminder = true }
-                    .buttonStyle(PrimaryButtonStyle(background: .white, foreground: Palette.heroB))
+                Button { showReminder = true } label: {
+                    Label(t.addReminder, systemImage: "calendar.badge.plus")
+                }
+                .buttonStyle(.gold)
             }
             Button(t.done) { dismiss() }
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(.white.opacity(0.85))
+                .font(AppFont.body(15, .bold))
+                .foregroundStyle(Palette.snow.opacity(0.9))
                 .frame(height: 44)
         }
         .padding(.horizontal, 20)
@@ -180,25 +167,24 @@ struct GiftBox: View {
 
     var body: some View {
         ZStack {
-            Circle().fill(Color(hex: 0xFFDF20, alpha: 0.18)).blur(radius: 30)
+            Circle().fill(Palette.goldLight.opacity(0.22)).blur(radius: 30)
             ZStack(alignment: .top) {
                 // Box
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(LinearGradient(colors: [Color(hex: 0xFE9A00), Color(hex: 0xE17100)], startPoint: .top, endPoint: .bottom))
+                    .fill(LinearGradient(colors: [Color(hex: 0x2F7A55), Palette.pine], startPoint: .top, endPoint: .bottom))
                     .frame(width: 160, height: 130)
-                    .overlay(Rectangle().fill(.white.opacity(0.95)).frame(width: 22))
+                    .overlay(Rectangle().fill(Palette.gold).frame(width: 22))
                     .shadow(color: .black.opacity(0.35), radius: 25, y: 20)
                     .offset(y: 90 - 44)
                 // Lid + bow
                 ZStack(alignment: .top) {
-                    Bow().stroke(.white, style: StrokeStyle(lineWidth: 12, lineCap: .round))
+                    Bow().stroke(Palette.gold, style: StrokeStyle(lineWidth: 12, lineCap: .round))
                         .frame(width: 70, height: 40)
                         .offset(y: -30)
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(LinearGradient(colors: [Color(hex: 0xFFB900), Color(hex: 0xFE9A00)], startPoint: .top, endPoint: .bottom))
+                        .fill(LinearGradient(colors: [Color(hex: 0x3A8A62), Color(hex: 0x2F7A55)], startPoint: .top, endPoint: .bottom))
                         .frame(width: 176, height: 48)
-                        .overlay(Rectangle().fill(.white.opacity(0.95)).frame(height: 22).offset(y: 2))
-                        .overlay(Rectangle().fill(.white.opacity(0.95)).frame(width: 22))
+                        .overlay(Rectangle().fill(Palette.gold).frame(width: 22))
                         .shadow(color: .black.opacity(0.25), radius: 10, y: 8)
                 }
                 .rotationEffect(.degrees(opened ? -18 : 0), anchor: .bottomLeading)

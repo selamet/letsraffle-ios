@@ -22,10 +22,15 @@ struct StepScaffold<Content: View, Bottom: View>: View {
                         .tracking(2.4)
                         .textCase(.uppercase)
                         .foregroundStyle(Palette.brandText)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Palette.chip, in: Capsule())
                 }
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
+            .padding(.bottom, 4)
+            .overlay(alignment: .bottom) { Rectangle().fill(Palette.cardBorder).frame(height: 1) }
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
@@ -41,9 +46,13 @@ struct StepScaffold<Content: View, Bottom: View>: View {
 
             bottom
                 .padding(.horizontal, 20)
-                .padding(.top, 12)
-                .padding(.bottom, 12)
-                .background(Palette.page)
+                .padding(.top, 14)
+                .padding(.bottom, 8)
+                .background(
+                    Palette.card
+                        .shadow(color: Color(hex: 0x6E0D12, alpha: 0.08), radius: 15, y: -6)
+                        .ignoresSafeArea(edges: .bottom)
+                )
         }
         .background(Palette.page.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
@@ -62,17 +71,17 @@ struct InviteSettingsView: View {
     var body: some View {
         StepScaffold(step: t.step1of2, title: t.settingsTitle, subtitle: t.settingsOptional) {
             CardSection {
-                IconRow(icon: "mappin.and.ellipse", iconTint: Color(hex: 0x2563EB), iconBackground: Color(hex: 0x2563EB, alpha: 0.12),
+                IconRow(icon: "mappin.and.ellipse", iconTint: Palette.amberText, iconBackground: Palette.amberSoft,
                         title: t.requireAddress, subtitle: t.requireAddressDesc, showsSeparator: true) {
-                    Toggle("", isOn: $draft.requireAddress).labelsHidden().tint(Color(hex: 0x34C759))
+                    Toggle(t.requireAddress, isOn: $draft.requireAddress).labelsHidden().toggleStyle(CandyToggleStyle())
                 }
-                IconRow(icon: "phone.fill", iconTint: Color(hex: 0x16A34A), iconBackground: Color(hex: 0x16A34A, alpha: 0.12),
+                IconRow(icon: "phone.fill", iconTint: Palette.amberText, iconBackground: Palette.amberSoft,
                         title: t.requirePhone, subtitle: t.requirePhoneDesc, showsSeparator: true) {
-                    Toggle("", isOn: $draft.requirePhone).labelsHidden().tint(Color(hex: 0x34C759))
+                    Toggle(t.requirePhone, isOn: $draft.requirePhone).labelsHidden().toggleStyle(CandyToggleStyle())
                 }
-                IconRow(icon: "calendar", iconTint: Color(hex: 0x9333EA), iconBackground: Color(hex: 0x9333EA, alpha: 0.12),
+                IconRow(icon: "calendar", iconTint: Palette.brandText, iconBackground: Palette.chip,
                         title: t.enableDrawDate, subtitle: t.drawDateEnabledDesc) {
-                    Toggle("", isOn: $draft.scheduleEnabled.animation()).labelsHidden().tint(Color(hex: 0x34C759))
+                    Toggle(t.enableDrawDate, isOn: $draft.scheduleEnabled.animation()).labelsHidden().toggleStyle(CandyToggleStyle())
                 }
             }
 
@@ -81,7 +90,14 @@ struct InviteSettingsView: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
             }
         } bottom: {
-            Button(t.continueTitle) { path.append(.inviteDetails) }
+            Button {
+                path.append(.inviteDetails)
+            } label: {
+                HStack(spacing: 8) {
+                    Text(t.continueTitle)
+                    Image(systemName: "arrow.right")
+                }
+            }
                 .buttonStyle(.primary)
                 .accessibilityIdentifier("invite.continue")
         }
@@ -114,24 +130,26 @@ struct ScheduleEditor: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(t.dateTime)
-                .font(.system(size: 13))
+                .font(.eyebrow)
+                .tracking(1.6)
                 .textCase(.uppercase)
                 .foregroundStyle(Palette.sub)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 6)
 
             CardSection {
                 HStack {
-                    Text(t.dateLabel).font(.system(size: 17)).foregroundStyle(Palette.text)
+                    Text(t.dateLabel).font(AppFont.body(16, .bold)).foregroundStyle(Palette.text)
                     Spacer()
                     DatePicker("", selection: day, in: Calendar.current.startOfDay(for: .now)..., displayedComponents: .date)
                         .labelsHidden()
+                        .tint(Palette.brand)
                 }
                 .padding(.horizontal, 16)
-                .frame(height: 52)
-                .overlay(alignment: .bottom) { Rectangle().fill(Palette.sep).frame(height: 0.5).padding(.leading, 16) }
+                .frame(height: 56)
+                .overlay(alignment: .bottom) { Rectangle().fill(Palette.sep).frame(height: 1).padding(.leading, 16) }
 
                 HStack {
-                    Text(t.timeLabel).font(.system(size: 17)).foregroundStyle(Palette.text)
+                    Text(t.timeLabel).font(AppFont.body(16, .bold)).foregroundStyle(Palette.text)
                     Spacer()
                     Picker("", selection: hour) {
                         ForEach(0..<24, id: \.self) { h in
@@ -139,7 +157,7 @@ struct ScheduleEditor: View {
                         }
                     }
                     .labelsHidden()
-                    .tint(Palette.text)
+                    .tint(Palette.brandText)
                 }
                 .padding(.horizontal, 16)
                 .frame(height: 52)
@@ -195,8 +213,10 @@ struct InviteOrganizerView: View {
             }
             .padding(.horizontal, 4)
         } bottom: {
-            Button(t.saveDetails, action: submit)
-                .buttonStyle(.primary(loading: isLoading))
+            Button(action: submit) {
+                Label(t.saveDetails, systemImage: "square.and.arrow.up")
+            }
+                .buttonStyle(GoldButtonStyle(isLoading: isLoading))
                 .disabled(isLoading)
                 .accessibilityIdentifier("invite.submit")
         }

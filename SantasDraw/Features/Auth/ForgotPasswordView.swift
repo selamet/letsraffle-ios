@@ -13,71 +13,33 @@ struct ForgotPasswordView: View {
     @State private var serverError: String?
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                AuthTopBar()
+        AuthScaffold(mood: .thinking, script: t.forgotTitle, subtitle: t.forgotFun) {
+            VStack(alignment: .leading, spacing: 14) {
+                ScreenHeader(title: t.forgotTitle, subtitle: t.forgotSub, titleSize: 27)
 
-                VStack(spacing: 12) {
-                    SantaAvatar(size: 150, thinking: true)
-                    Text(t.forgotFun)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Palette.brandText)
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 10)
-                        .background(Palette.card, in: Capsule())
-                        .brandShadow()
+                FormField(
+                    label: t.email, text: $email, placeholder: t.emailPh, kind: .email,
+                    error: showErrors ? Validation.emailError(email, t) : nil
+                )
+                Button(t.sendReset, action: submit)
+                    .buttonStyle(.primary(loading: isLoading))
+                    .disabled(isLoading)
+                    .padding(.top, 4)
+
+                if sent {
+                    Banner(text: t.resetSent, style: .success)
+                        .transition(.opacity)
                 }
-                .padding(.top, 12)
-
-                VStack(spacing: 6) {
-                    Text(t.forgotTitle)
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundStyle(Palette.text)
-                    Text(t.forgotSub)
-                        .font(.system(size: 15))
-                        .foregroundStyle(Palette.sub)
+                if let serverError {
+                    Banner(text: serverError, style: .error)
                 }
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 24)
-                .padding(.top, 20)
-
-                VStack(spacing: 14) {
-                    FormField(
-                        label: t.email, text: $email, placeholder: t.emailPh, kind: .email,
-                        error: showErrors ? Validation.emailError(email, t) : nil
-                    )
-                    Button(t.sendReset, action: submit)
-                        .buttonStyle(.primary(loading: isLoading))
-                        .disabled(isLoading)
-
-                    if sent {
-                        Text(t.resetSent)
-                            .font(.system(size: 14))
-                            .foregroundStyle(Palette.greenText)
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 14)
-                            .background(Palette.greenSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                            .transition(.opacity)
-                    }
-                    if let serverError {
-                        Banner(text: serverError, style: .error)
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 24)
 
                 Button(t.backToLogin) { dismiss() }
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(AppFont.body(15, .bold))
                     .foregroundStyle(Palette.brandText)
-                    .padding(.top, 32)
-                    .padding(.bottom, 24)
+                    .frame(maxWidth: .infinity, minHeight: 44)
             }
         }
-        .scrollDismissesKeyboard(.interactively)
-        .background(Palette.page.ignoresSafeArea())
-        .toolbar(.hidden, for: .navigationBar)
         .animation(.default, value: sent)
     }
 

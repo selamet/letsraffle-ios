@@ -33,12 +33,13 @@ struct ManualDrawView: View {
                 Spacer()
                 Button { editing = ParticipantInput(firstName: "", lastName: "", email: "") } label: {
                     Label(t.addParticipant, systemImage: "plus")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Palette.brandText)
+                        .font(AppFont.body(15, .bold))
+                        .foregroundStyle(.white)
                         .padding(.horizontal, 16)
-                        .frame(height: 44)
-                        .background(Palette.card, in: Capsule())
-                        .shadow(color: .black.opacity(0.07), radius: 1.5, y: 1)
+                        .frame(height: 40)
+                        .background(Palette.pine, in: Capsule())
+                        .background(Palette.pineEdge, in: Capsule().offset(y: 3))
+                        .frame(minHeight: 44)
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("manual.add")
@@ -73,14 +74,14 @@ struct ManualDrawView: View {
                     .listRowBackground(Palette.card)
                     .alignmentGuide(.listRowSeparatorLeading) { _ in 52 }
                 } header: {
-                    Text("🎄 \(t.treeTitle)")
-                        .font(.system(size: 20, weight: .bold))
+                    Text(t.treeTitle)
+                        .font(AppFont.display(19))
                         .foregroundStyle(Palette.text)
                         .textCase(nil)
                         .padding(.horizontal, -16)
                 } footer: {
                     if model.participants.count > 1 {
-                        Text("← \(t.swipeHint)").font(.system(size: 12)).foregroundStyle(Palette.ter).frame(maxWidth: .infinity)
+                        Text("← \(t.swipeHint)").font(AppFont.body(12, .semibold)).foregroundStyle(Palette.ter).frame(maxWidth: .infinity)
                     }
                 }
             }
@@ -95,15 +96,15 @@ struct ManualDrawView: View {
         HStack(spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("\(model.participants.count)")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(AppFont.display(30))
                     .foregroundStyle(Palette.brandText)
                     .contentTransition(.numericText())
-                Text(t.participants).font(.system(size: 13)).foregroundStyle(Palette.sub)
+                Text(t.participants).font(AppFont.body(13, .bold)).foregroundStyle(Palette.sub)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .padding(14)
-            .background(Palette.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Palette.sep))
+            .background(Palette.card2, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Palette.gold.opacity(0.6), lineWidth: 2))
 
             VStack(alignment: .leading, spacing: 6) {
                 CheckRow(title: t.addressReq, isOn: $model.requireAddress)
@@ -111,8 +112,8 @@ struct ManualDrawView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .padding(14)
-            .background(Palette.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Palette.sep))
+            .background(Palette.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
         }
         .fixedSize(horizontal: false, vertical: true)
         .animation(.default, value: model.participants.count)
@@ -122,9 +123,9 @@ struct ManualDrawView: View {
         HStack(spacing: 12) {
             Avatar(initials: Participant.initials(p.firstName, p.lastName))
             VStack(alignment: .leading, spacing: 2) {
-                Text(p.fullName).font(.system(size: 16, weight: .semibold)).foregroundStyle(Palette.text)
+                Text(p.fullName).font(AppFont.body(16, .bold)).foregroundStyle(Palette.text)
                 Text([p.email, p.address].compactMap { $0 }.joined(separator: " · "))
-                    .font(.system(size: 13))
+                    .font(AppFont.body(13, .medium))
                     .foregroundStyle(Palette.sub)
                     .lineLimit(1)
             }
@@ -140,23 +141,51 @@ struct ManualDrawView: View {
     }
 
     private var bottomBar: some View {
-        VStack(spacing: 8) {
+        let count = model.participants.count
+        let minimum = ManualDrawModel.minimumParticipants
+        return VStack(spacing: 8) {
             if let error = model.submitError {
                 Banner(text: error, style: .error)
             }
+            HStack {
+                Text(t.participantCount(count))
+                Spacer()
+                Text(count >= minimum ? t.readyForDraw : t.minHint)
+                    .foregroundStyle(count >= minimum ? Palette.greenText : Palette.brandText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .font(AppFont.body(13, .bold))
+            .foregroundStyle(Palette.sub)
+            GeometryReader { geo in
+                Capsule().fill(Color(light: 0xF1E3D3, dark: 0x3A2224))
+                    .overlay(alignment: .leading) {
+                        Capsule()
+                            .fill(LinearGradient(colors: [Palette.brand, Color(hex: 0xE8474C)], startPoint: .leading, endPoint: .trailing))
+                            .frame(width: geo.size.width * min(1, CGFloat(count) / CGFloat(max(minimum, 1))))
+                    }
+            }
+            .frame(height: 10)
+            .animation(.spring(duration: 0.4), value: count)
             Button(t.runDraw) {
                 Task { await model.submit(api: session.api, language: settings.language, t) }
             }
             .buttonStyle(.primary(loading: model.isSubmitting))
             .disabled(!model.canRun)
             .accessibilityIdentifier("manual.run")
-            if model.participants.count < ManualDrawModel.minimumParticipants {
-                Text(t.minHint).font(.system(size: 13)).foregroundStyle(Palette.sub).multilineTextAlignment(.center)
-            }
+            Text(t.manualEmailNote)
+                .font(AppFont.body(12, .bold))
+                .foregroundStyle(Palette.sub)
+                .multilineTextAlignment(.center)
         }
         .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-        .background(Palette.page)
+        .padding(.top, 14)
+        .padding(.bottom, 10)
+        .background(
+            Palette.card
+                .shadow(color: Color(hex: 0x6E0D12, alpha: 0.08), radius: 15, y: -6)
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
 }
 
@@ -175,7 +204,7 @@ private struct CheckRow: View {
                     .overlay {
                         if isOn { Image(systemName: "checkmark").font(.system(size: 9, weight: .heavy)).foregroundStyle(.white) }
                     }
-                Text(title).font(.system(size: 13)).foregroundStyle(isOn ? Palette.text : Palette.sub)
+                Text(title).font(AppFont.body(13, .bold)).foregroundStyle(isOn ? Palette.text : Palette.sub)
             }
         }
         .buttonStyle(.plain)
@@ -209,7 +238,7 @@ private struct ParticipantSheet: View {
 
                     Button { pickingContact = true } label: {
                         Label(t.importContacts, systemImage: "person.crop.circle.badge.plus")
-                            .font(.system(size: 15, weight: .medium))
+                            .font(AppFont.body(15, .bold))
                             .foregroundStyle(Palette.brandText)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -217,7 +246,7 @@ private struct ParticipantSheet: View {
                 }
                 .padding(20)
             }
-            .background(Palette.card)
+            .background(Palette.page)
             .navigationTitle(t.addParticipant)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -255,28 +284,56 @@ private struct ParticipantSheet: View {
     }
 }
 
-/// Shown after a manual draw was submitted.
+/// Shown after a manual draw was submitted: Santa draws from his sack, then celebrates.
 struct ManualSuccessView: View {
     var onDone: () -> Void
     @Environment(\.strings) private var t
+    @State private var revealed = false
 
     var body: some View {
-        VStack(spacing: 16) {
-            Spacer()
-            SantaAvatar(size: 140)
-            Text(t.successTitle).font(.system(size: 30, weight: .bold)).foregroundStyle(Palette.text)
-            Text(t.manualSuccess)
-                .font(.system(size: 16))
-                .foregroundStyle(Palette.sub)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-            Text(t.happyHolidays).font(.system(size: 15, weight: .semibold)).foregroundStyle(Palette.brandText)
-            Spacer()
-            Button(t.done, action: onDone)
-                .buttonStyle(.primary)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 12)
+        ZStack {
+            ChristmasBackdrop(garland: false, pines: false)
+            VStack(spacing: 14) {
+                Spacer(minLength: 20)
+                if revealed {
+                    Text(t.allReady).font(AppFont.script(46)).foregroundStyle(Palette.goldLight)
+                        .transition(.scale.combined(with: .opacity))
+                    Text(t.successTitle).font(AppFont.display(28)).foregroundStyle(Palette.snow)
+                    Text(t.manualSuccess)
+                        .font(AppFont.body(15, .semibold))
+                        .foregroundStyle(Palette.snow.opacity(0.9))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 28)
+                } else {
+                    Text(t.santaDrawing).font(AppFont.display(26)).foregroundStyle(Palette.snow)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                }
+                SantaAvatar(size: 290, mood: revealed ? .celebrate : .draw)
+                    .id(revealed)
+                    .transition(.opacity)
+                if revealed {
+                    Text("★ \(t.happyHolidays) ★").font(AppFont.body(15, .bold)).foregroundStyle(Palette.goldLight)
+                } else {
+                    Text(t.shuffling)
+                        .font(AppFont.body(14, .bold))
+                        .foregroundStyle(Palette.snow.opacity(0.9))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 28)
+                }
+                Spacer(minLength: 10)
+                Button(t.done, action: onDone)
+                    .buttonStyle(.gold)
+                    .padding(.horizontal, 22)
+                    .padding(.bottom, 14)
+                    .opacity(revealed ? 1 : 0)
+                    .disabled(!revealed)
+            }
         }
-        .sensoryFeedback(.success, trigger: true)
+        .task {
+            try? await Task.sleep(for: .seconds(4.5))
+            withAnimation(.spring(duration: 0.6)) { revealed = true }
+        }
+        .sensoryFeedback(.success, trigger: revealed)
     }
 }

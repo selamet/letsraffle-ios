@@ -86,9 +86,8 @@ struct AppleSignInButton: View {
         } label: {
             AppleLabel(title: title)
         }
-        .buttonStyle(style == .black
-            ? PrimaryButtonStyle(background: .black, foreground: .white, isLoading: isLoading)
-            : PrimaryButtonStyle(background: Palette.text, foreground: Palette.page, isLoading: isLoading))
+        // Apple's guidelines: always a black (or white) button with the Apple logo.
+        .buttonStyle(PrimaryButtonStyle(background: .black, foreground: .white, edge: .black, rim: .clear, isLoading: isLoading, height: 54))
         .disabled(isLoading)
         .accessibilityIdentifier("auth.apple")
     }

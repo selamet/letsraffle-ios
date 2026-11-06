@@ -17,47 +17,47 @@ struct ProfileView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     Text(t.tabProfile)
-                        .font(.system(size: 34, weight: .bold))
-                        .foregroundStyle(Palette.text)
-                        .padding(.horizontal, 8)
+                        .font(AppFont.display(32))
+                        .foregroundStyle(Palette.brandText)
+                        .padding(.horizontal, 4)
 
                     accountCard
 
                     section(t.preferences) {
-                        row(icon: .text(settings.language.rawValue), tint: Color(hex: 0x155DFC), title: t.language, separator: true) {
+                        row(icon: .text(settings.language.rawValue), tint: Palette.pine, title: t.language, separator: true) {
                             Picker(t.language, selection: $settings.language) {
                                 ForEach(AppLanguage.allCases) { Text($0.rawValue).tag($0) }
                             }
                             .pickerStyle(.segmented)
                             .frame(width: 110)
                         }
-                        row(icon: .symbol("moon.fill"), tint: Color(hex: 0x1D293D), title: t.appearance, separator: true) {
+                        row(icon: .symbol("moon.fill"), tint: Palette.cranberryDark, title: t.appearance, separator: true) {
                             Picker(t.appearance, selection: $settings.appearance) {
                                 ForEach(AppearancePreference.allCases) { Text($0.title(t)).tag($0) }
                             }
                             .pickerStyle(.menu)
                             .tint(Palette.sub)
                         }
-                        row(icon: .symbol("bell.fill"), tint: Color(hex: 0xFF3B30), title: t.notifications, separator: true) {
-                            Toggle("", isOn: $settings.notificationsEnabled).labelsHidden().tint(Color(hex: 0x34C759))
+                        row(icon: .symbol("bell.fill"), tint: Palette.goldDark, title: t.notifications, separator: true) {
+                            Toggle(t.notifications, isOn: $settings.notificationsEnabled).labelsHidden().toggleStyle(CandyToggleStyle())
                         }
                         Button { showWidgetHelp = true } label: {
-                            row(icon: .symbol("square.grid.2x2.fill"), tint: Color(hex: 0xFE9A00), title: t.widgets) { chevron }
+                            row(icon: .symbol("square.grid.2x2.fill"), tint: Palette.brand, title: t.widgets) { chevron }
                         }
                         .buttonStyle(.plain)
                     }
 
                     section(t.about) {
                         Link(destination: AppConfig.sourceCodeURL) {
-                            row(icon: .text("❤️"), tint: Color(hex: 0x1D293D), title: t.openSource, separator: true) {
+                            row(icon: .symbol("chevron.left.forwardslash.chevron.right"), tint: Palette.brand, title: t.openSource, separator: true) {
                                 HStack(spacing: 6) {
-                                    Text("GitHub").font(.system(size: 15)).foregroundStyle(Palette.sub)
+                                    Text("GitHub").font(AppFont.body(14, .semibold)).foregroundStyle(Palette.sub)
                                     chevron
                                 }
                             }
                         }
-                        row(icon: .symbol("info"), tint: Color(hex: 0x8E8E93), title: t.version) {
-                            Text(AppConfig.version).font(.system(size: 15)).foregroundStyle(Palette.sub)
+                        row(icon: .symbol("info"), tint: Palette.ter, title: t.version) {
+                            Text(AppConfig.version).font(AppFont.body(14, .semibold)).foregroundStyle(Palette.sub)
                         }
                     }
 
@@ -94,34 +94,41 @@ struct ProfileView: View {
     private var accountCard: some View {
         HStack(spacing: 14) {
             Text(initials)
-                .font(.system(size: 22, weight: .bold))
-                .foregroundStyle(.white)
-                .frame(width: 60, height: 60)
-                .background(LinearGradient(colors: [Color(hex: 0xFF6467), Color(hex: 0xE7000B)], startPoint: .topLeading, endPoint: .bottomTrailing), in: Circle())
+                .font(AppFont.display(22))
+                .foregroundStyle(Palette.cranberryDark)
+                .frame(width: 58, height: 58)
+                .background(Palette.goldGradient, in: Circle())
+                .overlay(Circle().strokeBorder(Color.white.opacity(0.4), lineWidth: 3))
             VStack(alignment: .leading, spacing: 3) {
                 if let user = session.user {
                     Text(user.email.components(separatedBy: "@").first ?? user.email)
-                        .font(.system(size: 20, weight: .semibold)).foregroundStyle(Palette.text).lineLimit(1)
-                    Text(user.email).font(.system(size: 14)).foregroundStyle(Palette.sub).lineLimit(1)
+                        .font(AppFont.display(19)).foregroundStyle(Palette.snow).lineLimit(1)
+                    Text(user.email).font(AppFont.body(13, .bold)).foregroundStyle(Palette.snow.opacity(0.85)).lineLimit(1)
                     if user.hasApple == true {
-                        Label(t.appleLinked, systemImage: "applelogo").font(.system(size: 12)).foregroundStyle(Palette.sub)
+                        Label(t.appleLinked, systemImage: "applelogo").font(AppFont.body(12, .bold)).foregroundStyle(Palette.goldLight)
                     }
                 } else {
-                    Text(t.guest).font(.system(size: 20, weight: .semibold)).foregroundStyle(Palette.text)
-                    Text(t.guestDrawsHint).font(.system(size: 13)).foregroundStyle(Palette.sub)
+                    Text(t.guest).font(AppFont.display(19)).foregroundStyle(Palette.snow)
+                    Text(t.guestDrawsHint).font(AppFont.body(13, .semibold)).foregroundStyle(Palette.snow.opacity(0.85))
                 }
             }
             Spacer(minLength: 0)
+            SantaAvatar(size: 64, mood: .wave)
+                .padding(.top, -14)
+                .padding(.bottom, -18)
         }
         .padding(16)
-        .background(Palette.card, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+        .background(Palette.heroGradient, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Radius.card, style: .continuous).strokeBorder(Palette.gold, lineWidth: 2))
+        .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+        .shadow(color: Color(hex: 0x6E0D12, alpha: 0.22), radius: 13, y: 10)
     }
 
     @ViewBuilder
     private var actions: some View {
         if session.isSignedIn {
             Button { Task { await session.signOut() } } label: {
-                Text(t.logout).actionLabel(color: Color(hex: 0xFF3B30))
+                Label(t.logout, systemImage: "rectangle.portrait.and.arrow.right").actionLabel(color: Palette.brandText)
             }
             .accessibilityIdentifier("profile.logout")
             Button { confirmDelete = true } label: {
@@ -153,10 +160,11 @@ struct ProfileView: View {
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.system(size: 13))
+                .font(.eyebrow)
+                .tracking(1.6)
                 .textCase(.uppercase)
                 .foregroundStyle(Palette.sub)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 6)
             CardSection { content() }
         }
     }
@@ -166,21 +174,21 @@ struct ProfileView: View {
             Group {
                 switch icon {
                 case let .symbol(name): Image(systemName: name).font(.system(size: 14, weight: .semibold))
-                case let .text(text): Text(text).font(.system(size: 12, weight: .bold))
+                case let .text(text): Text(text).font(AppFont.body(12, .black))
                 }
             }
             .foregroundStyle(.white)
-            .frame(width: 30, height: 30)
-            .background(tint, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
-            Text(title).font(.system(size: 17)).foregroundStyle(Palette.text)
+            .frame(width: 32, height: 32)
+            .background(tint, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            Text(title).font(AppFont.body(16, .bold)).foregroundStyle(Palette.text)
             Spacer(minLength: 8)
             trailing()
         }
         .padding(.horizontal, 16)
-        .frame(height: 52)
+        .frame(height: 56)
         .contentShape(Rectangle())
         .overlay(alignment: .bottom) {
-            if separator { Rectangle().fill(Palette.sep).frame(height: 0.5).padding(.leading, 58) }
+            if separator { Rectangle().fill(Palette.sep).frame(height: 1).padding(.leading, 60) }
         }
     }
 
@@ -196,10 +204,11 @@ struct ProfileView: View {
 }
 
 private extension View {
-    func actionLabel(color: Color, weight: Font.Weight = .medium, size: CGFloat = 17) -> some View {
-        font(.system(size: size, weight: weight))
+    func actionLabel(color: Color, weight: Font.Weight = .bold, size: CGFloat = 16) -> some View {
+        font(AppFont.body(size, weight))
             .foregroundStyle(color)
-            .frame(maxWidth: .infinity, minHeight: 52)
+            .frame(maxWidth: .infinity, minHeight: 54)
             .background(Palette.card, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: Radius.card, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
     }
 }

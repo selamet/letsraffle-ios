@@ -1,7 +1,8 @@
 import SwiftUI
 
 enum AuthRoute: Hashable {
-    case login, register, forgotPassword
+    case login, register, forgotPassword, joinCode
+    case joinForm(String)
 }
 
 /// Onboarding + email authentication stack shown while signed out.
@@ -25,6 +26,8 @@ struct AuthFlowView: View {
                     case .login: LoginView(path: $path)
                     case .register: RegisterView(path: $path)
                     case .forgotPassword: ForgotPasswordView()
+                    case .joinCode: JoinCodeScreen(path: $path)
+                    case let .joinForm(code): JoinFormView(inviteCode: code) { path.removeAll() }
                     }
                 }
         }
@@ -58,7 +61,7 @@ struct AuthTopBar<Trailing: View>: View {
 
     var body: some View {
         HStack {
-            CircleIconButton { dismiss() }
+            CircleIconButton(onDark: true) { dismiss() }
             Spacer()
             trailing
         }

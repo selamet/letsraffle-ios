@@ -10,57 +10,58 @@ struct RegisterView: View {
     @State private var showErrors = false
     @State private var isLoading = false
     @State private var serverError: String?
+    @State private var passwordFocused = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                AuthTopBar()
+        AuthScaffold(
+            mood: passwordFocused ? .cover : .list,
+            script: t.welcome,
+            subtitle: t.welcomeSub,
+            bubble: passwordFocused ? t.notLooking : nil
+        ) {
+            VStack(alignment: .leading, spacing: 14) {
+                AuthSegment(selected: .register) { _ in path = [.login] }
 
-                ScreenHeader(eyebrow: t.brandEyebrow, title: t.registerTitle, subtitle: t.registerSub)
-                    .padding(.horizontal, 24)
-                    .padding(.top, 16)
+                ScreenHeader(title: t.registerTitle, subtitle: t.registerSub, titleSize: 27)
+                    .padding(.top, 6)
 
-                VStack(spacing: 14) {
-                    if let serverError {
-                        Banner(text: serverError, style: .error)
-                    }
-                    FormField(
-                        label: t.email, text: $email, placeholder: t.emailPh, kind: .email,
-                        error: showErrors ? Validation.emailError(email, t) : nil
-                    )
-                    FormField(
-                        label: t.password, text: $password, placeholder: t.passwordPh, kind: .password,
-                        hint: t.passwordRule,
-                        error: showErrors ? Validation.passwordError(password, t) : nil
-                    )
-
-                    Button(t.registerBtn, action: submit)
-                        .buttonStyle(.primary(loading: isLoading))
-                        .disabled(isLoading)
-                        .padding(.top, 6)
-                        .accessibilityIdentifier("register.submit")
-
-                    OrDivider(title: t.or)
-
-                    AppleSignInButton(title: t.appleSignup) { serverError = $0 }
+                if let serverError {
+                    Banner(text: serverError, style: .error)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 24)
+                FormField(
+                    label: t.email, text: $email, placeholder: t.emailPh, kind: .email,
+                    error: showErrors ? Validation.emailError(email, t) : nil
+                )
+                FormField(
+                    label: t.password, text: $password, placeholder: t.passwordPh, kind: .password,
+                    hint: t.passwordRule,
+                    error: showErrors ? Validation.passwordError(password, t) : nil,
+                    onFocusChange: { focused in withAnimation { passwordFocused = focused } }
+                )
+
+                Button(t.registerBtn, action: submit)
+                    .buttonStyle(.primary(loading: isLoading))
+                    .disabled(isLoading)
+                    .padding(.top, 4)
+                    .accessibilityIdentifier("register.submit")
+
+                OrDivider(title: t.or)
+
+                VStack(spacing: 4) {
+                    AppleSignInButton(title: t.appleSignup) { serverError = $0 }
+                    GoogleSignInButton { serverError = $0 }
+                }
 
                 HStack(spacing: 4) {
                     Text(t.haveAccount).foregroundStyle(Palette.sub)
                     Button(t.loginLink) { path = [.login] }
-                        .fontWeight(.semibold)
+                        .fontWeight(.heavy)
                         .foregroundStyle(Palette.brandText)
                 }
-                .font(.system(size: 15))
-                .padding(.top, 32)
-                .padding(.bottom, 24)
+                .font(AppFont.body(15, .semibold))
+                .frame(maxWidth: .infinity, minHeight: 44)
             }
         }
-        .scrollDismissesKeyboard(.interactively)
-        .background(Palette.page.ignoresSafeArea())
-        .toolbar(.hidden, for: .navigationBar)
     }
 
     private func submit() {
