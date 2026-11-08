@@ -29,19 +29,23 @@ struct OnboardingView: View {
 
                     // Santa fills the space between the title and the sheet and
                     // stands on the snow wave instead of sinking behind it.
-                    SantaAvatar(size: compact ? 210 : 260, mood: .draw)
-                        .frame(maxHeight: .infinity, alignment: .bottom)
+                    AnimatedSanta(mood: .draw)
+                        .aspectRatio(0.8, contentMode: .fit)
+                        .frame(maxWidth: compact ? 230 : 280, maxHeight: .infinity, alignment: .bottom)
+                        .accessibilityHidden(true)
                         .padding(.top, 18)
                         .background {
                             RadialGradient(
                                 colors: [Palette.goldLight.opacity(0.35), Palette.goldLight.opacity(0.1), .clear],
                                 center: .center, startRadius: 0, endRadius: compact ? 150 : 180
                             )
+                            .frame(width: compact ? 300 : 360, height: compact ? 300 : 360)
                             .offset(y: 20)
+                            .allowsHitTesting(false)
                         }
                         .scaleEffect(appeared ? 1 : 0.92, anchor: .bottom)
                         .opacity(appeared ? 1 : 0)
-                        .padding(.bottom, -20)
+                        .padding(.bottom, 22)
                         .zIndex(0)
 
                     sheet(compact: compact)
@@ -66,6 +70,7 @@ struct OnboardingView: View {
                 .font(AppFont.body(15, .medium))
                 .foregroundStyle(Palette.sub)
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 6)
                 .padding(.bottom, 16)
 
