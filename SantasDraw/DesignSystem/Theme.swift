@@ -41,7 +41,7 @@ enum Palette {
     static let heroA = Color(light: 0xC4242A, dark: 0x9F1A1F)
     static let heroB = Color(light: 0xA3171C, dark: 0x7A0F14)
     static let heroC = Color(light: 0x6E0D12, dark: 0x3D0609)
-    static let tabBar = Color(light: (0xFFFBF5, 0.96), dark: (0x2A1416, 0.96))
+    static let tabBar = Color(light: (0xFFFBF5, 1), dark: (0x2A1416, 1))
 
     // Status
     static let green = Color(light: 0x2F8A5A, dark: 0x30D158)

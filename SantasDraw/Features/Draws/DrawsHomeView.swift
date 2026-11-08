@@ -214,12 +214,12 @@ private struct HomeHero: View {
             HStack(alignment: .bottom, spacing: 0) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(name.map { "\(t.hello) \($0)," } ?? "\(t.hello),")
-                        .font(AppFont.script(34))
+                        .font(AppFont.script(30))
                         .foregroundStyle(Palette.goldLight)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                     Text(t.myDraws)
-                        .font(AppFont.display(32))
+                        .font(AppFont.display(29))
                         .foregroundStyle(Palette.snow)
                     HStack(spacing: 8) {
                         HStack(spacing: 6) {
@@ -252,16 +252,16 @@ private struct HomeHero: View {
                     }
                     .padding(.top, 6)
                 }
-                .padding(.bottom, 44)
+                .padding(.bottom, 26)
                 Spacer(minLength: 0)
-                SantaAvatar(size: 136, mood: .watch)
-                    .padding(.bottom, 30)
+                SantaAvatar(size: 116, mood: .watch)
+                    .padding(.bottom, 16)
             }
             .padding(.leading, 20)
-            .padding(.trailing, 4)
-            .padding(.top, topInset + 30)
+            .padding(.trailing, 8)
+            .padding(.top, topInset + 18)
         }
-        .frame(height: 252 + topInset)
+        .frame(height: 200 + topInset)
         .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 34, bottomTrailingRadius: 34, style: .continuous))
     }
 }
@@ -318,12 +318,10 @@ private struct NextDrawCard: View {
     }
 }
 
-/// "Yeni bir sürpriz?" – choose invite or manual mode, then one call to action.
+/// "Yeni bir sürpriz?" – each mode card is itself the button that starts that flow.
 private struct NewDrawPicker: View {
-    enum Mode { case invite, manual }
     var onInvite: () -> Void
     var onManual: () -> Void
-    @State private var mode: Mode = .invite
     @Environment(\.strings) private var t
 
     var body: some View {
@@ -336,57 +334,43 @@ private struct NewDrawPicker: View {
 
             inviteCard
             manualCard
-
-            Button {
-                mode == .invite ? onInvite() : onManual()
-            } label: {
-                HStack(spacing: 8) {
-                    Text(mode == .invite ? t.inviteCta : t.manualCta)
-                    Image(systemName: "arrow.right")
-                }
-            }
-            .buttonStyle(ModeCTAStyle(gold: mode == .invite))
-            .accessibilityIdentifier(mode == .invite ? "home.invite" : "home.manual")
         }
-        .animation(.spring(duration: 0.35), value: mode)
     }
 
     private var inviteCard: some View {
-        let on = mode == .invite
-        return Button { mode = .invite } label: {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(alignment: .top) {
+        Button(action: onInvite) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .center) {
                     GiftTag(title: t.inviteModeTitle, size: 19)
                     Spacer()
-                    radio(on: on, light: true)
+                    arrow(light: true)
                 }
                 Text(t.inviteModeDesc)
                     .font(AppFont.body(14, .semibold))
                     .foregroundStyle(Palette.snow.opacity(0.92))
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
-                if on { steps(t.inviteSteps, light: true) }
+                steps(t.inviteSteps, light: true)
+                HStack(spacing: 6) {
+                    Text(t.inviteCta)
+                    Image(systemName: "arrow.right")
+                }
+                .font(AppFont.body(15, .black))
+                .foregroundStyle(Palette.goldLight)
             }
             .padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(alignment: .trailing) {
-                ZStack {
-                    on ? Palette.card2Brand : Color(hex: 0xB8474B)
-                    Rectangle().fill(Palette.gold.opacity(on ? 0.9 : 0.45)).frame(width: 12).frame(maxWidth: .infinity, alignment: .trailing).padding(.trailing, 58)
-                }
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Palette.gold.opacity(on ? 1 : 0.5), lineWidth: 2))
-            .shadow(color: Color(hex: 0x6E0D12, alpha: on ? 0.28 : 0), radius: 15, y: 12)
+            .background(Palette.card2Brand, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Palette.gold, lineWidth: 2))
+            .shadow(color: Color(hex: 0x6E0D12, alpha: 0.28), radius: 15, y: 12)
         }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(on ? .isSelected : [])
+        .buttonStyle(ModeCardStyle())
+        .accessibilityIdentifier("home.invite")
     }
 
     private var manualCard: some View {
-        let on = mode == .manual
-        return Button { mode = .manual } label: {
-            VStack(alignment: .leading, spacing: 8) {
+        Button(action: onManual) {
+            VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .center, spacing: 10) {
                     Image(systemName: "person.3.fill")
                         .font(.system(size: 15, weight: .bold))
@@ -395,35 +379,37 @@ private struct NewDrawPicker: View {
                         .background(Palette.greenSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     Text(t.manualModeTitle).font(AppFont.display(20)).foregroundStyle(Palette.brandText)
                     Spacer()
-                    radio(on: on, light: false)
+                    arrow(light: false)
                 }
                 Text(t.manualModeDesc)
                     .font(AppFont.body(14, .medium))
                     .foregroundStyle(Palette.sub)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
-                if on { steps(t.manualSteps, light: false) }
+                steps(t.manualSteps, light: false)
+                HStack(spacing: 6) {
+                    Text(t.manualCta)
+                    Image(systemName: "arrow.right")
+                }
+                .font(AppFont.body(15, .black))
+                .foregroundStyle(Palette.greenText)
             }
             .padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Palette.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(on ? Palette.pine : Palette.cardBorder, lineWidth: on ? 2.5 : 2))
-            .shadow(color: Palette.pine.opacity(on ? 0.16 : 0), radius: 15, y: 12)
+            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
+            .shadow(color: Palette.pine.opacity(0.1), radius: 12, y: 8)
         }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(on ? .isSelected : [])
+        .buttonStyle(ModeCardStyle())
+        .accessibilityIdentifier("home.manual")
     }
 
-    private func radio(on: Bool, light: Bool) -> some View {
-        ZStack {
-            Circle().fill(on ? (light ? Palette.goldLight : Palette.pine) : .clear)
-            Circle().strokeBorder(light ? Palette.gold : (on ? Palette.pine : Palette.fieldBorder), lineWidth: 2)
-            if on {
-                Image(systemName: "checkmark").font(.system(size: 12, weight: .heavy))
-                    .foregroundStyle(light ? Palette.cranberryDark : .white)
-            }
-        }
-        .frame(width: 26, height: 26)
+    private func arrow(light: Bool) -> some View {
+        Image(systemName: "arrow.right")
+            .font(.system(size: 14, weight: .heavy))
+            .foregroundStyle(light ? Palette.cranberryDark : .white)
+            .frame(width: 34, height: 34)
+            .background(light ? Palette.goldLight : Palette.pine, in: Circle())
     }
 
     private func steps(_ items: [String], light: Bool) -> some View {
@@ -438,6 +424,7 @@ private struct NewDrawPicker: View {
                     Text(item)
                         .font(AppFont.body(13, .bold))
                         .foregroundStyle(light ? Palette.snow : Palette.text)
+                        .multilineTextAlignment(.leading)
                 }
             }
         }
@@ -445,21 +432,16 @@ private struct NewDrawPicker: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(light ? Color.white.opacity(0.12) : Palette.card2, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(light ? Palette.goldLight.opacity(0.45) : Palette.cardBorder, lineWidth: 1.5))
-        .transition(.opacity.combined(with: .move(edge: .top)))
     }
 }
 
-private struct ModeCTAStyle: ButtonStyle {
-    let gold: Bool
-
+/// Whole-card button: presses down slightly.
+private struct ModeCardStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        Group {
-            if gold {
-                GoldButtonStyle().makeBody(configuration: configuration)
-            } else {
-                PrimaryButtonStyle().makeBody(configuration: configuration)
-            }
-        }
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .brightness(configuration.isPressed ? -0.03 : 0)
+            .animation(.spring(duration: 0.2), value: configuration.isPressed)
     }
 }
 
