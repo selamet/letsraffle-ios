@@ -1,4 +1,4 @@
-name: SantasDraw
+name: LetsRaffle
 options:
   bundleIdPrefix: com.letsraffle
   deploymentTarget:
@@ -16,93 +16,104 @@ settings:
     SWIFT_VERSION: "5.10"
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
-    DEVELOPMENT_TEAM: ""
+    DEVELOPMENT_TEAM: 9RHWLJA274
     ENABLE_USER_SCRIPT_SANDBOXING: YES
+packages:
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS
+    from: 8.0.0
+
 targets:
-  SantasDraw:
+  LetsRaffle:
     type: application
     platform: iOS
     sources:
-      - SantasDraw
+      - LetsRaffle
       - Shared
     dependencies:
-      - target: SantasDrawWidgets
+      - package: GoogleSignIn
+        product: GoogleSignIn
+      - target: LetsRaffleWidgets
         embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.letsraffle.ios
-        PRODUCT_NAME: "Santa's Draw"
+        PRODUCT_NAME: "Lets Raffle"
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: "Santa's Draw"
+        INFOPLIST_KEY_CFBundleDisplayName: "Lets Raffle"
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_NSCameraUsageDescription: "Used to scan invite QR codes."
         CODE_SIGN_STYLE: Automatic
     entitlements:
-      path: SantasDraw/Resources/SantasDraw.entitlements
+      path: LetsRaffle/Resources/LetsRaffle.entitlements
       properties:
         com.apple.developer.applesignin: [Default]
         aps-environment: development
         com.apple.security.application-groups: [group.com.letsraffle.ios]
     info:
-      path: SantasDraw/Resources/Info.plist
+      path: LetsRaffle/Resources/Info.plist
       properties:
         API_BASE_URL: $(API_BASE_URL)
         WEB_BASE_URL: $(WEB_BASE_URL)
         CFBundleLocalizations: [tr, en]
         UIAppFonts: [Fraunces_700Bold.ttf, Fraunces_900Black.ttf, GreatVibes_400Regular.ttf, Nunito_500Medium.ttf, Nunito_600SemiBold.ttf, Nunito_700Bold.ttf, Nunito_800ExtraBold.ttf, Nunito_900Black.ttf]
+        # iOS OAuth client of the "letsraffle" Google Cloud project (public identifier, not a secret).
+        GIDClientID: 536662543605-lefv2ehup00m2nan2peh0ir0gkmsksvg.apps.googleusercontent.com
         CFBundleURLTypes:
           - CFBundleURLName: com.letsraffle.ios
             CFBundleURLSchemes: [letsraffle]
-  SantasDrawWidgets:
+          - CFBundleURLName: google-signin
+            CFBundleURLSchemes: [com.googleusercontent.apps.536662543605-lefv2ehup00m2nan2peh0ir0gkmsksvg]
+  LetsRaffleWidgets:
     type: app-extension
     platform: iOS
     sources:
-      - SantasDrawWidgets
+      - LetsRaffleWidgets
       - Shared
-      - SantasDraw/DesignSystem/Theme.swift
-      - SantasDraw/DesignSystem/Illustrations/ChristmasTree.swift
+      - LetsRaffle/DesignSystem/Theme.swift
+      - LetsRaffle/DesignSystem/Illustrations/ChristmasTree.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.letsraffle.ios.widgets
-        PRODUCT_NAME: SantasDrawWidgets
+        PRODUCT_NAME: LetsRaffleWidgets
         TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: "Santa's Draw"
+        INFOPLIST_KEY_CFBundleDisplayName: "Lets Raffle"
         SKIP_INSTALL: YES
         CODE_SIGN_STYLE: Automatic
     info:
-      path: SantasDrawWidgets/Info.plist
+      path: LetsRaffleWidgets/Info.plist
       properties:
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
-      path: SantasDrawWidgets/SantasDrawWidgets.entitlements
+      path: LetsRaffleWidgets/LetsRaffleWidgets.entitlements
       properties:
         com.apple.security.application-groups: [group.com.letsraffle.ios]
-  SantasDrawTests:
+  LetsRaffleTests:
     type: bundle.unit-test
     platform: iOS
     sources:
-      - SantasDrawTests
+      - LetsRaffleTests
     dependencies:
-      - target: SantasDraw
+      - target: LetsRaffle
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
         BUNDLE_LOADER: $(TEST_HOST)
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Santa's Draw.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Santa's Draw"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Lets Raffle.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Lets Raffle"
 schemes:
-  SantasDraw:
+  LetsRaffle:
     build:
       targets:
-        SantasDraw: all
-        SantasDrawWidgets: all
-        SantasDrawTests: [test]
+        LetsRaffle: all
+        LetsRaffleWidgets: all
+        LetsRaffleTests: [test]
     test:
       targets:
-        - SantasDrawTests
+        - LetsRaffleTests

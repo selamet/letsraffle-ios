@@ -1,3 +1,6 @@
 #include "Base.xcconfig"
-API_BASE_URL = https:$(SLASH)/api.letsraffle.com/api/v1
+// Secrets.xcconfig is a local Debug override; it is included first so it can never
+// redirect an App Store build away from production.
 #include? "Secrets.xcconfig"
+API_BASE_URL = https:$(SLASH)/api.letsraffle.co/api/v1
+WEB_BASE_URL = https:$(SLASH)/letsraffle.co

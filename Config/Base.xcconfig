@@ -1,3 +1,2 @@
-// Shared configuration. Values can be overridden in Config/Secrets.xcconfig (git-ignored).
 SLASH = /
-WEB_BASE_URL = https:$(SLASH)/letsraffle.com
+WEB_BASE_URL = https:$(SLASH)/letsraffle.co

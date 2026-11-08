@@ -1,4 +1,4 @@
-# Santa's Draw — iOS
+# Lets Raffle — iOS
 
 Native SwiftUI client for [letsraffle-api](https://github.com/selamet/letsraffle-api).
 
@@ -10,7 +10,7 @@ Native SwiftUI client for [letsraffle-api](https://github.com/selamet/letsraffle
 ## Getting started
 
 ```bash
-make generate   # creates SantasDraw.xcodeproj from project.yml
+make generate   # creates LetsRaffle.xcodeproj from project.yml
 make open       # opens the project in Xcode
 make test       # runs unit tests on the simulator
 ```
@@ -33,7 +33,7 @@ API_BASE_URL = http:$(SLASH)/192.168.1.20:8000/api/v1
 ## Structure
 
 ```
-SantasDraw/
+LetsRaffle/
 ├── App/            # entry point, settings, config
 ├── DesignSystem/   # palette, components, illustrations
 └── Localization/   # TR / EN strings
