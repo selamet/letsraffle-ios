@@ -55,7 +55,13 @@ struct OnboardingView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .statusBarStyle(.lightContent)
-        .onAppear { withAnimation(.easeOut(duration: 0.6)) { appeared = true } }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.6)) { appeared = true }
+            #if DEBUG
+            if path.isEmpty, DebugRoute.current == "login" { path.append(.login) }
+            if path.isEmpty, DebugRoute.current == "register" { path.append(.register) }
+            #endif
+        }
     }
 
     private func sheet(compact: Bool) -> some View {

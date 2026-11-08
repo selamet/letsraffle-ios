@@ -58,4 +58,5 @@ extension Strings {
     var youreInvited: String { l("Davetlisin!", "You're invited!") }
     var congrats: String { l("Tebrikler!", "Congrats!") }
     var continueLabel: String { l("Devam et", "Continue") }
+    var backLabel: String { l("Geri", "Back") }
 }

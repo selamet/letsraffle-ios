@@ -16,12 +16,15 @@ struct AuthScaffold<Content: View>: View {
         ZStack(alignment: .top) {
             ChristmasBackdrop(garland: false, pines: false)
             VStack(spacing: 0) {
+                HStack {
+                    // The string runs up behind the status bar, as if hanging from the top edge.
+                    OrnamentBackButton(stringLength: 50) { dismiss() }
+                    Spacer()
+                }
+                .padding(.leading, 12)
+                .padding(.top, -46)
                 HStack(alignment: .bottom, spacing: 0) {
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            CircleIconButton(onDark: true) { dismiss() }.padding(.leading, -10)
-                            Spacer()
-                        }
                         Text(script)
                             .font(AppFont.script(50))
                             .foregroundStyle(Palette.goldLight)
@@ -57,7 +60,7 @@ struct AuthScaffold<Content: View>: View {
                 }
                 .padding(.leading, 22)
                 .padding(.trailing, 4)
-                .padding(.top, 54)
+                .padding(.top, 2)
 
                 ScrollView {
                     content

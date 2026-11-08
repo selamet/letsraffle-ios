@@ -61,12 +61,12 @@ struct AuthTopBar<Trailing: View>: View {
 
     var body: some View {
         HStack {
-            CircleIconButton(onDark: true) { dismiss() }
+            OrnamentBackButton(stringLength: 50) { dismiss() }
             Spacer()
             trailing
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
+        .padding(.horizontal, 12)
+        .padding(.top, -46)
     }
 }
 

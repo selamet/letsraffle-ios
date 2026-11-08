@@ -132,6 +132,83 @@ struct CircleIconButton: View {
     }
 }
 
+/// Back button shaped like a gold Christmas bauble hanging on a string,
+/// swinging gently. Used on red headers.
+struct OrnamentBackButton: View {
+    var stringLength: CGFloat = 18
+    var action: () -> Void
+    @State private var swing = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.strings) private var t
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 0) {
+                Rectangle()
+                    .fill(Palette.goldLight.opacity(0.75))
+                    .frame(width: 1.5, height: stringLength)
+                Circle()
+                    .strokeBorder(Palette.goldLight, lineWidth: 1.5)
+                    .frame(width: 8, height: 8)
+                    .padding(.bottom, -3)
+                RoundedRectangle(cornerRadius: 2, style: .continuous)
+                    .fill(LinearGradient(colors: [Palette.goldLight, Palette.goldDark], startPoint: .top, endPoint: .bottom))
+                    .frame(width: 15, height: 7)
+                    .overlay(
+                        HStack(spacing: 2.5) {
+                            ForEach(0..<3, id: \.self) { _ in
+                                Rectangle().fill(Palette.goldDark.opacity(0.6)).frame(width: 1, height: 7)
+                            }
+                        }
+                    )
+                    .zIndex(1)
+                ZStack {
+                    Circle().fill(
+                        RadialGradient(colors: [Palette.goldLight, Palette.gold, Palette.goldDark],
+                                       center: UnitPoint(x: 0.35, y: 0.3), startRadius: 1, endRadius: 26)
+                    )
+                    Circle().strokeBorder(Color.white.opacity(0.35), lineWidth: 1)
+                    // Painted band around the bauble.
+                    Capsule()
+                        .fill(Palette.cranberry.opacity(0.18))
+                        .frame(height: 6)
+                        .offset(y: 9)
+                        .mask(Circle())
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 15, weight: .heavy))
+                        .foregroundStyle(Palette.cranberryDark)
+                        .offset(x: -1)
+                    Ellipse()
+                        .fill(Color.white.opacity(0.6))
+                        .frame(width: 9, height: 5)
+                        .rotationEffect(.degrees(-35))
+                        .offset(x: -9, y: -10)
+                }
+                .frame(width: 38, height: 38)
+                .padding(.top, -1)
+                .shadow(color: Color(hex: 0x3A0006, alpha: 0.35), radius: 4, y: 3)
+            }
+            .rotationEffect(.degrees(swing ? 5 : -5), anchor: .top)
+            .frame(width: 48)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(OrnamentPressStyle())
+        .accessibilityLabel(t.backLabel)
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 1.9).repeatForever(autoreverses: true)) { swing = true }
+        }
+    }
+}
+
+private struct OrnamentPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.92 : 1, anchor: .top)
+            .animation(.spring(duration: 0.2), value: configuration.isPressed)
+    }
+}
+
 /// Pill shaped text button (e.g. "Register" in the login header).
 struct PillButton: View {
     let title: String
