@@ -20,6 +20,7 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: session.state)
+        .onAppear { DispatchQueue.main.async { KeyboardDismisser.install() } }
         .sheet(item: signedOutInvite) { invite in
             // Joining works without an account, so deep links open over onboarding.
             NavigationStack {

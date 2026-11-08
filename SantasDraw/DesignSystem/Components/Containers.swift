@@ -494,3 +494,47 @@ extension View {
             .onChange(of: style) { _, newStyle in StatusBar.set(newStyle) }
     }
 }
+
+// MARK: - Keyboard
+
+/// Dismisses the keyboard when the user taps anywhere outside a text input.
+/// Installed once on the app window; it never swallows the tap, so buttons,
+/// links and other controls keep working as usual.
+@MainActor
+enum KeyboardDismisser {
+    private final class Handler: NSObject, UIGestureRecognizerDelegate {
+        @objc func tapped(_ recognizer: UITapGestureRecognizer) {
+            recognizer.view?.endEditing(true)
+        }
+
+        func gestureRecognizer(_ recognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            // Tapping another field (or inside the current one) should not close the keyboard.
+            var view = touch.view
+            while let current = view {
+                if current is UITextField || current is UITextView { return false }
+                view = current.superview
+            }
+            return true
+        }
+
+        func gestureRecognizer(_ recognizer: UIGestureRecognizer,
+                               shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }
+    }
+
+    private static let handler = Handler()
+    private static var installed = Set<ObjectIdentifier>()
+
+    static func install() {
+        for scene in UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }) {
+            for window in scene.windows where !installed.contains(ObjectIdentifier(window)) {
+                let tap = UITapGestureRecognizer(target: handler, action: #selector(Handler.tapped(_:)))
+                tap.cancelsTouchesInView = false
+                tap.delaysTouchesBegan = false
+                tap.delaysTouchesEnded = false
+                tap.delegate = handler
+                window.addGestureRecognizer(tap)
+                installed.insert(ObjectIdentifier(window))
+            }
+        }
+    }
+}
