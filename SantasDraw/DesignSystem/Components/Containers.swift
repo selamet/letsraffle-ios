@@ -196,6 +196,65 @@ struct SnowDots: View {
         Dot(x: 0.42, y: 0.05, size: 3, opacity: 0.6),
         Dot(x: 0.58, y: 0.28, size: 5, opacity: 0.5),
     ]
+
+    /// Denser snowfall for big red scenes.
+    static let heavy: [Dot] = [
+        Dot(x: 0.62, y: 0.74, size: 7, opacity: 0.78),
+        Dot(x: 0.82, y: 0.65, size: 5, opacity: 0.51),
+        Dot(x: 0.47, y: 0.94, size: 6, opacity: 0.52),
+        Dot(x: 0.18, y: 0.37, size: 7, opacity: 0.60),
+        Dot(x: 0.54, y: 0.57, size: 3, opacity: 0.79),
+        Dot(x: 0.41, y: 0.18, size: 7, opacity: 0.81),
+        Dot(x: 0.18, y: 0.80, size: 4, opacity: 0.75),
+        Dot(x: 0.45, y: 0.13, size: 7, opacity: 0.50),
+        Dot(x: 0.76, y: 0.96, size: 4, opacity: 0.85),
+        Dot(x: 0.30, y: 0.96, size: 5, opacity: 0.85),
+        Dot(x: 0.62, y: 0.18, size: 6, opacity: 0.58),
+        Dot(x: 0.94, y: 0.38, size: 3, opacity: 0.64),
+        Dot(x: 0.19, y: 0.15, size: 3, opacity: 0.63),
+        Dot(x: 0.80, y: 0.59, size: 5, opacity: 0.77),
+        Dot(x: 0.35, y: 0.31, size: 7, opacity: 0.62),
+        Dot(x: 0.68, y: 0.18, size: 5, opacity: 0.78),
+        Dot(x: 0.08, y: 0.98, size: 3, opacity: 0.88),
+        Dot(x: 0.37, y: 0.40, size: 5, opacity: 0.82),
+        Dot(x: 0.37, y: 0.58, size: 3, opacity: 0.68),
+        Dot(x: 0.70, y: 0.62, size: 4, opacity: 0.55),
+        Dot(x: 0.26, y: 0.82, size: 5, opacity: 0.64),
+        Dot(x: 0.36, y: 0.52, size: 7, opacity: 0.69),
+        Dot(x: 0.58, y: 0.78, size: 4, opacity: 0.84),
+        Dot(x: 0.06, y: 0.95, size: 3, opacity: 0.58),
+        Dot(x: 0.51, y: 0.36, size: 4, opacity: 0.64),
+        Dot(x: 0.90, y: 0.55, size: 4, opacity: 0.77),
+        Dot(x: 0.32, y: 0.80, size: 6, opacity: 0.56),
+        Dot(x: 0.68, y: 1.00, size: 4, opacity: 0.79),
+        Dot(x: 0.11, y: 0.60, size: 5, opacity: 0.51),
+        Dot(x: 0.73, y: 0.34, size: 4, opacity: 0.68),
+        Dot(x: 0.43, y: 0.06, size: 6, opacity: 0.51),
+        Dot(x: 0.49, y: 0.84, size: 4, opacity: 0.89),
+        Dot(x: 0.56, y: 0.13, size: 7, opacity: 0.67),
+        Dot(x: 0.19, y: 0.37, size: 3, opacity: 0.84),
+        Dot(x: 0.31, y: 0.45, size: 5, opacity: 0.84),
+        Dot(x: 0.95, y: 0.45, size: 5, opacity: 0.78),
+        Dot(x: 0.33, y: 0.27, size: 5, opacity: 0.66),
+        Dot(x: 0.17, y: 0.38, size: 5, opacity: 0.88),
+        Dot(x: 0.62, y: 0.50, size: 4, opacity: 0.57),
+        Dot(x: 0.49, y: 0.52, size: 5, opacity: 0.85),
+        Dot(x: 0.37, y: 0.79, size: 7, opacity: 0.64),
+        Dot(x: 0.58, y: 0.03, size: 4, opacity: 0.65),
+        Dot(x: 0.69, y: 0.28, size: 5, opacity: 0.61),
+        Dot(x: 0.95, y: 0.72, size: 4, opacity: 0.76),
+        Dot(x: 0.58, y: 0.01, size: 5, opacity: 0.81),
+        Dot(x: 0.34, y: 0.27, size: 4, opacity: 0.83),
+        Dot(x: 0.64, y: 0.80, size: 4, opacity: 0.61),
+        Dot(x: 0.35, y: 0.94, size: 5, opacity: 0.64),
+        Dot(x: 0.82, y: 0.87, size: 6, opacity: 0.68),
+        Dot(x: 0.37, y: 0.33, size: 4, opacity: 0.71),
+        Dot(x: 0.19, y: 0.84, size: 7, opacity: 0.69),
+        Dot(x: 0.68, y: 0.72, size: 6, opacity: 0.67),
+        Dot(x: 0.61, y: 0.94, size: 5, opacity: 0.77),
+        Dot(x: 0.43, y: 0.62, size: 7, opacity: 0.85),
+    ]
+
     var falling = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -299,6 +358,7 @@ struct PineSilhouettes: View {
 struct ChristmasBackdrop: View {
     var garland = true
     var pines = true
+    var heavySnow = false
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -310,7 +370,7 @@ struct ChristmasBackdrop: View {
                     PineSilhouettes().frame(height: 170).padding(.bottom, 180)
                 }
             }
-            SnowDots()
+            SnowDots(dots: heavySnow ? SnowDots.heavy : SnowDots().dots)
             if garland {
                 Garland().padding(.top, 50)
             }

@@ -13,7 +13,7 @@ struct OnboardingView: View {
         GeometryReader { geo in
             let compact = geo.size.height < 760
             ZStack {
-                ChristmasBackdrop()
+                ChristmasBackdrop(heavySnow: true)
 
                 VStack(spacing: 0) {
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
@@ -45,7 +45,7 @@ struct OnboardingView: View {
                         }
                         .scaleEffect(appeared ? 1 : 0.92, anchor: .bottom)
                         .opacity(appeared ? 1 : 0)
-                        .padding(.bottom, 22)
+                        .padding(.bottom, 50)
                         .zIndex(0)
 
                     sheet(compact: compact)
@@ -60,7 +60,7 @@ struct OnboardingView: View {
 
     private func sheet(compact: Bool) -> some View {
         VStack(spacing: 0) {
-            brandPill.offset(y: -18).padding(.bottom, -8)
+            brandPill.offset(y: -30).padding(.bottom, -18)
 
             Text(t.onbTitle)
                 .font(AppFont.display(28))
@@ -71,8 +71,8 @@ struct OnboardingView: View {
                 .foregroundStyle(Palette.sub)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 6)
-                .padding(.bottom, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 22)
 
             VStack(spacing: 6) {
                 if let authError {
@@ -104,7 +104,7 @@ struct OnboardingView: View {
             .font(AppFont.body(15, .bold))
             .foregroundStyle(Palette.brandText)
             .frame(minHeight: 44)
-            .padding(.top, 10)
+            .padding(.top, 16)
 
             Button {
                 session.continueAsGuest()
@@ -117,14 +117,14 @@ struct OnboardingView: View {
             .accessibilityIdentifier("onboarding.guest")
         }
         .padding(.horizontal, 24)
-        .padding(.bottom, compact ? 8 : 16)
+        .padding(.bottom, compact ? -12 : -24)
         .frame(maxWidth: .infinity)
         .background(alignment: .top) {
             VStack(spacing: 0) {
-                SnowWave().fill(Palette.page).frame(height: 60)
+                SnowWave().fill(Palette.page).frame(height: 84)
                 Palette.page
             }
-            .padding(.top, -50)
+            .padding(.top, -74)
             .ignoresSafeArea(edges: .bottom)
         }
     }
