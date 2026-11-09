@@ -66,7 +66,7 @@ struct OnboardingView: View {
 
     private func sheet(compact: Bool) -> some View {
         VStack(spacing: 0) {
-            brandPill.offset(y: -30).padding(.bottom, -18)
+            brandPill.offset(y: -44).padding(.bottom, -40)
 
             Text(t.onbTitle)
                 .font(AppFont.display(28))
@@ -137,24 +137,11 @@ struct OnboardingView: View {
     }
 
     private var brandPill: some View {
-        HStack(spacing: 1) {
-            Image("logo-mark")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 42, height: 42)
-                .padding(.vertical, -10)
-                .accessibilityHidden(true)
-            Image("wordmark")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 34)
-                .accessibilityLabel("Lets Raffle")
-        }
-        .foregroundStyle(Palette.snow)
-        .padding(.leading, 8)
-        .padding(.trailing, 16)
-        .padding(.vertical, 6)
-        .background(Palette.cranberry, in: Capsule())
-        .overlay(Capsule().strokeBorder(Palette.gold, lineWidth: 2))
+        Image("lockup")
+            .resizable()
+            .scaledToFit()
+            .frame(height: 84)
+            .shadow(color: Color(hex: 0x6E0D12, alpha: 0.18), radius: 8, y: 4)
+            .accessibilityLabel("Lets Raffle")
     }
 }
