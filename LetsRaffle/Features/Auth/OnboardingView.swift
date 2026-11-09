@@ -137,18 +137,23 @@ struct OnboardingView: View {
     }
 
     private var brandPill: some View {
-        HStack(spacing: 7) {
-            Image(systemName: "gift.fill")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(Palette.cranberryDark)
-                .frame(width: 24, height: 24)
-                .background(Palette.goldGradient, in: Circle())
-            Text("Lets Raffle").font(AppFont.display(14))
+        HStack(spacing: 1) {
+            Image("logo-mark")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 42, height: 42)
+                .padding(.vertical, -10)
+                .accessibilityHidden(true)
+            Image("wordmark")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 34)
+                .accessibilityLabel("Lets Raffle")
         }
         .foregroundStyle(Palette.snow)
-        .padding(.leading, 5)
-        .padding(.trailing, 13)
-        .padding(.vertical, 5)
+        .padding(.leading, 8)
+        .padding(.trailing, 16)
+        .padding(.vertical, 6)
         .background(Palette.cranberry, in: Capsule())
         .overlay(Capsule().strokeBorder(Palette.gold, lineWidth: 2))
     }
