@@ -41,8 +41,41 @@ extension DrawType {
 }
 
 extension DrawListItem {
-    /// Invite draws are named by their memorable invite code; manual draws by id.
-    var displayName: String { inviteCode ?? "#\(id)" }
+    /// Invite draws are named by their memorable invite code; manual draws get a fun,
+    /// stable name in the draw's language (same word lists as the backend and web).
+    var displayName: String {
+        if let code = inviteCode, !code.isEmpty { return code }
+        return FunDrawName.make(id: id, language: language)
+    }
+}
+
+enum FunDrawName {
+    private static let trAdjectives = [
+        "neseli", "sakar", "uykucu", "obur", "tombik", "haylaz", "geveze", "telasli",
+        "pofuduk", "zipzip", "miskin", "sasirmis", "kikirdayan", "havali", "utangac",
+        "cilgin", "dalgin", "sirin", "afacan", "mizmiz", "keyifli",
+    ]
+    private static let trNouns = [
+        "rengeyigi", "kardanadam", "noelbaba", "kurabiye", "mandalina", "kestane",
+        "salep", "kizak", "yilbasiagaci", "penguen", "hindi", "corap", "zil",
+        "yildiz", "hediye", "cuce", "kartopu", "simit", "boza", "pamuk",
+    ]
+    private static let enAdjectives = [
+        "jolly", "merry", "festive", "bright", "shiny", "sparkly", "cheerful", "happy", "cozy",
+        "magical", "snowy", "frosty", "gleaming", "twinkling", "radiant", "dazzling", "glowing", "beaming",
+    ]
+    private static let enNouns = [
+        "reindeer", "snowman", "gift", "star", "bell", "tree", "santa", "elf", "candy",
+        "sleigh", "angel", "wreath", "snowflake", "gingerbread", "stocking", "ornament", "mistletoe", "carol",
+    ]
+
+    static func make(id: Int, language: String) -> String {
+        let tr = language.uppercased() == "TR"
+        let adjectives = tr ? trAdjectives : enAdjectives
+        let nouns = tr ? trNouns : enNouns
+        let n = abs(id)
+        return "\(adjectives[(n * 7 + 3) % adjectives.count])-\(nouns[(n * 13 + 5) % nouns.count])-\(100 + (n * 37) % 900)"
+    }
 }
 
 enum DrawDateFormat {
