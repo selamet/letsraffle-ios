@@ -46,6 +46,14 @@ extension Strings {
     var loadingDraws: String { l("Etkinlikler yükleniyor…", "Loading draws…") }
     var loadingDraw: String { l("Çekiliş bilgileri yükleniyor…", "Loading draw information…") }
 
+    // Invite sharing
+    var shareMessage: String { l("🎅 Yılbaşı çekilişine davetlisin! Katılmak için bilgilerini doldur:", "🎅 You're invited to our Secret Santa! Fill in your details to join:") }
+    var shareSubject: String { l("Yılbaşı çekilişine davetlisin 🎁", "You're invited to our Secret Santa 🎁") }
+    var shareMessages: String { l("Mesaj", "Messages") }
+    var shareMail: String { l("E-posta", "Mail") }
+    var shareInstagramCopied: String { l("Davet metni kopyalandı; Instagram'da istediğin sohbete ya da hikâyeye yapıştırabilirsin.", "Invite text copied; paste it into any Instagram chat or story.") }
+    var shareInstagramMissing: String { l("Instagram açılamadı. Davet metni kopyalandı, istediğin yere yapıştırabilirsin.", "Could not open Instagram. The invite text was copied so you can paste it anywhere.") }
+
     // Home
     var hello: String { l("Merhaba", "Hello") }
     var myDraws: String { l("Çekilişlerim", "My draws") }

@@ -40,6 +40,15 @@ final class DrawDetailStore {
     }
 
     func load(_ t: Strings) async {
+        #if DEBUG
+        // Visual QA without a backend: `-detailDemo YES`
+        if UserDefaults.standard.bool(forKey: "detailDemo") {
+            draw = DrawDetail(id: 7, drawType: .dynamic, status: .active, inviteCode: inviteCode, requireAddress: false,
+                              requirePhone: false, drawDate: nil, createdAt: .now, language: "TR", participants: [])
+            phase = .loaded
+            return
+        }
+        #endif
         do {
             draw = try await api.send(API.drawDetail(inviteCode: inviteCode))
             phase = .loaded

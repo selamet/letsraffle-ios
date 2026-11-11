@@ -238,7 +238,10 @@ struct DrawDetailView: View {
             .padding(.vertical, 6)
             .background(Palette.snow, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
 
-            ShareLink(item: store.inviteURL) {
+            InviteShareRow(url: store.inviteURL)
+                .padding(.vertical, 2)
+
+            ShareLink(item: store.inviteURL, message: Text(t.shareMessage)) {
                 Label(t.share, systemImage: "square.and.arrow.up")
                     .font(.buttonLabel)
                     .foregroundStyle(Palette.goldText)

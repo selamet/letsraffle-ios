@@ -57,6 +57,9 @@ struct DrawsHomeView: View {
             .navigationDestination(for: DrawsRoute.self, destination: destination)
         }
         .task(id: session.user?.id) {
+            #if DEBUG
+            if !session.isSignedIn, UserDefaults.standard.bool(forKey: "detailDemo") { applyDebugRoute() }
+            #endif
             guard session.isSignedIn else { store = nil; return }
             if store == nil { store = DrawsStore(api: session.api) }
             #if DEBUG
