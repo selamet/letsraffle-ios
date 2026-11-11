@@ -61,7 +61,12 @@ private struct SplashView: View {
     var body: some View {
         ZStack {
             Palette.heroGradient.ignoresSafeArea()
-            SantaAvatar(size: 160, mood: .draw)
+            SnowDots()
+            VStack(spacing: 22) {
+                Image("lockup").resizable().scaledToFit().frame(width: 250)
+                    .shadow(color: Color(hex: 0x280000, alpha: 0.35), radius: 8, y: 5)
+                ChristmasLoader(onDark: true, width: 160)
+            }
         }
     }
 }

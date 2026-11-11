@@ -26,6 +26,26 @@ extension Strings {
     var tryWithoutAccount: String { l("Hesap açmadan dene:", "Try without an account:") }
     var manualDraw: String { l("Manuel çekiliş", "Manual draw") }
 
+    // Reveal (same steps and copy as the website)
+    var revealLoading: String { l("Sürprizin hazırlanıyor…", "Getting your surprise ready…") }
+    var revealEyebrow: String { l("ÇEKİLİŞ YAPILDI!", "THE DRAW IS DONE!") }
+    var revealHelloText: String { l("Bu yılbaşı birini çok mutlu edeceksin. Noel Baba senin için bir isim seçti, hazırsan başlayalım!", "This year you're going to make someone very happy. Santa picked a name just for you. Ready?") }
+    var revealShow: String { l("Sürprizimi göster", "Show my surprise") }
+    var revealSantaTitle: String { l("Noel Baba torbaya uzandı…", "Santa reaches into his sack…") }
+    var revealSantaSearching: String { l("Bakalım kimin adını çekecek…", "Let's see whose name he draws…") }
+    var revealSantaFound: String { l("Buldu! Senin için özel bir isim çekti 🎅", "Got it! He drew a special name just for you 🎅") }
+    var revealBringGift: String { l("Hediyemi getir 🎁", "Bring my gift 🎁") }
+    var revealGiftTitle: String { l("Hediyen burada!", "Your gift is here!") }
+    var revealGiftText: String { l("Kimin hediyesini alacağın bu kutunun içinde.", "The person you're gifting is inside this box.") }
+    var revealGiftOpening: String { l("Açılıyor…", "Opening…") }
+    var revealGiftCta: String { l("Açmak için dokun", "Tap to open") }
+    var revealResultEyebrow: String { l("Hediyesini alacağın kişi", "You're gifting") }
+    var revealSecretNote: String { l("Unutma, bu bir sır! 🤫 Hediyeyi çekiliş günü sürpriz olarak ver.", "Remember, it's a secret! 🤫 Hand the gift over as a surprise on the day.") }
+    var revealReplay: String { l("Baştan izle", "Watch again") }
+
+    var loadingDraws: String { l("Etkinlikler yükleniyor…", "Loading draws…") }
+    var loadingDraw: String { l("Çekiliş bilgileri yükleniyor…", "Loading draw information…") }
+
     // Home
     var hello: String { l("Merhaba", "Hello") }
     var myDraws: String { l("Çekilişlerim", "My draws") }

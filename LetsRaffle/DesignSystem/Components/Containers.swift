@@ -281,31 +281,49 @@ struct SnowDots: View {
     }
 }
 
-/// String of fairy lights drooping across the top of a red scene.
+/// String of fairy lights across the top of a red scene: three drooping arcs
+/// with twinkling bulbs and a little "2027" door wreath where the arcs meet
+/// (same garland as the website).
 struct Garland: View {
+    var wreaths = true
     @State private var on = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private static let colors: [Color] = [Palette.goldLight, Color(hex: 0x4FB87E), Palette.snow, Color(hex: 0xFF8A7A)]
 
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
+            let arc = w / 3
+            let top: CGFloat = 10, sag: CGFloat = 26
             ZStack(alignment: .topLeading) {
                 Path { p in
-                    p.move(to: CGPoint(x: -10, y: 8))
-                    p.addQuadCurve(to: CGPoint(x: w / 2, y: 18), control: CGPoint(x: w / 4, y: 46))
-                    p.addQuadCurve(to: CGPoint(x: w + 10, y: 6), control: CGPoint(x: w * 0.75, y: -6))
+                    p.move(to: CGPoint(x: 0, y: top))
+                    for a in 0..<3 {
+                        p.addQuadCurve(to: CGPoint(x: arc * CGFloat(a + 1), y: top), control: CGPoint(x: arc * (CGFloat(a) + 0.5), y: top + sag))
+                    }
                 }
-                .stroke(Color(hex: 0x2C1210).opacity(0.6), lineWidth: 2)
-                ForEach(0..<6, id: \.self) { i in
-                    let colors: [Color] = [Palette.goldLight, Color(hex: 0x4FB87E), Palette.snow]
-                    let xs: [CGFloat] = [0.07, 0.24, 0.41, 0.6, 0.78, 0.93]
-                    let ys: [CGFloat] = [22, 34, 30, 18, 12, 14]
-                    Capsule()
-                        .fill(colors[i % 3])
-                        .frame(width: 9, height: 13)
-                        .shadow(color: colors[i % 3], radius: 6)
-                        .opacity(reduceMotion ? 1 : ((i % 2 == 0) == on ? 1 : 0.4))
-                        .position(x: w * xs[i], y: ys[i])
+                .stroke(Color(hex: 0x3B2A1E), lineWidth: 1.8)
+
+                ForEach(0..<9, id: \.self) { i in
+                    let a = i / 3, j = i % 3
+                    let f: CGFloat = [0.25, 0.5, 0.75][j]
+                    // point on the quadratic curve at t = f, bulb hangs just below it
+                    let y = top + 2 * f * (1 - f) * sag
+                    let color = Self.colors[(i + 1) % 4]
+                    VStack(spacing: 0) {
+                        RoundedRectangle(cornerRadius: 1).fill(Color(hex: 0x4A3A2C)).frame(width: 5, height: 4)
+                        Ellipse().fill(color).frame(width: 9, height: 13).shadow(color: color, radius: 5)
+                    }
+                    .opacity(reduceMotion ? 1 : ((i % 2 == 0) == on ? 1 : 0.35))
+                    .position(x: arc * (CGFloat(a) + f), y: y + 8)
+                }
+
+                if wreaths {
+                    ForEach(1..<3, id: \.self) { k in
+                        GarlandWreath(size: 34)
+                            .position(x: arc * CGFloat(k), y: top + 9)
+                    }
                 }
             }
         }
@@ -367,7 +385,7 @@ struct ChristmasBackdrop: View {
             if pines {
                 VStack {
                     Spacer()
-                    PineSilhouettes().frame(height: 170).padding(.bottom, 180)
+                    MountainRange().frame(height: 210).padding(.bottom, 150)
                 }
             }
             SnowDots(dots: heavySnow ? SnowDots.heavy : SnowDots().dots)

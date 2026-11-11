@@ -32,7 +32,24 @@ final class RevealStore {
 
     var drawDate: Date? { participations.participation(for: inviteCode)?.drawDate }
 
+    /// First name of the person looking at the reveal (from the join form), when known.
+    var firstName: String? {
+        guard let name = participations.participation(for: inviteCode)?.displayName
+            .split(separator: " ").first.map(String.init), !name.isEmpty else { return nil }
+        return name
+    }
+
     func load(_ t: Strings) async {
+        #if DEBUG
+        // Visual QA without a backend: `-revealDemo YES`
+        if UserDefaults.standard.bool(forKey: "revealDemo") {
+            phase = .revealed(MatchResult(
+                drawId: 7, inviteCode: inviteCode,
+                receiver: .init(firstName: "Mehmet", lastName: "Kaya", address: "Bağdat Cad. No:12 D:5, Kadıköy / İstanbul", phone: "+90 532 123 45 67")
+            ))
+            return
+        }
+        #endif
         let participation = participations.participation(for: inviteCode)
         if let cached = participation?.result {
             phase = .revealed(cached)

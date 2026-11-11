@@ -210,7 +210,7 @@ struct JoinFormView: View {
                         .padding(24)
                         .frame(maxHeight: .infinity, alignment: .top)
                     } else {
-                        ProgressView().tint(Palette.brand).frame(maxHeight: .infinity)
+                        ChristmasLoader(label: t.loadingDraw).frame(maxHeight: .infinity)
                     }
                 }
                 .frame(maxWidth: .infinity)

@@ -124,7 +124,7 @@ struct DrawsHomeView: View {
         if let store {
             switch store.phase {
             case .idle, .loading:
-                ProgressView().frame(maxWidth: .infinity).padding(.vertical, 24)
+                ChristmasLoader(label: t.loadingDraws).frame(maxWidth: .infinity).padding(.vertical, 20)
             case let .failed(message):
                 VStack(spacing: 12) {
                     Banner(text: message, style: .error)
@@ -204,7 +204,7 @@ private struct HomeHero: View {
         ZStack(alignment: .topLeading) {
             Palette.heroGradient
             RadialGradient(colors: [.white.opacity(0.14), .clear], center: UnitPoint(x: 0.85, y: 0.15), startRadius: 0, endRadius: 280)
-            Garland().padding(.top, topInset - 6)
+            Garland().padding(.top, topInset - 16)
             SnowDots(dots: [
                 .init(x: 0.58, y: 0.66, size: 5, opacity: 0.7),
                 .init(x: 0.36, y: 0.3, size: 3, opacity: 0.6),
@@ -449,10 +449,13 @@ struct EmptyHint: View {
     let text: String
 
     var body: some View {
-        Text(text)
-            .font(AppFont.body(15, .semibold))
-            .foregroundStyle(Palette.sub)
-            .multilineTextAlignment(.center)
+        VStack(spacing: 8) {
+            FriendImage(friend: .snowman, width: 84)
+            Text(text)
+                .font(AppFont.body(15, .semibold))
+                .foregroundStyle(Palette.sub)
+                .multilineTextAlignment(.center)
+        }
             .frame(maxWidth: .infinity)
             .padding(20)
             .background(Palette.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))

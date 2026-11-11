@@ -76,7 +76,7 @@ struct DrawDetailView: View {
     private var content: some View {
         switch store.phase {
         case .loading:
-            ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+            ChristmasLoader(label: t.loadingDraw).frame(maxWidth: .infinity, maxHeight: .infinity)
         case let .failed(message):
             VStack(spacing: 12) {
                 Banner(text: message, style: .error)

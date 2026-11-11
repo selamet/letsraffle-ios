@@ -46,6 +46,8 @@ struct OnboardingView: View {
                         .scaleEffect(appeared ? 1 : 0.92, anchor: .bottom)
                         .opacity(appeared ? 1 : 0)
                         .padding(.bottom, 50)
+                        .frame(maxWidth: .infinity)
+                        .overlay(alignment: .bottom) { friends(compact: compact) }
                         .zIndex(0)
 
                     sheet(compact: compact)
@@ -134,6 +136,25 @@ struct OnboardingView: View {
             .padding(.top, -74)
             .ignoresSafeArea(edges: .bottom)
         }
+    }
+
+    /// Snowman pair on Santa's left and a row of trees fading away on his right,
+    /// standing where the snow wave of the sheet begins (as on the website).
+    private func friends(compact: Bool) -> some View {
+        HStack(alignment: .bottom) {
+            FriendImage(friend: .hug, width: compact ? 70 : 84)
+                .padding(.leading, 10)
+            Spacer(minLength: 0)
+            ZStack(alignment: .bottomTrailing) {
+                FriendImage(friend: .tree, width: 30).saturation(0.6).brightness(-0.14).opacity(0.75).padding(.trailing, 80).padding(.bottom, 14)
+                FriendImage(friend: .tree, width: 40).saturation(0.8).brightness(-0.07).opacity(0.9).padding(.trailing, 44).padding(.bottom, 8)
+                FriendImage(friend: .tree, width: 52)
+            }
+            .padding(.trailing, 12)
+        }
+        .padding(.bottom, 34)
+        .opacity(appeared ? 1 : 0)
+        .allowsHitTesting(false)
     }
 
     private var brandPill: some View {

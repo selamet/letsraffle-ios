@@ -39,7 +39,7 @@ struct ProfileView: View {
                             .tint(Palette.sub)
                         }
                         row(icon: .symbol("bell.fill"), tint: Palette.goldDark, title: t.notifications, separator: true) {
-                            Toggle(t.notifications, isOn: $settings.notificationsEnabled).labelsHidden().toggleStyle(CandyToggleStyle())
+                            Toggle(isOn: $settings.notificationsEnabled) { EmptyView() }.toggleStyle(CandyToggleStyle()).accessibilityLabel(t.notifications)
                         }
                         Button { showWidgetHelp = true } label: {
                             row(icon: .symbol("square.grid.2x2.fill"), tint: Palette.brand, title: t.widgets) { chevron }
