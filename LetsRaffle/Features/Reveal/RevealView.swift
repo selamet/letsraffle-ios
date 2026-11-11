@@ -210,6 +210,8 @@ struct RevealView: View {
             }
             infoText(t.waitingSub)
                 .padding(.top, 4)
+            NewYearCountdown(language: settings.language)
+                .padding(.top, 14)
         }
     }
 
@@ -427,6 +429,60 @@ struct RevealView: View {
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: 300)
+    }
+}
+
+/// Days / hours / minutes left until midnight on 1 January. Turkish counts in Türkiye time,
+/// English in US Eastern time.
+private struct NewYearCountdown: View {
+    let language: AppLanguage
+    @Environment(\.strings) private var t
+
+    private var calendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: language == .tr ? "Europe/Istanbul" : "America/New_York") ?? .current
+        return calendar
+    }
+
+    private func remaining(at now: Date) -> (days: Int, hours: Int, minutes: Int) {
+        let year = calendar.component(.year, from: now) + 1
+        let target = calendar.date(from: DateComponents(year: year, month: 1, day: 1)) ?? now
+        let seconds = max(0, Int(target.timeIntervalSince(now)))
+        return (seconds / 86_400, seconds % 86_400 / 3_600, seconds % 3_600 / 60)
+    }
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 20)) { context in
+            let left = remaining(at: context.date)
+            VStack(spacing: 8) {
+                Text(t.newYearEyebrow)
+                    .font(AppFont.body(11, .black)).tracking(2.2)
+                    .foregroundStyle(Palette.goldLight)
+                HStack(spacing: 8) {
+                    tile(left.days, t.unitDays)
+                    tile(left.hours, t.unitHours)
+                    tile(left.minutes, t.unitMinutes)
+                }
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(t.newYearEyebrow): \(left.days) \(t.unitDays), \(left.hours) \(t.unitHours), \(left.minutes) \(t.unitMinutes)")
+        }
+    }
+
+    private func tile(_ value: Int, _ unit: String) -> some View {
+        VStack(spacing: 0) {
+            Text("\(value)")
+                .font(AppFont.display(26))
+                .foregroundStyle(Palette.brandText)
+                .monospacedDigit()
+            Text(unit)
+                .font(AppFont.body(11, .black))
+                .foregroundStyle(Palette.sub)
+        }
+        .frame(width: 72, height: 60)
+        .background(Palette.snow, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Palette.gold, lineWidth: 2))
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Palette.goldDark).offset(y: 4))
     }
 }
 

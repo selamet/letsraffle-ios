@@ -73,6 +73,10 @@ extension Strings {
     var myDraws: String { l("Çekilişlerim", "My draws") }
     var nextDraw: String { l("Sıradaki çekiliş", "Next draw") }
     var allEvents: String { l("Tüm etkinlikler", "All events") }
+    var newYearEyebrow: String { l("YILBAŞINA KALAN", "UNTIL NEW YEAR") }
+    var unitDays: String { l("gün", "days") }
+    var unitHours: String { l("saat", "hours") }
+    var unitMinutes: String { l("dakika", "min") }
     var waitingTitle: String { l("Çekiliş henüz yapılmadı", "The draw hasn't run yet") }
     var waitingSub: String { l("Sonuç açıklanınca eşleşmeni burada göreceksin.", "You'll see your match here once it's out.") }
     var waitingBubble: String { l("Hâlâ mı çekilmedi?", "Is it time yet?") }
