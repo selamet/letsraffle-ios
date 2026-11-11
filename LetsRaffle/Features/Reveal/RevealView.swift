@@ -29,13 +29,25 @@ struct RevealView: View {
             background
             VStack(spacing: 0) {
                 topBar
-                Spacer(minLength: 0)
-                content
-                    .padding(.horizontal, 24)
-                Spacer(minLength: 0)
-                FriendsRow()
-                    .padding(.horizontal, 8)
-                    .padding(.bottom, 4)
+                if store.phase == .waiting {
+                    // Sits right under the close ornament; only the brand at the bottom.
+                    waiting
+                        .fixedSize(horizontal: false, vertical: true)
+                        .layoutPriority(1)
+                        .padding(.horizontal, 24)
+                        .padding(.top, 6)
+                    Spacer(minLength: 0)
+                    brandFooter
+                        .padding(.bottom, 18)
+                } else {
+                    Spacer(minLength: 0)
+                    content
+                        .padding(.horizontal, 24)
+                    Spacer(minLength: 0)
+                    FriendsRow()
+                        .padding(.horizontal, 8)
+                        .padding(.bottom, 4)
+                }
             }
             ConfettiBurst(trigger: confetti).ignoresSafeArea()
         }
@@ -72,7 +84,8 @@ struct RevealView: View {
 
     private var background: some View {
         ZStack {
-            ChristmasBackdrop(garland: true, pines: true)
+            // No mountains behind the waiting text.
+            ChristmasBackdrop(garland: true, pines: store.phase != .waiting)
             RadialGradient(colors: [Palette.goldLight.opacity(0.22), .clear], center: UnitPoint(x: 0.5, y: 0.42), startRadius: 0, endRadius: 240)
                 .ignoresSafeArea()
         }
@@ -84,7 +97,13 @@ struct RevealView: View {
             Spacer()
             // While waiting, the name is the headline of the page instead.
             if store.phase != .waiting {
-                Text(drawName).font(AppFont.script(26)).foregroundStyle(Palette.goldLight).lineLimit(1).padding(.bottom, 6)
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(drawName).font(AppFont.script(26))
+                    if let number = drawNumber { Text("No. \(number)").font(AppFont.body(11, .black)).tracking(1) }
+                }
+                .foregroundStyle(Palette.goldLight)
+                .lineLimit(1)
+                .padding(.bottom, 6)
             }
             Spacer()
             Color.clear.frame(width: 48, height: 44)
@@ -135,6 +154,11 @@ struct RevealView: View {
         return words.map { $0.capitalized }.joined(separator: " ")
     }
 
+    /// The number at the end of the invite code ("768"), if it has one.
+    private var drawNumber: String? {
+        store.inviteCode.split(separator: "-").last.flatMap { Int($0) == nil ? nil : String($0) }
+    }
+
     /// Draw not run yet: the draw's name, Santa checking his watch, and the brand.
     private var waiting: some View {
         VStack(spacing: 8) {
@@ -144,22 +168,34 @@ struct RevealView: View {
                 .shadow(color: Color(hex: 0x5A0A0F, alpha: 0.45), radius: 0, y: 3)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
+            if let number = drawNumber {
+                Text("No. \(number)")
+                    .font(AppFont.body(12, .black)).tracking(1.4)
+                    .foregroundStyle(Palette.goldText)
+                    .padding(.horizontal, 12)
+                    .frame(height: 24)
+                    .background(Palette.goldGradient, in: Capsule())
+                    .padding(.top, -6)
+                    .padding(.bottom, 4)
+            }
             Text(t.waitingTitle)
                 .font(AppFont.display(22))
                 .foregroundStyle(Palette.snow)
                 .multilineTextAlignment(.center)
-            SantaAvatar(size: 168, mood: .watch)
-                .overlay(alignment: .topTrailing) {
-                    Text(t.waitingBubble)
-                        .font(AppFont.display(13))
-                        .foregroundStyle(Palette.brandText)
-                        .padding(.horizontal, 12).padding(.vertical, 6)
-                        .background(Palette.snow, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Palette.gold, lineWidth: 2))
-                        .fixedSize()
-                        .offset(x: 84, y: 18)
-                }
-                .padding(.top, -6)
+            // Speech bubble right above his head, its tail pointing down at him.
+            Text(t.waitingBubble)
+                .font(AppFont.display(16))
+                .foregroundStyle(Palette.brandText)
+                .padding(.horizontal, 18)
+                .padding(.top, 10)
+                .padding(.bottom, 20)
+                .background(SpeechBubble().fill(Palette.snow))
+                .overlay(SpeechBubble().stroke(Palette.gold, lineWidth: 2))
+                .shadow(color: Color(hex: 0x3C0000, alpha: 0.25), radius: 6, y: 4)
+                .fixedSize()
+                .padding(.top, 14)
+            SantaAvatar(size: 160, mood: .watch)
+                .padding(.top, -22)
             if let date = store.drawDate {
                 HStack(spacing: 6) {
                     Image(systemName: "calendar").font(.system(size: 12, weight: .bold))
@@ -173,17 +209,20 @@ struct RevealView: View {
                 .overlay(Capsule().strokeBorder(Color.white.opacity(0.4), lineWidth: 1.5))
             }
             infoText(t.waitingSub)
-            VStack(spacing: 0) {
-                Image("lockup")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 132)
-                    .accessibilityLabel("Lets Raffle")
-                Text("letsraffle.co")
-                    .font(AppFont.body(13, .bold))
-                    .foregroundStyle(Palette.snow.opacity(0.9))
-            }
-            .padding(.top, 14)
+                .padding(.top, 4)
+        }
+    }
+
+    private var brandFooter: some View {
+        VStack(spacing: 0) {
+            Image("lockup")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 150)
+                .accessibilityLabel("Lets Raffle")
+            Text("letsraffle.co")
+                .font(AppFont.body(14, .bold))
+                .foregroundStyle(Palette.snow.opacity(0.9))
         }
     }
 
@@ -386,7 +425,33 @@ struct RevealView: View {
             .font(AppFont.body(14, .bold))
             .foregroundStyle(Palette.snow.opacity(0.85))
             .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: 300)
+    }
+}
+
+/// Rounded speech bubble with a small tail at the bottom centre (the tail is 10pt tall).
+private struct SpeechBubble: Shape {
+    func path(in rect: CGRect) -> Path {
+        let tail: CGFloat = 10
+        let body = CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: rect.height - tail)
+        let r = min(18, body.height / 2)
+        let mid = rect.midX
+        var p = Path()
+        p.move(to: CGPoint(x: body.minX + r, y: body.minY))
+        p.addLine(to: CGPoint(x: body.maxX - r, y: body.minY))
+        p.addArc(tangent1End: CGPoint(x: body.maxX, y: body.minY), tangent2End: CGPoint(x: body.maxX, y: body.minY + r), radius: r)
+        p.addLine(to: CGPoint(x: body.maxX, y: body.maxY - r))
+        p.addArc(tangent1End: CGPoint(x: body.maxX, y: body.maxY), tangent2End: CGPoint(x: body.maxX - r, y: body.maxY), radius: r)
+        p.addLine(to: CGPoint(x: mid + 9, y: body.maxY))
+        p.addLine(to: CGPoint(x: mid, y: rect.maxY))
+        p.addLine(to: CGPoint(x: mid - 9, y: body.maxY))
+        p.addLine(to: CGPoint(x: body.minX + r, y: body.maxY))
+        p.addArc(tangent1End: CGPoint(x: body.minX, y: body.maxY), tangent2End: CGPoint(x: body.minX, y: body.maxY - r), radius: r)
+        p.addLine(to: CGPoint(x: body.minX, y: body.minY + r))
+        p.addArc(tangent1End: CGPoint(x: body.minX, y: body.minY), tangent2End: CGPoint(x: body.minX + r, y: body.minY), radius: r)
+        p.closeSubpath()
+        return p
     }
 }
 
