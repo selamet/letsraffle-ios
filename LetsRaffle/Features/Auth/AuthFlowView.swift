@@ -23,8 +23,8 @@ struct AuthFlowView: View {
             OnboardingView(path: $path)
                 .navigationDestination(for: AuthRoute.self) { route in
                     switch route {
-                    case .login: LoginView(path: $path)
-                    case .register: RegisterView(path: $path)
+                    case .login: EmailAuthView(path: $path, mode: .login)
+                    case .register: EmailAuthView(path: $path, mode: .register)
                     case .forgotPassword: ForgotPasswordView()
                     case .joinCode: JoinCodeScreen(path: $path)
                     case let .joinForm(code): JoinFormView(inviteCode: code) { path.removeAll() }

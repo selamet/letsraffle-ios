@@ -85,8 +85,7 @@ struct GoldButtonStyle: ButtonStyle {
     }
 }
 
-/// Christmas call-to-action: glossy red with a gold foil rim, sparkles beside the label
-/// and a cap of snow sitting on the top edge.
+/// Christmas call-to-action: glossy red with a gold foil rim and sparkles beside the label.
 struct FestiveButtonStyle: ButtonStyle {
     var isLoading = false
 
@@ -110,17 +109,15 @@ private struct FestiveButtonBody: View {
                 Image(systemName: "sparkle").font(.system(size: 11, weight: .bold)).foregroundStyle(Palette.goldLight)
             }
             .opacity(isLoading ? 0 : 1)
-            .offset(y: 3)
-            if isLoading { ProgressView().tint(.white).offset(y: 3) }
+            if isLoading { ProgressView().tint(.white) }
         }
         .font(.buttonLabel)
         .foregroundStyle(.white)
-        .frame(maxWidth: .infinity, minHeight: 60)
+        .frame(maxWidth: .infinity, minHeight: 58)
         .background(
-            ZStack(alignment: .top) {
+            ZStack {
                 LinearGradient(colors: [Color(hex: 0xD0282F), Palette.cranberry, Palette.cranberryDark], startPoint: .top, endPoint: .bottom)
-                SnowCap().fill(Palette.snow).frame(height: 20)
-                    .shadow(color: Color(hex: 0x3C0000, alpha: 0.25), radius: 1.5, y: 1.5)
+                LinearGradient(colors: [.white.opacity(0.18), .clear], startPoint: .top, endPoint: .center)
             }
             .clipShape(shape)
         )
@@ -130,26 +127,6 @@ private struct FestiveButtonBody: View {
         .padding(.bottom, 5)
         .opacity(isEnabled ? 1 : 0.45)
         .animation(.easeOut(duration: 0.12), value: pressed)
-    }
-}
-
-/// Snow lying along a top edge: flat on top, soft uneven drips underneath.
-struct SnowCap: Shape {
-    func path(in rect: CGRect) -> Path {
-        let depths: [CGFloat] = [0.55, 0.3, 0.95, 0.4, 0.6, 0.25, 0.8, 0.35, 1.0, 0.45, 0.6]
-        let step = rect.width / CGFloat(depths.count)
-        let base = rect.minY + rect.height * 0.3
-        var p = Path()
-        p.move(to: CGPoint(x: rect.minX, y: rect.minY))
-        p.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
-        p.addLine(to: CGPoint(x: rect.maxX, y: base))
-        for (i, d) in depths.enumerated().reversed() {
-            let x1 = rect.minX + step * CGFloat(i)
-            let mid = x1 + step / 2
-            p.addQuadCurve(to: CGPoint(x: x1, y: base), control: CGPoint(x: mid, y: base + rect.height * 1.3 * d))
-        }
-        p.closeSubpath()
-        return p
     }
 }
 
