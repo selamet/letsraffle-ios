@@ -56,7 +56,7 @@ struct JoinTabView: View {
             .scrollDismissesKeyboard(.interactively)
             .floatingTabBarInset()
             .background(alignment: .top) {
-                ChristmasBackdrop(garland: true, pines: false).frame(height: 420)
+                ChristmasBackdrop(garland: true, pines: false).frame(height: 470)
             }
             .background(Palette.page.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
@@ -87,38 +87,34 @@ struct JoinTabView: View {
     }
 
     private var hero: some View {
-        HStack(alignment: .bottom, spacing: 0) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(t.haveInvite)
-                    .font(AppFont.script(42))
-                    .foregroundStyle(Palette.goldLight)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                Text(t.haveInviteSub)
-                    .font(AppFont.body(14, .bold))
-                    .foregroundStyle(Palette.snow.opacity(0.92))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(.bottom, 34)
-            Spacer(minLength: 4)
+        VStack(spacing: 6) {
+            Text(t.haveInvite)
+                .font(AppFont.script(48))
+                .foregroundStyle(Palette.goldLight)
+                .shadow(color: Color(hex: 0x3C0000, alpha: 0.3), radius: 0, y: 3)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Text(t.haveInviteSub)
+                .font(AppFont.body(15, .bold))
+                .foregroundStyle(Palette.snow.opacity(0.95))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 40)
             SantaAvatar(size: 150, mood: .invite)
+                .padding(.top, 4)
         }
-        .padding(.leading, 22)
-        .padding(.trailing, 6)
-        .padding(.top, 70)
-        .frame(height: 270, alignment: .bottom)
+        .frame(maxWidth: .infinity)
+        .padding(.top, 96)
     }
 
     private var codeCard: some View {
         JoinCodeCard(code: $code, error: codeError, focused: $codeFocused, onSubmit: { open(code) }, onScan: { scanning = true })
-            .padding(.horizontal, 24)
-            .padding(.top, 26)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 22)
+            .foilCard(radius: 30)
+            .padding(.horizontal, 16)
+            .padding(.top, -14)
             .padding(.bottom, 20)
-            .background(
-                UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous)
-                    .fill(Palette.page)
-                    .shadow(color: Color(hex: 0x320000, alpha: 0.3), radius: 22, y: -8)
-            )
     }
 
     @ViewBuilder

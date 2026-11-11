@@ -20,7 +20,12 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: session.state)
-        .onAppear { DispatchQueue.main.async { KeyboardDismisser.install() } }
+        .onAppear {
+            // No scroll bars anywhere in the app (also covers sheets and UIKit-backed lists).
+            UIScrollView.appearance().showsVerticalScrollIndicator = false
+            UIScrollView.appearance().showsHorizontalScrollIndicator = false
+            DispatchQueue.main.async { KeyboardDismisser.install() }
+        }
         .sheet(item: signedOutInvite) { invite in
             // Joining works without an account, so deep links open over onboarding.
             NavigationStack {

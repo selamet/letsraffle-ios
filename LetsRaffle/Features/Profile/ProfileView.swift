@@ -15,13 +15,8 @@ struct ProfileView: View {
         @Bindable var settings = settings
         NavigationStack {
             ScrollView {
+                header
                 VStack(alignment: .leading, spacing: 18) {
-                    Text(t.tabProfile)
-                        .font(AppFont.display(32))
-                        .foregroundStyle(Palette.brandText)
-                        .padding(.horizontal, 4)
-
-                    accountCard
 
                     section(t.preferences) {
                         row(icon: .text(settings.language.rawValue), tint: Palette.pine, title: t.language, separator: true) {
@@ -70,13 +65,21 @@ struct ProfileView: View {
                     actions
                 }
                 .padding(.horizontal, 16)
-                .padding(.top, 16)
+                .padding(.top, 22)
                 .padding(.bottom, 24)
+                .background(
+                    UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous)
+                        .fill(Palette.page)
+                        .shadow(color: Color(hex: 0x320000, alpha: 0.3), radius: 18, y: -8)
+                )
             }
             .floatingTabBarInset()
-            .background(Palette.page)
+            .background(alignment: .top) {
+                ChristmasBackdrop(garland: true, pines: false).frame(height: 420)
+            }
+            .background(Palette.page.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
-            .statusBarStyle(.darkContent)
+            .statusBarStyle(.lightContent)
         }
         .confirmationDialog(t.deleteAccount, isPresented: $confirmDelete, titleVisibility: .visible) {
             Button(t.deleteAccount, role: .destructive) { Task { await deleteAccount() } }
@@ -98,37 +101,39 @@ struct ProfileView: View {
 
     // MARK: Sections
 
-    private var accountCard: some View {
-        HStack(spacing: 14) {
+    /// Red scene header: gold initial badge, "Profil" in script, name / e-mail and Santa waving.
+    private var header: some View {
+        HStack(alignment: .center, spacing: 14) {
             Text(initials)
-                .font(AppFont.display(22))
+                .font(AppFont.display(26))
                 .foregroundStyle(Palette.cranberryDark)
-                .frame(width: 58, height: 58)
+                .frame(width: 68, height: 68)
                 .background(Palette.goldGradient, in: Circle())
-                .overlay(Circle().strokeBorder(Color.white.opacity(0.4), lineWidth: 3))
-            VStack(alignment: .leading, spacing: 3) {
+                .overlay(Circle().strokeBorder(Palette.snow, lineWidth: 3))
+                .background(Circle().fill(Palette.goldDark).offset(y: 5))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(t.tabProfile)
+                    .font(AppFont.script(30))
+                    .foregroundStyle(Palette.goldLight)
                 if let user = session.user {
                     Text(user.email.components(separatedBy: "@").first ?? user.email)
-                        .font(AppFont.display(19)).foregroundStyle(Palette.snow).lineLimit(1)
-                    Text(user.email).font(AppFont.body(13, .bold)).foregroundStyle(Palette.snow.opacity(0.85)).lineLimit(1)
+                        .font(AppFont.display(24)).foregroundStyle(Palette.snow).lineLimit(1).minimumScaleFactor(0.7)
+                    Text(user.email).font(AppFont.body(13.5, .bold)).foregroundStyle(Palette.snow.opacity(0.9)).lineLimit(1)
                     if user.hasApple == true {
                         Label(t.appleLinked, systemImage: "applelogo").font(AppFont.body(12, .bold)).foregroundStyle(Palette.goldLight)
                     }
                 } else {
-                    Text(t.guest).font(AppFont.display(19)).foregroundStyle(Palette.snow)
-                    Text(t.guestDrawsHint).font(AppFont.body(13, .semibold)).foregroundStyle(Palette.snow.opacity(0.85))
+                    Text(t.guest).font(AppFont.display(24)).foregroundStyle(Palette.snow)
+                    Text(t.guestDrawsHint).font(AppFont.body(13, .semibold)).foregroundStyle(Palette.snow.opacity(0.9))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             Spacer(minLength: 0)
-            SantaAvatar(size: 64, mood: .wave)
-                .padding(.top, -14)
-                .padding(.bottom, -18)
+            SantaAvatar(size: 76, mood: .wave)
         }
-        .padding(16)
-        .background(Palette.heroGradient, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Radius.card, style: .continuous).strokeBorder(Palette.gold, lineWidth: 2))
-        .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
-        .shadow(color: Color(hex: 0x6E0D12, alpha: 0.22), radius: 13, y: 10)
+        .padding(.horizontal, 20)
+        .padding(.top, 96)
+        .padding(.bottom, 22)
     }
 
     @ViewBuilder
@@ -156,8 +161,8 @@ struct ProfileView: View {
     private enum RowIcon { case symbol(String), text(String) }
 
     private var initials: String {
-        guard let email = session.user?.email else { return "🎅" }
-        return String(email.prefix(2)).uppercased()
+        guard let email = session.user?.email else { return "LR" }
+        return String(email.prefix(1)).uppercased()
     }
 
     private var chevron: some View {

@@ -13,6 +13,7 @@ struct LetsRaffleApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .scrollIndicators(.hidden)
                 .environment(settings)
                 .environment(session)
                 .environment(participations)

@@ -14,7 +14,13 @@ struct AuthScaffold<Content: View>: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            ChristmasBackdrop(garland: false, pines: false)
+            ChristmasBackdrop(garland: true, pines: false)
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                SnowFriends(fill: Palette.page, height: 84)
+            }
+            .ignoresSafeArea(.container, edges: .bottom)
+            .ignoresSafeArea(.keyboard)
             VStack(spacing: 0) {
                 HStack {
                     // The string runs up behind the status bar, as if hanging from the top edge.
@@ -64,17 +70,14 @@ struct AuthScaffold<Content: View>: View {
 
                 ScrollView {
                     content
-                        .padding(.horizontal, 24)
-                        .padding(.top, 24)
-                        .padding(.bottom, 24)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 20)
+                        .foilCard(radius: 30)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 10)
+                        .padding(.bottom, 28)
                 }
                 .scrollDismissesKeyboard(.interactively)
-                .background(
-                    UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous)
-                        .fill(Palette.page)
-                        .shadow(color: Color(hex: 0x320000, alpha: 0.35), radius: 22, y: -8)
-                        .ignoresSafeArea(edges: .bottom)
-                )
             }
         }
         .toolbar(.hidden, for: .navigationBar)
