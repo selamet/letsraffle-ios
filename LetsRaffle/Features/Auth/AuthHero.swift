@@ -32,7 +32,7 @@ struct AuthScaffold<Content: View>: View {
                 HStack(alignment: .bottom, spacing: 0) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(script)
-                            .font(AppFont.script(50))
+                            .font(AppFont.script(44))
                             .foregroundStyle(Palette.goldLight)
                             .lineLimit(1)
                             .minimumScaleFactor(0.6)
@@ -41,10 +41,10 @@ struct AuthScaffold<Content: View>: View {
                             .foregroundStyle(Palette.snow.opacity(0.92))
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    .padding(.bottom, 22)
+                    .padding(.bottom, 16)
                     Spacer(minLength: 0)
                     ZStack(alignment: .topLeading) {
-                        SantaAvatar(size: 140, mood: mood)
+                        SantaAvatar(size: 120, mood: mood)
                             .id(mood)
                             .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .bottom)))
                         if let bubble {
@@ -66,7 +66,8 @@ struct AuthScaffold<Content: View>: View {
                 }
                 .padding(.leading, 22)
                 .padding(.trailing, 4)
-                .padding(.top, 2)
+                // Tucked up next to the back ornament so the card below gets more room.
+                .padding(.top, -30)
 
                 // The foil card itself stays put; only what is inside it scrolls.
                 ScrollView {
@@ -111,13 +112,14 @@ struct AuthSegment: View {
         } label: {
             Text(title)
                 .font(AppFont.body(15, .bold))
-                .foregroundStyle(on ? Palette.brandText : Palette.sub)
+                .foregroundStyle(on ? Palette.snow : Palette.sub)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .background {
                     if on {
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Palette.card)
-                            .shadow(color: Color(hex: 0x6E0D12, alpha: 0.1), radius: 6, y: 3)
+                            .fill(LinearGradient(colors: [Color(hex: 0xD0282F), Palette.cranberry], startPoint: .top, endPoint: .bottom))
+                            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Palette.goldLight, lineWidth: 1.5))
+                            .shadow(color: Color(hex: 0x6E0D12, alpha: 0.25), radius: 5, y: 3)
                     }
                 }
         }

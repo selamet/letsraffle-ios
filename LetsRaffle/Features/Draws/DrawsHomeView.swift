@@ -384,8 +384,8 @@ private struct NewDrawPicker: View {
 
             // Both modes are raffle tickets, like on the web: notched at the perforation,
             // with a tear-off stub that carries the arrow.
-            Button(action: onInvite) {
-                ticket(
+            TicketCard(
+                    action: onInvite,
                     stub: 80,
                     minHeight: 136,
                     colors: [Color(hex: 0xD0282F), Palette.cranberry, Palette.cranberryDark],
@@ -432,12 +432,10 @@ private struct NewDrawPicker: View {
                         .overlay(Circle().strokeBorder(Palette.snow.opacity(0.85), lineWidth: 2))
                         .background(Circle().fill(Palette.cranberryDark).offset(y: 3))
                 }
-            }
-            .buttonStyle(ModeCardStyle())
             .accessibilityIdentifier("home.invite")
 
-            Button(action: onManual) {
-                ticket(
+            TicketCard(
+                    action: onManual,
                     stub: 80,
                     minHeight: 72,
                     colors: [Color(hex: 0x2F8A5A), Palette.pine, Palette.pineEdge],
@@ -468,24 +466,59 @@ private struct NewDrawPicker: View {
                         .background(Palette.goldGradient, in: Circle())
                         .background(Circle().fill(.black.opacity(0.35)).offset(y: 3))
                 }
-            }
-            .buttonStyle(ModeCardStyle())
             .accessibilityIdentifier("home.manual")
         }
     }
 
-    /// A raffle ticket: glossy body on the left, tear-off stub on the right, a dashed
-    /// perforation between them and a thick bottom edge.
-    private func ticket<Content: View, Arrow: View>(
-        stub: CGFloat,
-        minHeight: CGFloat,
-        colors: [Color],
-        edge: Color,
-        stubFill: AnyShapeStyle,
-        perforation: Color,
-        @ViewBuilder content: () -> Content,
-        @ViewBuilder arrow: () -> Arrow
-    ) -> some View {
+}
+
+/// A raffle ticket button: glossy body on the left, tear-off stub on the right, a dashed
+/// perforation between them and a thick bottom edge. Tapping tears the stub off along the
+/// perforation, then runs the action.
+private struct TicketCard<Content: View, Arrow: View>: View {
+    var action: () -> Void
+    var stub: CGFloat
+    var minHeight: CGFloat
+    var colors: [Color]
+    var edge: Color
+    var stubFill: AnyShapeStyle
+    var perforation: Color
+    @ViewBuilder var content: () -> Content
+    @ViewBuilder var arrow: () -> Arrow
+
+    @State private var torn = TicketCard.startsTorn
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private static var startsTorn: Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "tornDemo")
+        #else
+        false
+        #endif
+    }
+
+    var body: some View {
+        Button(action: tear) {
+            ZStack {
+                // The same ticket drawn twice, each half masked, so the stub can come away.
+                face.mask {
+                    Rectangle().padding(.trailing, stub).padding([.leading, .vertical], -12)
+                }
+                face.mask {
+                    HStack(spacing: 0) {
+                        Spacer(minLength: 0)
+                        Rectangle().frame(width: stub).padding([.trailing, .vertical], -12)
+                    }
+                }
+                .rotationEffect(.degrees(torn ? 4 : 0), anchor: .bottomTrailing)
+                .offset(x: 0, y: torn ? 3 : 0)
+            }
+            .shadow(color: edge.opacity(0.3), radius: 10, y: 10)
+        }
+        .buttonStyle(ModeCardStyle())
+    }
+
+    private var face: some View {
         let shape = TicketShape(stub: stub)
         return HStack(spacing: 0) {
             content()
@@ -512,7 +545,20 @@ private struct NewDrawPicker: View {
         .overlay(shape.stroke(Palette.goldLight, lineWidth: 2.5))
         .background(shape.fill(edge).offset(y: 6))
         .padding(.bottom, 6)
-        .shadow(color: edge.opacity(0.3), radius: 10, y: 10)
+    }
+
+    private func tear() {
+        guard !torn else { return }
+        guard !reduceMotion else { action(); return }
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        withAnimation(.spring(duration: 0.34, bounce: 0.4)) { torn = true }
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(360))
+            action()
+            // Put the ticket back together once the next screen covers it.
+            try? await Task.sleep(for: .milliseconds(700))
+            torn = false
+        }
     }
 }
 

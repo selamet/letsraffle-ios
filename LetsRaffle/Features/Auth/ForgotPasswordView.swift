@@ -22,7 +22,7 @@ struct ForgotPasswordView: View {
                     error: showErrors ? Validation.emailError(email, t) : nil
                 )
                 Button(t.sendReset, action: submit)
-                    .buttonStyle(.primary(loading: isLoading))
+                    .buttonStyle(.festive(loading: isLoading))
                     .disabled(isLoading)
                     .padding(.top, 4)
 

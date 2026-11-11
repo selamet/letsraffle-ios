@@ -40,7 +40,7 @@ struct RegisterView: View {
                 )
 
                 Button(t.registerBtn, action: submit)
-                    .buttonStyle(.primary(loading: isLoading))
+                    .buttonStyle(.festive(loading: isLoading))
                     .disabled(isLoading)
                     .padding(.top, 4)
                     .accessibilityIdentifier("register.submit")

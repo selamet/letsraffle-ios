@@ -85,6 +85,78 @@ struct GoldButtonStyle: ButtonStyle {
     }
 }
 
+/// Christmas call-to-action: glossy red with a gold foil rim, sparkles beside the label
+/// and a cap of snow sitting on the top edge.
+struct FestiveButtonStyle: ButtonStyle {
+    var isLoading = false
+
+    func makeBody(configuration: Configuration) -> some View {
+        FestiveButtonBody(configuration: configuration, isLoading: isLoading)
+    }
+}
+
+private struct FestiveButtonBody: View {
+    let configuration: ButtonStyle.Configuration
+    let isLoading: Bool
+    @Environment(\.isEnabled) private var isEnabled
+
+    var body: some View {
+        let pressed = configuration.isPressed
+        let shape = RoundedRectangle(cornerRadius: Radius.button, style: .continuous)
+        ZStack {
+            HStack(spacing: 10) {
+                Image(systemName: "sparkle").font(.system(size: 11, weight: .bold)).foregroundStyle(Palette.goldLight)
+                configuration.label
+                Image(systemName: "sparkle").font(.system(size: 11, weight: .bold)).foregroundStyle(Palette.goldLight)
+            }
+            .opacity(isLoading ? 0 : 1)
+            .offset(y: 3)
+            if isLoading { ProgressView().tint(.white).offset(y: 3) }
+        }
+        .font(.buttonLabel)
+        .foregroundStyle(.white)
+        .frame(maxWidth: .infinity, minHeight: 60)
+        .background(
+            ZStack(alignment: .top) {
+                LinearGradient(colors: [Color(hex: 0xD0282F), Palette.cranberry, Palette.cranberryDark], startPoint: .top, endPoint: .bottom)
+                SnowCap().fill(Palette.snow).frame(height: 20)
+                    .shadow(color: Color(hex: 0x3C0000, alpha: 0.25), radius: 1.5, y: 1.5)
+            }
+            .clipShape(shape)
+        )
+        .overlay(shape.strokeBorder(Palette.goldLight, lineWidth: 2.5))
+        .background(Color(hex: 0x4A080C), in: shape.offset(y: pressed ? 2 : 5))
+        .offset(y: pressed ? 3 : 0)
+        .padding(.bottom, 5)
+        .opacity(isEnabled ? 1 : 0.45)
+        .animation(.easeOut(duration: 0.12), value: pressed)
+    }
+}
+
+/// Snow lying along a top edge: flat on top, soft uneven drips underneath.
+struct SnowCap: Shape {
+    func path(in rect: CGRect) -> Path {
+        let depths: [CGFloat] = [0.55, 0.3, 0.95, 0.4, 0.6, 0.25, 0.8, 0.35, 1.0, 0.45, 0.6]
+        let step = rect.width / CGFloat(depths.count)
+        let base = rect.minY + rect.height * 0.3
+        var p = Path()
+        p.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        p.addLine(to: CGPoint(x: rect.maxX, y: base))
+        for (i, d) in depths.enumerated().reversed() {
+            let x1 = rect.minX + step * CGFloat(i)
+            let mid = x1 + step / 2
+            p.addQuadCurve(to: CGPoint(x: x1, y: base), control: CGPoint(x: mid, y: base + rect.height * 1.3 * d))
+        }
+        p.closeSubpath()
+        return p
+    }
+}
+
+extension ButtonStyle where Self == FestiveButtonStyle {
+    static func festive(loading: Bool) -> FestiveButtonStyle { FestiveButtonStyle(isLoading: loading) }
+}
+
 extension ButtonStyle where Self == PrimaryButtonStyle {
     static var primary: PrimaryButtonStyle { PrimaryButtonStyle() }
 

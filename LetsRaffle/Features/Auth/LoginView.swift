@@ -55,7 +55,7 @@ struct LoginView: View {
                         Image(systemName: "arrow.right")
                     }
                 }
-                .buttonStyle(.primary(loading: isLoading))
+                .buttonStyle(.festive(loading: isLoading))
                 .disabled(isLoading)
                 .accessibilityIdentifier("login.submit")
 
