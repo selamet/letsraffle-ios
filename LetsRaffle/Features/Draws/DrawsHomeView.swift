@@ -100,6 +100,7 @@ struct DrawsHomeView: View {
         if route == "invite" { open(.createInvite) }
         if route == "invite2" { open(.createInvite); path.append(.inviteDetails) }
         if route == "manual" { open(.manual) }
+        if route == "all" { path = [.allDraws] }
         if route.hasPrefix("detail:") { path = [.detail(inviteCode: String(route.dropFirst(7)))] }
         tabBar.isHidden = !path.isEmpty
     }
@@ -130,7 +131,7 @@ struct DrawsHomeView: View {
                 .font(AppFont.display(19))
                 .foregroundStyle(Palette.text)
             Spacer()
-            if let store, store.draws.count > 3 {
+            if let store, store.draws.count > 1 {
                 Button(t.seeAll) { path.append(.allDraws) }
                     .font(AppFont.body(15, .bold))
                     .foregroundStyle(Palette.brandText)
@@ -152,7 +153,7 @@ struct DrawsHomeView: View {
             case .loaded where store.draws.isEmpty:
                 EmptyHint(text: t.noDraws)
             case .loaded:
-                ForEach(store.activeFirst.prefix(3)) { draw in
+                ForEach(store.activeFirst.prefix(1)) { draw in
                     drawLink(draw)
                 }
             }
@@ -385,7 +386,7 @@ private struct NewDrawPicker: View {
             // with a tear-off stub that carries the arrow.
             Button(action: onInvite) {
                 ticket(
-                    stub: 86,
+                    stub: 80,
                     minHeight: 136,
                     colors: [Color(hex: 0xD0282F), Palette.cranberry, Palette.cranberryDark],
                     edge: Color(hex: 0x4A080C),
@@ -437,7 +438,7 @@ private struct NewDrawPicker: View {
 
             Button(action: onManual) {
                 ticket(
-                    stub: 70,
+                    stub: 80,
                     minHeight: 72,
                     colors: [Color(hex: 0x2F8A5A), Palette.pine, Palette.pineEdge],
                     edge: Color(hex: 0x0C2A1C),
@@ -580,21 +581,64 @@ struct EmptyHint: View {
     }
 }
 
-/// Full list behind "See all".
+/// Full list behind "See all": fixed red header with the logo, the events scroll in the cream sheet.
 struct AllDrawsView<Row: View>: View {
     let store: DrawsStore?
     let rowLink: (DrawListItem) -> Row
     @Environment(\.strings) private var t
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 10) {
-                ForEach(store?.draws ?? []) { rowLink($0) }
+        VStack(spacing: 0) {
+            header
+            ScrollView {
+                LazyVStack(spacing: 10) {
+                    let draws = store?.activeFirst ?? []
+                    if draws.isEmpty {
+                        EmptyHint(text: t.noDraws)
+                    } else {
+                        ForEach(draws) { rowLink($0) }
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 22)
+                .padding(.bottom, 24)
             }
-            .padding(16)
+            .refreshable { await store?.load(t) }
+            .clipShape(UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous))
+            .background(
+                UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous)
+                    .fill(Palette.page)
+                    .shadow(color: Color(hex: 0x320000, alpha: 0.3), radius: 18, y: -8)
+                    .ignoresSafeArea(edges: .bottom)
+            )
         }
-        .background(Palette.page)
-        .navigationTitle(t.homeTitle)
-        .refreshable { await store?.load(t) }
+        .background(alignment: .top) {
+            ChristmasBackdrop(garland: true, pines: false).frame(height: 420)
+        }
+        .background(Palette.page.ignoresSafeArea())
+        .toolbar(.hidden, for: .navigationBar)
+        .statusBarStyle(.lightContent)
+    }
+
+    private var header: some View {
+        ZStack(alignment: .topLeading) {
+            VStack(spacing: 0) {
+                Image("lockup")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 62)
+                    .shadow(color: Color(hex: 0x3C0000, alpha: 0.25), radius: 6, y: 3)
+                    .accessibilityLabel("Lets Raffle")
+                Text(t.allEvents)
+                    .font(AppFont.script(28))
+                    .foregroundStyle(Palette.goldLight)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 48)
+            OrnamentBackButton(stringLength: 50) { dismiss() }
+                .padding(.leading, 16)
+        }
+        .padding(.bottom, 14)
     }
 }
