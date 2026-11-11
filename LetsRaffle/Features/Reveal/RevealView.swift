@@ -17,6 +17,7 @@ struct RevealView: View {
     @State private var screenshotTaken = false
     @Environment(\.strings) private var t
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppSettings.self) private var settings
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(inviteCode: String, api: APIClient, participations: ParticipationStore, isSignedIn: Bool) {
@@ -79,9 +80,12 @@ struct RevealView: View {
 
     private var topBar: some View {
         HStack(alignment: .bottom) {
-            OrnamentBackButton(stringLength: 24, systemName: "xmark") { dismiss() }
+            OrnamentBackButton(stringLength: 62, systemName: "xmark") { dismiss() }
             Spacer()
-            Text(store.inviteCode).font(AppFont.body(13, .black)).tracking(1.2).foregroundStyle(Palette.goldLight).padding(.bottom, 12)
+            // While waiting, the name is the headline of the page instead.
+            if store.phase != .waiting {
+                Text(drawName).font(AppFont.script(26)).foregroundStyle(Palette.goldLight).lineLimit(1).padding(.bottom, 6)
+            }
             Spacer()
             Color.clear.frame(width: 48, height: 44)
         }
@@ -100,10 +104,7 @@ struct RevealView: View {
         case .loading:
             ChristmasLoader(label: t.revealLoading, onDark: true, width: 150)
         case .waiting:
-            VStack(spacing: 14) {
-                FriendImage(friend: .snowman, width: 120)
-                infoText(t.waitingForDraw)
-            }
+            waiting
         case let .failed(message):
             VStack(spacing: 14) {
                 FriendImage(friend: .rudolph, width: 96)
@@ -124,6 +125,65 @@ struct RevealView: View {
                 insertion: .opacity.combined(with: .offset(y: 14)),
                 removal: .opacity.combined(with: .offset(y: -10))
             ))
+        }
+    }
+
+    /// "miskin-penguen-768" → "Miskin Penguen".
+    private var drawName: String {
+        let words = store.inviteCode.split(separator: "-").filter { Int($0) == nil }
+        guard !words.isEmpty else { return store.inviteCode }
+        return words.map { $0.capitalized }.joined(separator: " ")
+    }
+
+    /// Draw not run yet: the draw's name, Santa checking his watch, and the brand.
+    private var waiting: some View {
+        VStack(spacing: 8) {
+            Text(drawName)
+                .font(AppFont.script(54))
+                .foregroundStyle(Palette.goldLight)
+                .shadow(color: Color(hex: 0x5A0A0F, alpha: 0.45), radius: 0, y: 3)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            Text(t.waitingTitle)
+                .font(AppFont.display(22))
+                .foregroundStyle(Palette.snow)
+                .multilineTextAlignment(.center)
+            SantaAvatar(size: 168, mood: .watch)
+                .overlay(alignment: .topTrailing) {
+                    Text(t.waitingBubble)
+                        .font(AppFont.display(13))
+                        .foregroundStyle(Palette.brandText)
+                        .padding(.horizontal, 12).padding(.vertical, 6)
+                        .background(Palette.snow, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Palette.gold, lineWidth: 2))
+                        .fixedSize()
+                        .offset(x: 84, y: 18)
+                }
+                .padding(.top, -6)
+            if let date = store.drawDate {
+                HStack(spacing: 6) {
+                    Image(systemName: "calendar").font(.system(size: 12, weight: .bold))
+                    Text(DrawDateFormat.long(date, language: settings.language))
+                }
+                .font(AppFont.body(13, .black))
+                .foregroundStyle(Palette.snow)
+                .padding(.horizontal, 14)
+                .frame(height: 34)
+                .background(Color.white.opacity(0.16), in: Capsule())
+                .overlay(Capsule().strokeBorder(Color.white.opacity(0.4), lineWidth: 1.5))
+            }
+            infoText(t.waitingSub)
+            VStack(spacing: 0) {
+                Image("lockup")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 132)
+                    .accessibilityLabel("Lets Raffle")
+                Text("letsraffle.co")
+                    .font(AppFont.body(13, .bold))
+                    .foregroundStyle(Palette.snow.opacity(0.9))
+            }
+            .padding(.top, 14)
         }
     }
 

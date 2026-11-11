@@ -42,6 +42,7 @@ final class RevealStore {
     func load(_ t: Strings) async {
         #if DEBUG
         // Visual QA without a backend: `-revealDemo YES`
+        if UserDefaults.standard.bool(forKey: "revealWaiting") { phase = .waiting; return }
         if UserDefaults.standard.bool(forKey: "revealDemo") {
             phase = .revealed(MatchResult(
                 drawId: 7, inviteCode: inviteCode,
