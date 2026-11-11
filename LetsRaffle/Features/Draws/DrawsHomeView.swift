@@ -269,7 +269,7 @@ private struct HomeHero: View {
                                 .foregroundStyle(Palette.goldLight)
                                 .fixedSize()
                                 .padding(.leading, 6)
-                                .offset(y: 30)
+                                .offset(y: 40)
                         }
                 }
                 Spacer(minLength: 8)
