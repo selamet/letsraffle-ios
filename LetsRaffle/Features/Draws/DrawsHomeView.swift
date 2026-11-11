@@ -52,14 +52,10 @@ struct DrawsHomeView: View {
                 .mask {
                     // The cut sits a little below the snow line so there is a band of snow
                     // between the scene and the scrolling content, and it fades out softly.
-                    VStack(spacing: 0) {
-                        Color.clear.frame(height: 16)
-                        SnowWave().frame(height: 56)
-                        Rectangle()
-                    }
-                    .padding(.horizontal, -12)
-                    .padding(.bottom, -12)
-                    .blur(radius: 3)
+                    SnowTopMask(offset: 16, waveHeight: 56)
+                        .padding(.horizontal, -12)
+                        .padding(.bottom, -12)
+                        .blur(radius: 3)
                 }
                 .padding(.top, heroHeight - 56)
 
@@ -212,6 +208,24 @@ struct DrawsHomeView: View {
         case .manual:
             ManualDrawView { path.removeAll() }
         }
+    }
+}
+
+/// One continuous shape (no seam): everything below a snow-wave line that starts `offset` points down.
+private struct SnowTopMask: Shape {
+    var offset: CGFloat
+    var waveHeight: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width, h = waveHeight, y0 = rect.minY + offset, x0 = rect.minX
+        var p = Path()
+        p.move(to: CGPoint(x: x0, y: y0 + h * 0.5))
+        p.addCurve(to: CGPoint(x: x0 + w * 0.54, y: y0 + h * 0.4), control1: CGPoint(x: x0 + w * 0.18, y: y0 + h * 0.1), control2: CGPoint(x: x0 + w * 0.36, y: y0 + h * 0.75))
+        p.addCurve(to: CGPoint(x: x0 + w, y: y0 + h * 0.36), control1: CGPoint(x: x0 + w * 0.72, y: y0 + h * 0.08), control2: CGPoint(x: x0 + w * 0.88, y: y0))
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        p.closeSubpath()
+        return p
     }
 }
 
