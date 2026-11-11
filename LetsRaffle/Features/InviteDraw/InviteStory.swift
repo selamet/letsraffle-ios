@@ -170,7 +170,7 @@ struct InviteStoryCard: View {
 }
 
 /// Rounded card with a half-circle bitten out of the left and right edge at `split`.
-private struct StoryTicketShape: Shape {
+struct StoryTicketShape: Shape {
     var split: CGFloat
     var radius: CGFloat = 22
     var notch: CGFloat = 11

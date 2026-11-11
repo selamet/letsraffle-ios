@@ -46,6 +46,7 @@ struct RootView: View {
             if !session.isSignedIn { await session.debugAutoLogin() }
             if DebugRoute.current == "push" { push.isPromptPresented = true }
             InviteStory.debugDump()
+            InvitePoster.debugDump()
             if let route = DebugRoute.current, route.hasPrefix("reveal:") {
                 router.pendingDestination = .reveal(inviteCode: String(route.dropFirst(7)))
             }

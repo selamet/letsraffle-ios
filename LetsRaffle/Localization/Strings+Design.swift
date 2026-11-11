@@ -53,6 +53,12 @@ extension Strings {
     var shareMail: String { l("E-posta", "Mail") }
     var shareWhatsAppStatus: String { l("Durum", "Status") }
     var shareInstagramStory: String { l("Hikâye", "Story") }
+    var sharePoster: String { l("Afiş", "Poster") }
+    var posterScan: String { l("Kameranla okut", "Scan with your camera") }
+    var posterStep1: String { l("QR kodu okut", "Scan the QR code") }
+    var posterStep2: String { l("Bilgilerini doldur", "Fill in your details") }
+    var posterStep3: String { l("Eşleşmeni öğren", "Find out your match") }
+    var posterOr: String { l("ya da letsraffle.co'da bu kodu gir", "or enter this code at letsraffle.co") }
     var storyEyebrow: String { l("YILBAŞI ÇEKİLİŞİ", "SECRET SANTA") }
     var storyBody: String { l("Çekilişimize katıl, hediyeni kime alacağını Noel Baba söylesin!", "Join our draw and let Santa tell you who you're gifting!") }
     var storyCodeLabel: String { l("DAVET KODU", "INVITE CODE") }

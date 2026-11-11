@@ -19,6 +19,10 @@ struct InviteShareRow: View {
                 target(t.shareWhatsAppStatus, image: "glyph-whatsapp", style: 0, story: true) { shareStory(instagram: false) }
                 target(t.shareInstagramStory, image: "glyph-instagram", style: 1, story: true) { shareStory(instagram: true) }
                 target(t.shareMail, symbol: "envelope.fill", style: 2) { open("mailto:?subject=\(enc(t.shareSubject))&body=\(enc(message))") }
+                target(t.sharePoster, symbol: "printer.fill", style: 1) {
+                    // A4 invitation with the QR code, to print and hang up.
+                    if let picture = InvitePoster.image(inviteCode: url.lastPathComponent, url: url, t: t) { InviteStory.presentShareSheet(picture) }
+                }
             }
             .padding(.top, 8)
             if let notice {
