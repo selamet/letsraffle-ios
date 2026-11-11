@@ -65,13 +65,18 @@ struct ProfileView: View {
 
                     actions
 
-                    Image("lockup")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 128)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 6)
-                        .accessibilityLabel("Lets Raffle")
+                    VStack(spacing: 2) {
+                        Image("lockup")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 128)
+                            .accessibilityLabel("Lets Raffle")
+                        Text("letsraffle.co")
+                            .font(AppFont.body(14, .bold))
+                            .foregroundStyle(Palette.sub)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 6)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 22)

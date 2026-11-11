@@ -501,14 +501,16 @@ private struct TicketCard<Content: View, Arrow: View>: View {
         Button(action: tear) {
             ZStack {
                 // The same ticket drawn twice, each half masked, so the stub can come away.
-                face.mask {
-                    Rectangle().padding(.trailing, stub).padding([.leading, .vertical], -12)
-                }
-                face.mask {
-                    HStack(spacing: 0) {
-                        Spacer(minLength: 0)
-                        Rectangle().frame(width: stub).padding([.trailing, .vertical], -12)
+                face.mask(alignment: .leading) {
+                    GeometryReader { geo in
+                        Rectangle()
+                            .frame(width: geo.size.width - stub + 12, height: geo.size.height + 24)
+                            .offset(x: -12, y: -12)
                     }
+                }
+                face.mask(alignment: .trailing) {
+                    // Exactly the stub, starting on the perforation (no gap between the halves).
+                    Rectangle().frame(width: stub + 12).offset(x: 12).padding(.vertical, -12)
                 }
                 .rotationEffect(.degrees(torn ? 4 : 0), anchor: .bottomTrailing)
                 .offset(x: 0, y: torn ? 3 : 0)

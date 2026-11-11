@@ -114,6 +114,7 @@ struct AuthSegment: View {
                 .font(AppFont.body(15, .bold))
                 .foregroundStyle(on ? Palette.snow : Palette.sub)
                 .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
                 .background {
                     if on {
                         RoundedRectangle(cornerRadius: 12, style: .continuous)

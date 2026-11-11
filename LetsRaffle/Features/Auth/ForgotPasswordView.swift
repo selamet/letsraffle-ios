@@ -38,6 +38,19 @@ struct ForgotPasswordView: View {
                     .font(AppFont.body(15, .bold))
                     .foregroundStyle(Palette.brandText)
                     .frame(maxWidth: .infinity, minHeight: 44)
+
+                VStack(spacing: 2) {
+                    Image("lockup")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 150)
+                        .accessibilityLabel("Lets Raffle")
+                    Text("letsraffle.co")
+                        .font(AppFont.body(14, .bold))
+                        .foregroundStyle(Palette.sub)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 18)
             }
         }
         .animation(.default, value: sent)

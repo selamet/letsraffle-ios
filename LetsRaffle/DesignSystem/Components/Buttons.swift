@@ -114,6 +114,7 @@ private struct FestiveButtonBody: View {
         .font(.buttonLabel)
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity, minHeight: 58)
+        .contentShape(shape)
         .background(
             ZStack {
                 LinearGradient(colors: [Color(hex: 0xD0282F), Palette.cranberry, Palette.cranberryDark], startPoint: .top, endPoint: .bottom)
