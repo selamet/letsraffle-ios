@@ -44,16 +44,22 @@ struct DrawsHomeView: View {
                         draws
                     }
                     .padding(.horizontal, 18)
-                    .padding(.top, 48)
+                    .padding(.top, 62)
                     .padding(.bottom, 24)
                 }
                 .floatingTabBarInset()
                 .refreshable { await store?.load(t) }
                 .mask {
+                    // The cut sits a little below the snow line so there is a band of snow
+                    // between the scene and the scrolling content, and it fades out softly.
                     VStack(spacing: 0) {
+                        Color.clear.frame(height: 16)
                         SnowWave().frame(height: 56)
                         Rectangle()
                     }
+                    .padding(.horizontal, -12)
+                    .padding(.bottom, -12)
+                    .blur(radius: 3)
                 }
                 .padding(.top, heroHeight - 56)
 
