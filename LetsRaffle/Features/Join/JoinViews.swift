@@ -236,34 +236,42 @@ struct JoinFormView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .bottom, spacing: 0) {
-            VStack(alignment: .leading, spacing: 6) {
-                OrnamentBackButton(stringLength: 26) { dismiss() }
-                    .padding(.leading, -12)
-                    .padding(.bottom, 4)
-                Text(t.youreInvited)
-                    .font(AppFont.script(40))
-                    .foregroundStyle(Palette.goldLight)
-                Text(t.joinHeading)
-                    .font(AppFont.display(28))
-                    .foregroundStyle(Palette.snow)
-                if let info {
-                    HStack(spacing: 6) {
-                        if let date = info.drawDate {
-                            chip(icon: "calendar", DrawDateFormat.long(date, language: settings.language))
-                        }
-                        chip(icon: "person.2.fill", t.participantCount(info.participantCount))
-                    }
-                    .padding(.top, 4)
-                }
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                // The string runs up behind the status bar, as if hanging from the top edge.
+                OrnamentBackButton(stringLength: 50) { dismiss() }
+                Spacer()
             }
-            .padding(.bottom, 26)
-            Spacer(minLength: 0)
-            SantaAvatar(size: 128, mood: .invite)
+            .padding(.leading, 12)
+            .padding(.top, -46)
+            HStack(alignment: .bottom, spacing: 0) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(t.youreInvited)
+                        .font(AppFont.script(38))
+                        .foregroundStyle(Palette.goldLight)
+                    Text(t.joinHeading)
+                        .font(AppFont.display(26))
+                        .foregroundStyle(Palette.snow)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    if let info {
+                        HStack(spacing: 6) {
+                            if let date = info.drawDate {
+                                chip(icon: "calendar", DrawDateFormat.long(date, language: settings.language))
+                            }
+                            chip(icon: "person.2.fill", t.participantCount(info.participantCount))
+                        }
+                        .padding(.top, 4)
+                    }
+                }
+                .padding(.bottom, 18)
+                Spacer(minLength: 0)
+                SantaAvatar(size: 116, mood: .invite)
+            }
+            .padding(.leading, 22)
+            .padding(.trailing, 4)
+            .padding(.top, 2)
         }
-        .padding(.leading, 22)
-        .padding(.trailing, 4)
-        .padding(.top, 50)
     }
 
     private func chip(icon: String, _ text: String) -> some View {
@@ -410,6 +418,9 @@ struct JoinFormView: View {
             ))
             success = true
             await push.sync()
+        } catch APIError.server(status: 409, _) {
+            // The backend answers in English; say it in the app's language.
+            submitError = t.emailAlreadyJoined
         } catch {
             submitError = error.userMessage(t)
         }

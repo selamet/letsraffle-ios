@@ -109,7 +109,7 @@ extension Strings {
         joinTitle: "Join the Draw",
         joinSub: "Enter the invite code or scan a QR.",
         enterCode: "Invite code",
-        enterCodeSub: "The code shared by the organizer (e.g. jolly-reindeer-742)",
+        enterCodeSub: "The code shared by the organizer (e.g. miskin-penguen-53)",
         scanQr: "Scan QR Code",
         deepLinkHint: "Tapping an invite link skips this step and opens the form directly.",
         hostedBy: "Hosted by",

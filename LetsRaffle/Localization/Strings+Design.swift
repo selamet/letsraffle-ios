@@ -73,6 +73,7 @@ extension Strings {
     var myDraws: String { l("Çekilişlerim", "My draws") }
     var nextDraw: String { l("Sıradaki çekiliş", "Next draw") }
     var allEvents: String { l("Tüm etkinlikler", "All events") }
+    var emailAlreadyJoined: String { l("Bu e-posta bu çekilişe zaten kayıtlı.", "This email is already registered for this draw.") }
     var activeCount: String { l("%d aktif", "%d active") }
     var daysUnit: String { l("gün", "days") }
     var hoursUnit: String { l("saat", "hours") }

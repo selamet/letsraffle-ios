@@ -109,7 +109,7 @@ extension Strings {
         joinTitle: "Çekilişe Katıl",
         joinSub: "Davet kodunu gir ya da QR okut.",
         enterCode: "Davet kodu",
-        enterCodeSub: "Organizatörün paylaştığı kod (ör. jolly-reindeer-742)",
+        enterCodeSub: "Organizatörün paylaştığı kod (ör. miskin-penguen-53)",
         scanQr: "QR Kod Okut",
         deepLinkHint: "Davet linkine dokunduğunda bu adım atlanır, doğrudan form açılır.",
         hostedBy: "Organizatör:",
