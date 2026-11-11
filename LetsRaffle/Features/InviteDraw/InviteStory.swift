@@ -31,7 +31,7 @@ struct InviteStoryCard: View {
             }
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
-                SnowFriends(fill: Palette.snow, height: 100)
+                SnowWave().fill(Palette.snow).frame(height: 52)
             }
 
             VStack(spacing: 0) {
@@ -68,7 +68,7 @@ struct InviteStoryCard: View {
         let shape = StoryTicketShape(split: 104)
         return VStack(spacing: 0) {
             VStack(spacing: 5) {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                HStack(alignment: .center, spacing: 8) {
                     Text(name)
                         .font(AppFont.display(25))
                         .foregroundStyle(Palette.cranberryDark)
