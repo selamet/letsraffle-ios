@@ -249,11 +249,21 @@ private struct HomeHero: View {
             Garland().padding(.top, topInset - 16)
 
             HStack(alignment: .center) {
-                Text(name.map { "\(t.hello) \($0)," } ?? "\(t.hello),")
-                    .font(AppFont.script(34))
-                    .foregroundStyle(Palette.goldLight)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                if let name {
+                    Text("\(t.hello) \(name),")
+                        .font(AppFont.script(34))
+                        .foregroundStyle(Palette.goldLight)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                } else {
+                    // The brand sits where the greeting would be: this is the most-seen screen.
+                    Image("lockup")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 44)
+                        .shadow(color: Color(hex: 0x3C0000, alpha: 0.25), radius: 6, y: 3)
+                        .accessibilityLabel("Lets Raffle")
+                }
                 Spacer(minLength: 8)
                 HStack(spacing: 6) {
                     Circle().fill(Color(hex: 0x7BE0A0)).frame(width: 8, height: 8)
