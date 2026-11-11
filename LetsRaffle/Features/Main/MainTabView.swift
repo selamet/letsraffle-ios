@@ -86,38 +86,39 @@ struct FloatingTabBar: View {
     @Environment(\.strings) private var t
 
     var body: some View {
-        HStack(alignment: .bottom) {
+        HStack(alignment: .center) {
             ForEach(MainTab.allCases, id: \.self) { tab in
                 let selected = tab == selection
                 Button {
                     selection = tab
                 } label: {
-                    if tab == .join {
-                        VStack(spacing: 3) {
+                    // Every tab has the same icon slot and label line, so the three labels sit
+                    // on one baseline; the join ornament just rises out of its slot.
+                    VStack(spacing: 3) {
+                        if tab == .join {
+                            Color.clear
+                                .frame(height: 24)
+                                .overlay(alignment: .bottom) {
+                                    Image(systemName: tab.icon)
+                                        .font(.system(size: 22, weight: .bold))
+                                        .foregroundStyle(.white)
+                                        .frame(width: 58, height: 58)
+                                        .background(selected ? Palette.brand : Palette.cranberryDark, in: Circle())
+                                        .overlay(Circle().strokeBorder(Palette.goldLight, lineWidth: 3))
+                                        .background(Circle().fill(Color(hex: 0x4A080C)).offset(y: 4))
+                                        .shadow(color: Color(hex: 0x6E0D12, alpha: 0.3), radius: 8, y: 6)
+                                        .offset(y: -3)
+                                }
+                        } else {
                             Image(systemName: tab.icon)
-                                .font(.system(size: 22, weight: .bold))
-                                .foregroundStyle(.white)
-                                .frame(width: 58, height: 58)
-                                .background(selected ? Palette.brand : Palette.cranberryDark, in: Circle())
-                                .overlay(Circle().strokeBorder(Palette.goldLight, lineWidth: 3))
-                                .background(Circle().fill(Color(hex: 0x4A080C)).offset(y: 4))
-                                .shadow(color: Color(hex: 0x6E0D12, alpha: 0.3), radius: 10, y: 8)
-                                .offset(y: -18)
-                                .padding(.bottom, -18)
-                            Text(tab.title(t)).font(AppFont.body(11, .bold))
-                                .foregroundStyle(selected ? Palette.brandText : Palette.sub)
+                                .font(.system(size: 21, weight: .semibold))
+                                .frame(height: 24)
                         }
-                        .frame(maxWidth: .infinity)
-                        .contentShape(Rectangle())
-                    } else {
-                        VStack(spacing: 3) {
-                            Image(systemName: tab.icon).font(.system(size: 21, weight: .semibold))
-                            Text(tab.title(t)).font(AppFont.body(11, .bold))
-                        }
-                        .foregroundStyle(selected ? Palette.brandText : Palette.sub)
-                        .frame(maxWidth: .infinity, minHeight: 52)
-                        .contentShape(Rectangle())
+                        Text(tab.title(t)).font(AppFont.body(11, selected ? .black : .bold))
                     }
+                    .foregroundStyle(selected ? Palette.brandText : Palette.sub)
+                    .frame(maxWidth: .infinity, minHeight: 52)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(selected ? .isSelected : [])
