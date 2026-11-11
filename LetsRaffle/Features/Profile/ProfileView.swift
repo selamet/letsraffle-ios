@@ -153,8 +153,8 @@ struct ProfileView: View {
             SantaAvatar(size: 76, mood: .wave)
         }
         .padding(.horizontal, 20)
-        .padding(.top, 96)
-        .padding(.bottom, 22)
+        .padding(.top, 50)
+        .padding(.bottom, 18)
     }
 
     @ViewBuilder

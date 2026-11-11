@@ -373,7 +373,7 @@ private struct NewDrawPicker: View {
     @Environment(\.strings) private var t
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             Text(t.newDrawTitle)
                 .font(AppFont.display(26))
                 .foregroundStyle(Palette.brandText)
@@ -381,8 +381,17 @@ private struct NewDrawPicker: View {
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 2)
 
+            // Both modes are raffle tickets, like on the web: notched at the perforation,
+            // with a tear-off stub that carries the arrow.
             Button(action: onInvite) {
-                HStack(spacing: 12) {
+                ticket(
+                    stub: 86,
+                    minHeight: 136,
+                    colors: [Color(hex: 0xD0282F), Palette.cranberry, Palette.cranberryDark],
+                    edge: Color(hex: 0x4A080C),
+                    stubFill: AnyShapeStyle(Palette.goldGradient),
+                    perforation: Palette.cranberryDark
+                ) {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 5) {
                             Image(systemName: "star.fill").font(.system(size: 9, weight: .bold))
@@ -393,7 +402,7 @@ private struct NewDrawPicker: View {
                         .frame(height: 22)
                         .background(Palette.goldGradient, in: Capsule())
                         Text(t.inviteHeroTitle)
-                            .font(AppFont.display(27))
+                            .font(AppFont.display(26))
                             .foregroundStyle(Palette.goldLight)
                             .shadow(color: Color(hex: 0x3C0000, alpha: 0.35), radius: 0, y: 2)
                             .lineLimit(1)
@@ -407,29 +416,34 @@ private struct NewDrawPicker: View {
                             .font(AppFont.body(11.5, .black))
                             .foregroundStyle(Palette.goldLight)
                             .lineLimit(1)
-                            .minimumScaleFactor(0.7)
+                            .minimumScaleFactor(0.6)
                             .padding(.top, 1)
                     }
-                    Spacer(minLength: 0)
+                    .padding(.leading, 18)
+                    .padding(.trailing, 12)
+                    .padding(.vertical, 16)
+                } arrow: {
                     Image(systemName: "arrow.right")
                         .font(.system(size: 18, weight: .heavy))
-                        .foregroundStyle(Palette.goldText)
-                        .frame(width: 52, height: 52)
-                        .background(Palette.goldGradient, in: Circle())
-                        .overlay(Circle().strokeBorder(.white.opacity(0.55), lineWidth: 2))
-                        .background(Circle().fill(Palette.goldDark).offset(y: 3))
+                        .foregroundStyle(Palette.snow)
+                        .frame(width: 50, height: 50)
+                        .background(Palette.cranberry, in: Circle())
+                        .overlay(Circle().strokeBorder(Palette.snow.opacity(0.85), lineWidth: 2))
+                        .background(Circle().fill(Palette.cranberryDark).offset(y: 3))
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 18)
-                .frame(maxWidth: .infinity, minHeight: 134, alignment: .leading)
-                .background(giftBackground([Color(hex: 0xD0282F), Palette.cranberry, Palette.cranberryDark], edge: Color(hex: 0x4A080C), halo: true))
-                .padding(.bottom, 6)
             }
             .buttonStyle(ModeCardStyle())
             .accessibilityIdentifier("home.invite")
 
             Button(action: onManual) {
-                HStack(spacing: 12) {
+                ticket(
+                    stub: 70,
+                    minHeight: 72,
+                    colors: [Color(hex: 0x2F8A5A), Palette.pine, Palette.pineEdge],
+                    edge: Color(hex: 0x0C2A1C),
+                    stubFill: AnyShapeStyle(Color(hex: 0x164A31)),
+                    perforation: Palette.goldLight
+                ) {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(t.manualHeroTitle)
                             .font(AppFont.display(19))
@@ -442,39 +456,99 @@ private struct NewDrawPicker: View {
                             .multilineTextAlignment(.leading)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    Spacer(minLength: 0)
+                    .padding(.leading, 18)
+                    .padding(.trailing, 12)
+                    .padding(.vertical, 12)
+                } arrow: {
                     Image(systemName: "arrow.right")
                         .font(.system(size: 15, weight: .heavy))
-                        .foregroundStyle(Palette.pine)
-                        .frame(width: 38, height: 38)
-                        .background(Palette.snow, in: Circle())
-                        .background(Circle().fill(.black.opacity(0.3)).offset(y: 3))
+                        .foregroundStyle(Color(hex: 0x164A31))
+                        .frame(width: 40, height: 40)
+                        .background(Palette.goldGradient, in: Circle())
+                        .background(Circle().fill(.black.opacity(0.35)).offset(y: 3))
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                .frame(maxWidth: .infinity, minHeight: 68, alignment: .leading)
-                .background(giftBackground([Color(hex: 0x2F8A5A), Palette.pine, Palette.pineEdge], edge: Color(hex: 0x0C2A1C), halo: false))
-                .padding(.bottom, 6)
             }
             .buttonStyle(ModeCardStyle())
             .accessibilityIdentifier("home.manual")
         }
     }
 
-    /// Glossy gift-wrap fill: gradient, double gold foil border, thick bottom edge.
-    private func giftBackground(_ colors: [Color], edge: Color, halo: Bool) -> some View {
-        let shape = RoundedRectangle(cornerRadius: 26, style: .continuous)
-        return ZStack {
-            shape.fill(edge).offset(y: 6)
-            shape.fill(LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing))
-            shape.fill(LinearGradient(colors: [.white.opacity(0.16), .clear], startPoint: .topLeading, endPoint: .center))
-            shape.strokeBorder(Palette.goldLight, lineWidth: 2.5)
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .strokeBorder(Palette.goldLight.opacity(0.35), lineWidth: 1)
-                .padding(6)
+    /// A raffle ticket: glossy body on the left, tear-off stub on the right, a dashed
+    /// perforation between them and a thick bottom edge.
+    private func ticket<Content: View, Arrow: View>(
+        stub: CGFloat,
+        minHeight: CGFloat,
+        colors: [Color],
+        edge: Color,
+        stubFill: AnyShapeStyle,
+        perforation: Color,
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder arrow: () -> Arrow
+    ) -> some View {
+        let shape = TicketShape(stub: stub)
+        return HStack(spacing: 0) {
+            content()
+                .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .leading)
+                .background(
+                    ZStack {
+                        LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
+                        LinearGradient(colors: [.white.opacity(0.16), .clear], startPoint: .topLeading, endPoint: .center)
+                    }
+                )
+            arrow()
+                .frame(width: stub)
+                .frame(maxHeight: .infinity)
+                .background(stubFill)
+                .overlay(alignment: .leading) {
+                    PerforationLine()
+                        .stroke(perforation.opacity(0.5), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [5, 6]))
+                        .frame(width: 2)
+                        .padding(.vertical, 20)
+                }
         }
-        .background(shape.stroke(Palette.goldLight.opacity(halo ? 0.3 : 0), lineWidth: 8))
-        .shadow(color: edge.opacity(0.35), radius: 12, y: 12)
+        .fixedSize(horizontal: false, vertical: true)
+        .clipShape(shape)
+        .overlay(shape.stroke(Palette.goldLight, lineWidth: 2.5))
+        .background(shape.fill(edge).offset(y: 6))
+        .padding(.bottom, 6)
+        .shadow(color: edge.opacity(0.3), radius: 10, y: 10)
+    }
+}
+
+/// Rounded rectangle with a half-circle bitten out of the top and bottom edge where the stub starts.
+private struct TicketShape: Shape {
+    var stub: CGFloat
+    var radius: CGFloat = 22
+    var notch: CGFloat = 12
+
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width, h = rect.height, r = radius, n = notch
+        let nx = w - stub
+        var p = Path()
+        p.move(to: CGPoint(x: r, y: 0))
+        p.addLine(to: CGPoint(x: nx - n, y: 0))
+        p.addArc(center: CGPoint(x: nx, y: 0), radius: n, startAngle: .degrees(180), endAngle: .degrees(0), clockwise: true)
+        p.addLine(to: CGPoint(x: w - r, y: 0))
+        p.addArc(tangent1End: CGPoint(x: w, y: 0), tangent2End: CGPoint(x: w, y: r), radius: r)
+        p.addLine(to: CGPoint(x: w, y: h - r))
+        p.addArc(tangent1End: CGPoint(x: w, y: h), tangent2End: CGPoint(x: w - r, y: h), radius: r)
+        p.addLine(to: CGPoint(x: nx + n, y: h))
+        p.addArc(center: CGPoint(x: nx, y: h), radius: n, startAngle: .degrees(0), endAngle: .degrees(180), clockwise: true)
+        p.addLine(to: CGPoint(x: r, y: h))
+        p.addArc(tangent1End: CGPoint(x: 0, y: h), tangent2End: CGPoint(x: 0, y: h - r), radius: r)
+        p.addLine(to: CGPoint(x: 0, y: r))
+        p.addArc(tangent1End: CGPoint(x: 0, y: 0), tangent2End: CGPoint(x: r, y: 0), radius: r)
+        p.closeSubpath()
+        return p.offsetBy(dx: rect.minX, dy: rect.minY)
+    }
+}
+
+private struct PerforationLine: Shape {
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        p.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
+        return p
     }
 }
 
