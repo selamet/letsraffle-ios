@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// "Gift tag" text field: white, 16pt corners, warm border, red focus ring.
 struct FormField: View {
@@ -42,6 +43,8 @@ struct FormField: View {
                     .font(AppFont.body(16, .bold))
                     .foregroundStyle(Palette.text)
                     .focused($focused)
+                    .submitLabel(kind == .password ? .done : .next)
+                    .onSubmit { FocusChain.advance() }
                 if kind == .password {
                     Button {
                         revealed.toggle()
@@ -200,5 +203,36 @@ struct CandyToggleStyle: ToggleStyle {
             .buttonStyle(.plain)
             .accessibilityAddTraits(configuration.isOn ? [.isButton, .isSelected] : .isButton)
         }
+    }
+}
+
+/// Return key behaviour shared by every form: jump to the next text field on screen
+/// (top to bottom, left to right), or close the keyboard on the last one.
+@MainActor
+enum FocusChain {
+    static func advance() {
+        guard let window = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow) else { return }
+        var fields: [UITextField] = []
+        collect(window, into: &fields)
+        guard let current = fields.first(where: \.isFirstResponder) else { return }
+        let ordered = fields
+            .filter { !$0.isHidden && $0.isEnabled && $0.window != nil }
+            .sorted { a, b in
+                let pa = a.convert(a.bounds.origin, to: window)
+                let pb = b.convert(b.bounds.origin, to: window)
+                return abs(pa.y - pb.y) > 12 ? pa.y < pb.y : pa.x < pb.x
+            }
+        guard let index = ordered.firstIndex(of: current), index + 1 < ordered.count else { return }
+        let next = ordered[index + 1]
+        // After SwiftUI has finished handling the return key for the current field.
+        DispatchQueue.main.async { next.becomeFirstResponder() }
+    }
+
+    private static func collect(_ view: UIView, into fields: inout [UITextField]) {
+        if let field = view as? UITextField { fields.append(field) }
+        for sub in view.subviews { collect(sub, into: &fields) }
     }
 }
