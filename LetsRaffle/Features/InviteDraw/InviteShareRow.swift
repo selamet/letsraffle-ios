@@ -1,9 +1,9 @@
 import SwiftUI
 import UIKit
 
-/// One-tap sharing of the invite link (same targets as the website):
-/// WhatsApp, Telegram, Instagram, X, Messages and Mail. The system share
-/// sheet stays available through the "Paylaş" button below this row.
+/// One-tap sharing of the invite: WhatsApp and Instagram (chat and story) and Mail.
+/// The story targets share a 9:16 picture of the invitation (`InviteStoryCard`).
+/// The system share sheet stays available through the "Paylaş" button below this row.
 struct InviteShareRow: View {
     let url: URL
     @State private var notice: String?
@@ -16,10 +16,8 @@ struct InviteShareRow: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 0) {
                 target("WhatsApp", image: "glyph-whatsapp", style: 0) { open("https://wa.me/?text=\(enc(message))") }
-                target("Telegram", image: "glyph-telegram", style: 1) { open("https://t.me/share/url?url=\(enc(url.absoluteString))&text=\(enc(t.shareMessage))") }
-                target("Instagram", image: "glyph-instagram", style: 2, action: shareInstagram)
-                target("X", image: "glyph-x", style: 0) { open("https://twitter.com/intent/tweet?text=\(enc(message))") }
-                target(t.shareMessages, symbol: "message.fill", style: 1) { open("sms:&body=\(enc(message))") }
+                target(t.shareWhatsAppStatus, image: "glyph-whatsapp", style: 0, story: true) { shareStory(instagram: false) }
+                target(t.shareInstagramStory, image: "glyph-instagram", style: 1, story: true) { shareStory(instagram: true) }
                 target(t.shareMail, symbol: "envelope.fill", style: 2) { open("mailto:?subject=\(enc(t.shareSubject))&body=\(enc(message))") }
             }
             .padding(.top, 8)
@@ -47,13 +45,16 @@ struct InviteShareRow: View {
         openURL(target)
     }
 
-    /// Instagram's share sheet takes text only when the app is installed; otherwise
-    /// the invite is copied so it can be pasted into a chat or story.
-    private func shareInstagram() {
-        UIPasteboard.general.string = message
-        guard let target = URL(string: "instagram://sharesheet?text=\(enc(message))") else { return }
-        UIApplication.shared.open(target) { opened in
-            show(opened ? t.shareInstagramCopied : t.shareInstagramMissing)
+    /// Renders the invitation picture and hands it to the story composer. Instagram gets it
+    /// directly when a Facebook App ID is configured; otherwise (and always for WhatsApp, which
+    /// has no status link) the share sheet opens with the picture.
+    private func shareStory(instagram: Bool) {
+        guard let picture = InviteStory.image(inviteCode: url.lastPathComponent, t: t) else { return }
+        Task {
+            if instagram, await InviteStory.openInstagramStory(picture) { return }
+            UIPasteboard.general.string = url.absoluteString
+            show(t.storyLinkCopied)
+            InviteStory.presentShareSheet(picture)
         }
     }
 
@@ -66,7 +67,7 @@ struct InviteShareRow: View {
     }
 
     /// Each target is a little Christmas bauble: cranberry, pine or gold with a gold cap.
-    private func target(_ label: String, image: String? = nil, symbol: String? = nil, style: Int, action: @escaping () -> Void) -> some View {
+    private func target(_ label: String, image: String? = nil, symbol: String? = nil, style: Int, story: Bool = false, action: @escaping () -> Void) -> some View {
         let palettes: [([Color], Color, Color)] = [
             ([Color(hex: 0xE0444A), Palette.cranberry, Palette.cranberryDark], Color(hex: 0x4A080C), Palette.snow),
             ([Color(hex: 0x3F9A63), Palette.pine, Palette.pineEdge], Color(hex: 0x0C2A1C), Palette.snow),
@@ -93,17 +94,30 @@ struct InviteShareRow: View {
                         .frame(width: 12, height: 8)
                         .offset(y: -7)
                 }
+                .overlay(alignment: .bottomTrailing) {
+                    // Story targets carry a little "+" like the story ring in those apps.
+                    if story {
+                        Image(systemName: "plus")
+                            .font(.system(size: 9, weight: .black))
+                            .foregroundStyle(Palette.cranberryDark)
+                            .frame(width: 17, height: 17)
+                            .background(Palette.snow, in: Circle())
+                            .overlay(Circle().strokeBorder(Palette.gold, lineWidth: 1.5))
+                            .offset(x: 3, y: 4)
+                    }
+                }
                 Text(label)
                     .font(AppFont.body(10.5, .bold))
                     .foregroundStyle(Palette.text)
-                    .lineLimit(1)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
                     .minimumScaleFactor(0.75)
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(label)
-        .accessibilityIdentifier("share.\(label.lowercased())")
+        .accessibilityLabel(label.replacingOccurrences(of: "\n", with: " "))
+        .accessibilityIdentifier("share.\(label.lowercased().replacingOccurrences(of: "\n", with: "-"))")
     }
 }

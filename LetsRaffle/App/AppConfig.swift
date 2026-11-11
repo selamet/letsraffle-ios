@@ -13,6 +13,14 @@ enum AppConfig {
     static var privacyURL: URL { webBaseURL.appending(path: "privacy") }
     static var termsURL: URL { webBaseURL.appending(path: "terms") }
 
+    /// Facebook App ID (`FACEBOOK_APP_ID` in Info.plist). Instagram only accepts direct
+    /// story shares from apps that pass one; without it the system share sheet is used.
+    static var facebookAppID: String? {
+        guard let raw = Bundle.main.object(forInfoDictionaryKey: "FACEBOOK_APP_ID") as? String else { return nil }
+        let id = raw.trimmingCharacters(in: .whitespaces)
+        return id.isEmpty ? nil : id
+    }
+
     static var version: String {
         let info = Bundle.main.infoDictionary
         let short = info?["CFBundleShortVersionString"] as? String ?? "1.0.0"

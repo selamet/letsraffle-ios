@@ -51,6 +51,13 @@ extension Strings {
     var shareSubject: String { l("Yılbaşı çekilişine davetlisin 🎁", "You're invited to our Secret Santa 🎁") }
     var shareMessages: String { l("Mesaj", "Messages") }
     var shareMail: String { l("E-posta", "Mail") }
+    var shareWhatsAppStatus: String { l("Durum", "Status") }
+    var shareInstagramStory: String { l("Hikâye", "Story") }
+    var storyEyebrow: String { l("YILBAŞI ÇEKİLİŞİ", "SECRET SANTA") }
+    var storyBody: String { l("Çekilişimize katıl, hediyeni kime alacağını Noel Baba söylesin!", "Join our draw and let Santa tell you who you're gifting!") }
+    var storyCodeLabel: String { l("DAVET KODU", "INVITE CODE") }
+    var storyHow: String { l("letsraffle.co'da ya da uygulamada kodu gir", "Enter the code at letsraffle.co or in the app") }
+    var storyLinkCopied: String { l("Davet linki de kopyalandı; hikâyene bağlantı olarak ekleyebilirsin.", "The invite link was copied too; add it to your story as a link.") }
     var shareInstagramCopied: String { l("Davet metni kopyalandı; Instagram'da istediğin sohbete ya da hikâyeye yapıştırabilirsin.", "Invite text copied; paste it into any Instagram chat or story.") }
     var shareInstagramMissing: String { l("Instagram açılamadı. Davet metni kopyalandı, istediğin yere yapıştırabilirsin.", "Could not open Instagram. The invite text was copied so you can paste it anywhere.") }
 
