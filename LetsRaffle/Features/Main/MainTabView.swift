@@ -131,7 +131,7 @@ struct FloatingTabBar: View {
             Capsule(style: .continuous)
                 .fill(Palette.tabBar)
                 .overlay(Capsule(style: .continuous).strokeBorder(Palette.gold, lineWidth: 2))
-                .shadow(color: Color(hex: 0x3C0000, alpha: 0.28), radius: 14, y: 10)
+                .shadow(color: Color(hex: 0x3C0000, alpha: 0.14), radius: 10, y: 5)
         )
         .padding(.horizontal, 18)
         .padding(.bottom, 2)

@@ -24,8 +24,10 @@ struct DrawsHomeView: View {
     var body: some View {
         NavigationStack(path: $path) {
             GeometryReader { geo in
-            // The winter scene stays put; the buttons and the list scroll underneath.
-            VStack(spacing: 0) {
+            // The winter scene stays put. The list scrolls underneath and disappears along the
+            // snow line (not a straight edge); Santa stands in front of it.
+            let heroHeight = 300 + geo.safeAreaInsets.top
+            ZStack(alignment: .top) {
                     HomeHero(
                         topInset: geo.safeAreaInsets.top,
                         name: nil,
@@ -42,11 +44,23 @@ struct DrawsHomeView: View {
                         draws
                     }
                     .padding(.horizontal, 18)
-                    .padding(.top, 2)
+                    .padding(.top, 48)
                     .padding(.bottom, 24)
                 }
                 .floatingTabBarInset()
                 .refreshable { await store?.load(t) }
+                .mask {
+                    VStack(spacing: 0) {
+                        SnowWave().frame(height: 56)
+                        Rectangle()
+                    }
+                }
+                .padding(.top, heroHeight - 56)
+
+                SantaAvatar(size: 158, mood: .draw)
+                    .padding(.bottom, 20)
+                    .frame(height: heroHeight, alignment: .bottom)
+                    .allowsHitTesting(false)
             }
             .background(Palette.page)
             .ignoresSafeArea(edges: .top)
@@ -249,7 +263,6 @@ private struct HomeHero: View {
                     }
                     .padding(.bottom, 24)
                     SnowWave().fill(Palette.page).frame(height: 56)
-                    SantaAvatar(size: 158, mood: .draw).padding(.bottom, 20)
                 }
             }
         }

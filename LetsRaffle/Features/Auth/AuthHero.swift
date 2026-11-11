@@ -68,16 +68,19 @@ struct AuthScaffold<Content: View>: View {
                 .padding(.trailing, 4)
                 .padding(.top, 2)
 
+                // The foil card itself stays put; only what is inside it scrolls.
                 ScrollView {
                     content
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 20)
-                        .foilCard(radius: 30)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 10)
-                        .padding(.bottom, 28)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 14)
                 }
                 .scrollDismissesKeyboard(.interactively)
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .padding(8)
+                .foilCard(radius: 30)
+                .padding(.horizontal, 16)
+                .padding(.top, 10)
+                .padding(.bottom, 10)
             }
         }
         .toolbar(.hidden, for: .navigationBar)
