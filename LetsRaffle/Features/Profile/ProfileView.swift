@@ -14,8 +14,10 @@ struct ProfileView: View {
     var body: some View {
         @Bindable var settings = settings
         NavigationStack {
-            ScrollView {
+            // The red header stays put; only the cream sheet scrolls.
+            VStack(spacing: 0) {
                 header
+                ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
 
                     section(t.preferences) {
@@ -67,13 +69,16 @@ struct ProfileView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 22)
                 .padding(.bottom, 24)
+                }
+                .floatingTabBarInset()
+                .clipShape(UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous))
                 .background(
                     UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous)
                         .fill(Palette.page)
                         .shadow(color: Color(hex: 0x320000, alpha: 0.3), radius: 18, y: -8)
+                        .ignoresSafeArea(edges: .bottom)
                 )
             }
-            .floatingTabBarInset()
             .background(alignment: .top) {
                 ChristmasBackdrop(garland: true, pines: false).frame(height: 420)
             }
@@ -104,9 +109,16 @@ struct ProfileView: View {
     /// Red scene header: gold initial badge, "Profil" in script, name / e-mail and Santa waving.
     private var header: some View {
         HStack(alignment: .center, spacing: 14) {
-            Text(initials)
-                .font(AppFont.display(26))
-                .foregroundStyle(Palette.cranberryDark)
+            Group {
+                if session.user == nil {
+                    // Guests have no initial: show the gift box instead.
+                    Image("gift-closed").resizable().scaledToFit().padding(.horizontal, 7).padding(.top, 4)
+                } else {
+                    Text(initials)
+                        .font(AppFont.display(26))
+                        .foregroundStyle(Palette.cranberryDark)
+                }
+            }
                 .frame(width: 68, height: 68)
                 .background(Palette.goldGradient, in: Circle())
                 .overlay(Circle().strokeBorder(Palette.snow, lineWidth: 3))

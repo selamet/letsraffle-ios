@@ -44,7 +44,6 @@ targets:
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: "Lets Raffle"
-        INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_NSCameraUsageDescription: "Used to scan invite QR codes."
@@ -61,6 +60,9 @@ targets:
         API_BASE_URL: $(API_BASE_URL)
         WEB_BASE_URL: $(WEB_BASE_URL)
         CFBundleLocalizations: [tr, en]
+        # Red launch screen so the app never flashes white before the logo + fairy-light loader.
+        UILaunchScreen:
+          UIColorName: LaunchBackground
         UIAppFonts: [Fraunces_700Bold.ttf, Fraunces_900Black.ttf, GreatVibes_400Regular.ttf, Nunito_500Medium.ttf, Nunito_600SemiBold.ttf, Nunito_700Bold.ttf, Nunito_800ExtraBold.ttf, Nunito_900Black.ttf]
         # iOS OAuth client of the "letsraffle" Google Cloud project (public identifier, not a secret).
         GIDClientID: 536662543605-lefv2ehup00m2nan2peh0ir0gkmsksvg.apps.googleusercontent.com

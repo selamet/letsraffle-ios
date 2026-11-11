@@ -5,12 +5,15 @@ struct RootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(DeepLinkRouter.self) private var router
     @Environment(PushManager.self) private var push
+    /// The logo + fairy-light loader stays up for a short moment on every launch.
+    @State private var splashDone = false
 
     var body: some View {
         Group {
-            switch session.state {
+            switch splashDone ? session.state : .restoring {
             case .restoring:
                 SplashView()
+                    .transition(.opacity)
             case .signedOut:
                 AuthFlowView()
                     .transition(.opacity)
@@ -20,6 +23,11 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: session.state)
+        .animation(.easeInOut(duration: 0.35), value: splashDone)
+        .task {
+            try? await Task.sleep(for: .seconds(1.6))
+            splashDone = true
+        }
         .onAppear {
             // No scroll bars anywhere in the app (also covers sheets and UIKit-backed lists).
             UIScrollView.appearance().showsVerticalScrollIndicator = false

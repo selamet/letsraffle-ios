@@ -45,16 +45,19 @@ struct JoinTabView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            ScrollView {
-                VStack(spacing: 0) {
-                    hero
-                    codeCard
-                    joined
+            // Santa and the title stay put; the card and the joined draws scroll underneath.
+            VStack(spacing: 0) {
+                hero
+                ScrollView {
+                    VStack(spacing: 0) {
+                        codeCard
+                        joined
+                    }
+                    .padding(.bottom, 24)
                 }
-                .padding(.bottom, 24)
+                .scrollDismissesKeyboard(.interactively)
+                .floatingTabBarInset()
             }
-            .scrollDismissesKeyboard(.interactively)
-            .floatingTabBarInset()
             .background(alignment: .top) {
                 ChristmasBackdrop(garland: true, pines: false).frame(height: 470)
             }
@@ -100,11 +103,11 @@ struct JoinTabView: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 40)
-            SantaAvatar(size: 150, mood: .invite)
-                .padding(.top, 4)
+            SantaAvatar(size: 132, mood: .invite)
+                .padding(.top, 2)
         }
         .frame(maxWidth: .infinity)
-        .padding(.top, 96)
+        .padding(.top, 60)
     }
 
     private var codeCard: some View {
@@ -113,7 +116,7 @@ struct JoinTabView: View {
             .padding(.vertical, 22)
             .foilCard(radius: 30)
             .padding(.horizontal, 16)
-            .padding(.top, -14)
+            .padding(.top, 4)
             .padding(.bottom, 20)
     }
 

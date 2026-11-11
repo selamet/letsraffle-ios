@@ -41,7 +41,12 @@ final class SessionStore {
         }
 
         guard await api.isAuthenticated else {
-            state = defaults.bool(forKey: Keys.guest) ? .guest : .signedOut
+            // Without an account the app always opens on the welcome / sign-in screen;
+            // guest mode lasts for the current run only ("Hesapsız" on that screen).
+            state = .signedOut
+            #if DEBUG
+            if defaults.bool(forKey: "debugGuest") { state = .guest }
+            #endif
             return
         }
 

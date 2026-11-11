@@ -24,13 +24,14 @@ struct DrawsHomeView: View {
     var body: some View {
         NavigationStack(path: $path) {
             GeometryReader { geo in
-            ScrollView {
-                VStack(spacing: 0) {
+            // The winter scene stays put; the buttons and the list scroll underneath.
+            VStack(spacing: 0) {
                     HomeHero(
                         topInset: geo.safeAreaInsets.top,
                         name: nil,
                         activeCount: store?.draws.filter { $0.status == .active || $0.status == .inProgress }.count ?? 0
                     )
+                ScrollView {
                     VStack(spacing: 14) {
                         NewDrawPicker(onInvite: { open(.createInvite) }, onManual: { path.append(.manual) })
                         if let next = nextDraw {
@@ -44,11 +45,11 @@ struct DrawsHomeView: View {
                     .padding(.top, 2)
                     .padding(.bottom, 24)
                 }
+                .floatingTabBarInset()
+                .refreshable { await store?.load(t) }
             }
             .background(Palette.page)
             .ignoresSafeArea(edges: .top)
-            .floatingTabBarInset()
-            .refreshable { await store?.load(t) }
             }
             .toolbar(.hidden, for: .navigationBar)
             .statusBarStyle(.lightContent)
@@ -248,11 +249,11 @@ private struct HomeHero: View {
                     }
                     .padding(.bottom, 24)
                     SnowWave().fill(Palette.page).frame(height: 56)
-                    SantaAvatar(size: 172, mood: .draw).padding(.bottom, 20)
+                    SantaAvatar(size: 158, mood: .draw).padding(.bottom, 20)
                 }
             }
         }
-        .frame(height: 326 + topInset)
+        .frame(height: 300 + topInset)
         .accessibilityElement(children: .combine)
     }
 }
