@@ -263,6 +263,14 @@ private struct HomeHero: View {
                         .frame(height: 44)
                         .shadow(color: Color(hex: 0x3C0000, alpha: 0.25), radius: 6, y: 3)
                         .accessibilityLabel("Lets Raffle")
+                        .overlay(alignment: .bottomLeading) {
+                            Text("\(t.hello),")
+                                .font(AppFont.script(24))
+                                .foregroundStyle(Palette.goldLight)
+                                .fixedSize()
+                                .padding(.leading, 6)
+                                .offset(y: 30)
+                        }
                 }
                 Spacer(minLength: 8)
                 HStack(spacing: 6) {
