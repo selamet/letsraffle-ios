@@ -54,7 +54,7 @@ struct InviteStoryCard: View {
                 ticket
                     .padding(.top, -10)
                 brand
-                    .padding(.top, 14)
+                    .padding(.top, 36)
                 Spacer(minLength: 0)
             }
             .padding(.top, 94)
@@ -235,6 +235,10 @@ enum InviteStory {
     /// `-storyDemo YES`: writes the card to the app's tmp folder for visual QA.
     static func debugDump() {
         guard UserDefaults.standard.bool(forKey: "storyDemo") else { return }
+        let og = ImageRenderer(content: LinkPreviewCard(t: AppLanguage.tr.strings))
+        og.scale = 3
+        og.isOpaque = true
+        try? og.uiImage?.pngData()?.write(to: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("og.png"))
         for (language, file) in [(AppLanguage.tr, "story-tr.png"), (.en, "story-en.png")] {
             let picture = image(inviteCode: "miskin-penguen-768", t: language.strings)
             try? picture?.pngData()?.write(to: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(file))
@@ -242,3 +246,62 @@ enum InviteStory {
     }
     #endif
 }
+
+#if DEBUG
+/// 1200×630 picture used as the website's link preview (WhatsApp, iMessage, …).
+/// Only rendered from the debug dump; the PNG is committed to the web project.
+struct LinkPreviewCard: View {
+    let t: Strings
+
+    var body: some View {
+        ZStack {
+            Palette.heroGradient
+            RadialGradient(colors: [Palette.goldLight.opacity(0.26), .clear], center: UnitPoint(x: 0.76, y: 0.5), startRadius: 0, endRadius: 190)
+            VStack(spacing: 0) {
+                Garland().frame(height: 50).padding(.top, 6)
+                Spacer(minLength: 0)
+            }
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                SnowWave().fill(Palette.snow).frame(height: 30)
+            }
+            HStack(alignment: .center, spacing: 0) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(t.storyEyebrow)
+                        .font(AppFont.body(10, .black)).tracking(2.6)
+                        .foregroundStyle(Palette.goldLight)
+                    Text(t.youreInvited)
+                        .font(AppFont.script(50))
+                        .foregroundStyle(Palette.goldLight)
+                        .shadow(color: Color(hex: 0x5A0A0F, alpha: 0.45), radius: 0, y: 3)
+                        .fixedSize()
+                    Text(t.storyBody)
+                        .font(AppFont.body(13, .bold))
+                        .foregroundStyle(Palette.snow)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(width: 210, alignment: .leading)
+                        .padding(.top, 2)
+                    HStack(spacing: 8) {
+                        Image("lockup").resizable().scaledToFit().frame(width: 96)
+                        Text("letsraffle.co")
+                            .font(AppFont.body(12, .black))
+                            .foregroundStyle(Palette.snow)
+                            .fixedSize()
+                    }
+                    .padding(.top, 10)
+                }
+                Spacer(minLength: 0)
+                Image("santa-invite-still")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 128)
+            }
+            .padding(.leading, 30)
+            .padding(.trailing, 28)
+            .padding(.top, 34)
+        }
+        .frame(width: 400, height: 210)
+        .clipped()
+    }
+}
+#endif
