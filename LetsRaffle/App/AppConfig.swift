@@ -6,6 +6,8 @@ enum AppConfig {
     static let webBaseURL: URL = url(forKey: "WEB_BASE_URL", fallback: "https://letsraffle.co")
 
     static let sourceCodeURL = URL(string: "https://github.com/selamet/letsraffle-ios")!
+    static let webSourceURL = URL(string: "https://github.com/hakanbudak/letsraffle-web")!
+    static let apiSourceURL = URL(string: "https://github.com/selamet/letsraffle-api")!
 
     /// Legal pages served by the website (also linked from App Store Connect).
     static var privacyURL: URL { webBaseURL.appending(path: "privacy") }

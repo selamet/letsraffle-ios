@@ -65,6 +65,9 @@ extension Strings {
     var manualHeroDesc: String { l("Katılımcıları ekle, sonucu hemen gör.", "Add participants, see the result right away.") }
     var inviteCardTitle: String { l("Davet et", "Invite") }
 
+    var codeNotFound: String { l("Bu kodla bir çekiliş bulamadık. Kodu kontrol edip tekrar dener misin?", "We couldn't find a draw with this code. Check it and try again?") }
+    var codeNotFoundBubble: String { l("Listemde yok!", "Not on my list!") }
+
     // Home
     var hello: String { l("Merhaba", "Hello") }
     var myDraws: String { l("Çekilişlerim", "My draws") }

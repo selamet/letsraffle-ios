@@ -41,6 +41,8 @@ struct JoinTabView: View {
     @State private var code = ""
     @State private var codeError: String?
     @State private var scanning = false
+    @State private var isChecking = false
+    @State private var shake = 0
     @FocusState private var codeFocused: Bool
 
     var body: some View {
@@ -77,6 +79,7 @@ struct JoinTabView: View {
             QRScannerSheet { scanned in open(scanned) }
         }
         .onChange(of: path, initial: true) { _, newPath in tabBar.isHidden = !newPath.isEmpty }
+        .onChange(of: code) { _, _ in if codeError != nil { withAnimation { codeError = nil } } }
         .onChange(of: router.pendingInviteCode, initial: true) { _, pending in
             guard let pending else { return }
             router.pendingInviteCode = nil
@@ -90,28 +93,12 @@ struct JoinTabView: View {
     }
 
     private var hero: some View {
-        VStack(spacing: 6) {
-            Text(t.haveInvite)
-                .font(AppFont.script(48))
-                .foregroundStyle(Palette.goldLight)
-                .shadow(color: Color(hex: 0x3C0000, alpha: 0.3), radius: 0, y: 3)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-            Text(t.haveInviteSub)
-                .font(AppFont.body(15, .bold))
-                .foregroundStyle(Palette.snow.opacity(0.95))
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 40)
-            SantaAvatar(size: 132, mood: .invite)
-                .padding(.top, 2)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 60)
+        JoinCodeHero(failed: codeError != nil)
+            .padding(.top, 60)
     }
 
     private var codeCard: some View {
-        JoinCodeCard(code: $code, error: codeError, focused: $codeFocused, onSubmit: { open(code) }, onScan: { scanning = true })
+        JoinCodeCard(code: $code, error: codeError, focused: $codeFocused, onSubmit: { open(code) }, onScan: { scanning = true }, isChecking: isChecking, shake: shake)
             .padding(.horizontal, 20)
             .padding(.vertical, 22)
             .foilCard(radius: 30)
@@ -158,15 +145,24 @@ struct JoinTabView: View {
         }
     }
 
+    /// A wrong code is reported on the card (shake + message + sad Santa); only a real draw opens the form.
     private func open(_ raw: String) {
-        guard let inviteCode = InviteLink.code(from: raw) else {
-            codeError = t.fieldRequired
-            return
+        guard !isChecking else { return }
+        isChecking = true
+        Task {
+            let outcome = await InviteCodeCheck.run(raw, api: session.api, t: t)
+            isChecking = false
+            switch outcome {
+            case let .ok(inviteCode):
+                codeError = nil
+                code = ""
+                codeFocused = false
+                path = [.form(inviteCode: inviteCode)]
+            case let .failed(message):
+                withAnimation { codeError = message }
+                shake += 1
+            }
         }
-        codeError = nil
-        code = ""
-        codeFocused = false
-        path = [.form(inviteCode: inviteCode)]
     }
 }
 
@@ -242,9 +238,9 @@ struct JoinFormView: View {
     private var header: some View {
         HStack(alignment: .bottom, spacing: 0) {
             VStack(alignment: .leading, spacing: 6) {
-                CircleIconButton(onDark: true) { dismiss() }
-                    .padding(.leading, -10)
-                    .padding(.bottom, 6)
+                OrnamentBackButton(stringLength: 26) { dismiss() }
+                    .padding(.leading, -12)
+                    .padding(.bottom, 4)
                 Text(t.youreInvited)
                     .font(AppFont.script(40))
                     .foregroundStyle(Palette.goldLight)

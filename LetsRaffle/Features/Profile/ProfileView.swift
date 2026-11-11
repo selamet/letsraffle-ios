@@ -51,12 +51,11 @@ struct ProfileView: View {
                         Link(destination: AppConfig.termsURL) {
                             row(icon: .symbol("doc.text.fill"), tint: Palette.goldDark, title: t.termsOfUse, separator: true) { chevron }
                         }
-                        Link(destination: AppConfig.sourceCodeURL) {
-                            row(icon: .symbol("chevron.left.forwardslash.chevron.right"), tint: Palette.brand, title: t.openSource, separator: true) {
-                                HStack(spacing: 6) {
-                                    Text("GitHub").font(AppFont.body(14, .semibold)).foregroundStyle(Palette.sub)
-                                    chevron
-                                }
+                        row(icon: .symbol("chevron.left.forwardslash.chevron.right"), tint: Palette.brand, title: t.openSource, separator: true) {
+                            HStack(spacing: 5) {
+                                repoChip("Web", AppConfig.webSourceURL)
+                                repoChip("Backend", AppConfig.apiSourceURL)
+                                repoChip("iOS", AppConfig.sourceCodeURL)
                             }
                         }
                         row(icon: .symbol("info"), tint: Palette.ter, title: t.version) {
@@ -112,7 +111,9 @@ struct ProfileView: View {
             Group {
                 if session.user == nil {
                     // Guests have no initial: show the gift box instead.
-                    Image("gift-closed").resizable().scaledToFit().padding(.horizontal, 7).padding(.top, 4)
+                    // The box sits low in its artwork (room for the lid animation), so it is
+                    // sized and nudged up to land exactly in the middle of the badge.
+                    Image("gift-closed").resizable().frame(width: 80, height: 70).offset(y: -11.5)
                 } else {
                     Text(initials)
                         .font(AppFont.display(26))
@@ -175,6 +176,23 @@ struct ProfileView: View {
     private var initials: String {
         guard let email = session.user?.email else { return "LR" }
         return String(email.prefix(1)).uppercased()
+    }
+
+    /// Small link to one of the three open-source repositories.
+    private func repoChip(_ title: String, _ url: URL) -> some View {
+        Link(destination: url) {
+            Text(title)
+                .font(AppFont.body(12, .black))
+                .foregroundStyle(Palette.brandText)
+                .lineLimit(1)
+                .fixedSize()
+                .padding(.horizontal, 9)
+                .frame(height: 30)
+                .background(Palette.chip, in: Capsule())
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+        }
+        .accessibilityLabel("\(t.openSource): \(title)")
     }
 
     private var chevron: some View {
