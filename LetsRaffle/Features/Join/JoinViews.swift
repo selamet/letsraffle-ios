@@ -60,10 +60,8 @@ struct JoinTabView: View {
                 .scrollDismissesKeyboard(.interactively)
                 .floatingTabBarInset()
             }
-            .background(alignment: .top) {
-                ChristmasBackdrop(garland: true, pines: false).frame(height: 470)
-            }
-            .background(Palette.page.ignoresSafeArea())
+            // The red scene fills the whole screen, down to the tab bar.
+            .background { ChristmasBackdrop(garland: true, pines: false) }
             .toolbar(.hidden, for: .navigationBar)
             .statusBarStyle(.lightContent)
             .navigationDestination(for: JoinRoute.self) { route in
@@ -94,7 +92,7 @@ struct JoinTabView: View {
 
     private var hero: some View {
         JoinCodeHero(failed: codeError != nil)
-            .padding(.top, 60)
+            .padding(.top, 40)
     }
 
     private var codeCard: some View {
@@ -113,7 +111,7 @@ struct JoinTabView: View {
             VStack(alignment: .leading, spacing: 10) {
                 Text(t.myJoinedDraws)
                     .font(AppFont.display(19))
-                    .foregroundStyle(Palette.text)
+                    .foregroundStyle(Palette.goldLight)
                     .padding(.horizontal, 4)
                 ForEach(participations.items) { item in
                     NavigationLink(value: JoinRoute.reveal(inviteCode: item.inviteCode)) {
@@ -141,7 +139,6 @@ struct JoinTabView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
-            .background(Palette.page)
         }
     }
 

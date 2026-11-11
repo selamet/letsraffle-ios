@@ -152,7 +152,8 @@ struct JoinCodeHero: View {
                             .transition(.scale.combined(with: .opacity))
                     }
                 }
-                .padding(.top, 2)
+                // The artwork has empty space above the hat; pull him up under the text.
+                .padding(.top, -18)
         }
         .frame(maxWidth: .infinity)
         .animation(.spring(duration: 0.35), value: failed)
@@ -189,7 +190,7 @@ struct JoinCodeScreen: View {
                 .padding(.leading, 12)
                 .padding(.top, -46)
                 JoinCodeHero(failed: error != nil)
-                    .padding(.top, -8)
+                    .padding(.top, -22)
                 ScrollView {
                     JoinCodeCard(code: $code, error: error, focused: $focused, onSubmit: submit, onScan: { scanning = true }, isChecking: isChecking, shake: shake)
                         .padding(.horizontal, 20)
