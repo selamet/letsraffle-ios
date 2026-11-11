@@ -54,6 +54,17 @@ extension Strings {
     var shareInstagramCopied: String { l("Davet metni kopyalandı; Instagram'da istediğin sohbete ya da hikâyeye yapıştırabilirsin.", "Invite text copied; paste it into any Instagram chat or story.") }
     var shareInstagramMissing: String { l("Instagram açılamadı. Davet metni kopyalandı, istediğin yere yapıştırabilirsin.", "Could not open Instagram. The invite text was copied so you can paste it anywhere.") }
 
+    var emailChip: String { l("E-posta", "E-mail") }
+    var guestChip: String { l("Hesapsız", "No account") }
+    var newDrawTitle: String { l("Yeni bir çekiliş başlat", "Start a new draw") }
+    var favTag: String { l("EN SEVİLEN", "MOST LOVED") }
+    var inviteHeroTitle: String { l("Davet linkiyle", "With an invite link") }
+    var inviteHeroDesc: String { l("Linki paylaş, herkes kendi bilgisini girsin.", "Share the link, everyone fills in their own details.") }
+    var inviteHeroFeatures: String { l("Tarihli çekiliş · E-posta · Bildirim", "Scheduled draw · E-mail · Notifications") }
+    var manualHeroTitle: String { l("İsimleri ben yazarım", "I'll enter the names") }
+    var manualHeroDesc: String { l("Katılımcıları ekle, sonucu hemen gör.", "Add participants, see the result right away.") }
+    var inviteCardTitle: String { l("Davet et", "Invite") }
+
     // Home
     var hello: String { l("Merhaba", "Hello") }
     var myDraws: String { l("Çekilişlerim", "My draws") }

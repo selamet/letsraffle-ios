@@ -136,6 +136,7 @@ struct CircleIconButton: View {
 /// swinging gently. Used on red headers.
 struct OrnamentBackButton: View {
     var stringLength: CGFloat = 18
+    var systemName = "chevron.left"
     var action: () -> Void
     @State private var swing = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -174,10 +175,10 @@ struct OrnamentBackButton: View {
                         .frame(height: 6)
                         .offset(y: 9)
                         .mask(Circle())
-                    Image(systemName: "chevron.left")
+                    Image(systemName: systemName)
                         .font(.system(size: 15, weight: .heavy))
                         .foregroundStyle(Palette.cranberryDark)
-                        .offset(x: -1)
+                        .offset(x: systemName == "chevron.left" ? -1 : 0)
                     Ellipse()
                         .fill(Color.white.opacity(0.6))
                         .frame(width: 9, height: 5)

@@ -78,15 +78,15 @@ struct RevealView: View {
     }
 
     private var topBar: some View {
-        HStack {
-            CircleIconButton(onDark: true) { dismiss() }
+        HStack(alignment: .bottom) {
+            OrnamentBackButton(stringLength: 24, systemName: "xmark") { dismiss() }
             Spacer()
-            Text(store.inviteCode).font(AppFont.body(13, .black)).tracking(1.2).foregroundStyle(Palette.goldLight)
+            Text(store.inviteCode).font(AppFont.body(13, .black)).tracking(1.2).foregroundStyle(Palette.goldLight).padding(.bottom, 12)
             Spacer()
-            Color.clear.frame(width: 44, height: 44)
+            Color.clear.frame(width: 48, height: 44)
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 34)
+        .padding(.horizontal, 12)
+        .padding(.top, 2)
     }
 
     private func go(_ next: Stage) {

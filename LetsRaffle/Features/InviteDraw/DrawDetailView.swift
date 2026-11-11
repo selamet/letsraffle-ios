@@ -57,8 +57,8 @@ struct DrawDetailView: View {
     }
 
     private var topBar: some View {
-        HStack {
-            CircleIconButton { dismiss() }
+        HStack(alignment: .bottom) {
+            OrnamentBackButton(stringLength: 50) { dismiss() }
             Spacer()
             if let draw = store.draw {
                 StatusChip(title: draw.status.title(t), foreground: draw.status.foreground, background: draw.status.background)
@@ -68,8 +68,8 @@ struct DrawDetailView: View {
                     .accessibilityLabel(t.editDate)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
+        .padding(.horizontal, 12)
+        .padding(.top, -46)
     }
 
     @ViewBuilder
@@ -198,8 +198,8 @@ struct DrawDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(t.shareTitle).font(AppFont.script(28)).foregroundStyle(Palette.goldLight)
-                    Text(t.qrHint).font(AppFont.body(13, .bold)).foregroundStyle(Palette.snow.opacity(0.9))
+                    Text(t.inviteCardTitle).font(AppFont.script(34)).foregroundStyle(Color(hex: 0xB08A2E))
+                    Text(t.qrHint).font(AppFont.body(13, .bold)).foregroundStyle(Palette.sub)
                 }
                 Spacer(minLength: 0)
                 QRCodeView(content: store.inviteURL.absoluteString)
@@ -236,7 +236,8 @@ struct DrawDetailView: View {
             .padding(.leading, 14)
             .padding(.trailing, 6)
             .padding(.vertical, 6)
-            .background(Palette.snow, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(Palette.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Palette.fieldBorder, lineWidth: 2))
 
             InviteShareRow(url: store.inviteURL)
                 .padding(.vertical, 2)
@@ -251,17 +252,8 @@ struct DrawDetailView: View {
                     .padding(.bottom, 4)
             }
         }
-        .padding(18)
-        .background(alignment: .trailing) {
-            ZStack {
-                Palette.card2Brand
-                Rectangle().fill(Palette.gold.opacity(0.85)).frame(width: 12)
-                    .frame(maxWidth: .infinity, alignment: .trailing).padding(.trailing, 40)
-            }
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Palette.gold, lineWidth: 2))
-        .shadow(color: Color(hex: 0x6E0D12, alpha: 0.24), radius: 14, y: 10)
+        .padding(20)
+        .foilCard(radius: 26)
     }
 
     private func participantsHeader(_ draw: DrawDetail) -> some View {

@@ -29,21 +29,19 @@ struct DrawsHomeView: View {
                     HomeHero(
                         topInset: geo.safeAreaInsets.top,
                         name: nil,
-                        activeCount: store?.draws.filter { $0.status == .active || $0.status == .inProgress }.count ?? 0,
-                        onJoin: { tabBar.requestedTab = .join }
+                        activeCount: store?.draws.filter { $0.status == .active || $0.status == .inProgress }.count ?? 0
                     )
-                    VStack(spacing: 12) {
+                    VStack(spacing: 14) {
+                        NewDrawPicker(onInvite: { open(.createInvite) }, onManual: { path.append(.manual) })
                         if let next = nextDraw {
                             NextDrawCard(draw: next).onTapGesture {
                                 if let code = next.inviteCode { path.append(.detail(inviteCode: code)) }
                             }
                         }
-                        NewDrawPicker(onInvite: { open(.createInvite) }, onManual: { path.append(.manual) })
-                            .padding(.top, nextDraw == nil ? 0 : 8)
                         draws
                     }
                     .padding(.horizontal, 18)
-                    .padding(.top, nextDraw == nil ? 16 : -30)
+                    .padding(.top, 2)
                     .padding(.bottom, 24)
                 }
             }
@@ -196,76 +194,66 @@ struct DrawsHomeView: View {
     }
 }
 
+/// Winter scene at the top of the home screen: greeting, Santa drawing from
+/// his sack on the snow with his friends, as on the website's home page.
 private struct HomeHero: View {
     var topInset: CGFloat = 0
     var name: String?
     var activeCount: Int
-    var onJoin: () -> Void
     @Environment(\.strings) private var t
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        ZStack(alignment: .top) {
             Palette.heroGradient
-            RadialGradient(colors: [.white.opacity(0.14), .clear], center: UnitPoint(x: 0.85, y: 0.15), startRadius: 0, endRadius: 280)
-            Garland().padding(.top, topInset - 16)
-            SnowDots(dots: [
-                .init(x: 0.58, y: 0.66, size: 5, opacity: 0.7),
-                .init(x: 0.36, y: 0.3, size: 3, opacity: 0.6),
-                .init(x: 0.12, y: 0.8, size: 4, opacity: 0.5),
-            ])
-
-            HStack(alignment: .bottom, spacing: 0) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(name.map { "\(t.hello) \($0)," } ?? "\(t.hello),")
-                        .font(AppFont.script(30))
-                        .foregroundStyle(Palette.goldLight)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                    Text(t.myDraws)
-                        .font(AppFont.display(29))
-                        .foregroundStyle(Palette.snow)
-                    HStack(spacing: 8) {
-                        HStack(spacing: 6) {
-                            Circle().fill(Color(hex: 0x4FB87E)).frame(width: 8, height: 8)
-                            Text(String(format: t.activeCount, activeCount))
-                        }
-                        .font(AppFont.body(13, .bold))
-                        .foregroundStyle(Palette.snow)
-                        .padding(.horizontal, 12)
-                        .frame(height: 32)
-                        .background(Color.white.opacity(0.16), in: Capsule())
-                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.35), lineWidth: 1.5))
-
-                        Button(action: onJoin) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "ticket.fill").font(.system(size: 12, weight: .bold))
-                                Text(t.joinWithCode)
-                            }
-                            .font(AppFont.body(13, .black))
-                            .foregroundStyle(Palette.goldText)
-                            .padding(.horizontal, 13)
-                            .frame(height: 32)
-                            .background(Palette.goldGradient, in: Capsule())
-                            .background(Palette.goldDark, in: Capsule().offset(y: 3))
-                            .frame(minHeight: 44)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("home.joinCode")
-                    }
-                    .padding(.top, 6)
-                }
-                .padding(.bottom, 26)
+            RadialGradient(colors: [.white.opacity(0.14), .clear], center: UnitPoint(x: 0.5, y: 0.3), startRadius: 0, endRadius: 280)
+            VStack(spacing: 0) {
                 Spacer(minLength: 0)
-                SantaAvatar(size: 116, mood: .watch)
-                    .padding(.bottom, 16)
+                MountainRange().frame(height: 150).padding(.bottom, 36)
             }
-            .padding(.leading, 20)
-            .padding(.trailing, 8)
-            .padding(.top, topInset + 18)
+            SnowDots()
+            Garland().padding(.top, topInset - 16)
+
+            HStack(alignment: .center) {
+                Text(name.map { "\(t.hello) \($0)," } ?? "\(t.hello),")
+                    .font(AppFont.script(34))
+                    .foregroundStyle(Palette.goldLight)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Spacer(minLength: 8)
+                HStack(spacing: 6) {
+                    Circle().fill(Color(hex: 0x7BE0A0)).frame(width: 8, height: 8)
+                    Text(String(format: t.activeCount, activeCount))
+                }
+                .font(AppFont.body(13, .black))
+                .foregroundStyle(Palette.snow)
+                .padding(.horizontal, 14)
+                .frame(height: 36)
+                .background(Color.white.opacity(0.16), in: Capsule())
+                .overlay(Capsule().strokeBorder(Color.white.opacity(0.4), lineWidth: 1.5))
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, topInset + 36)
+
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                ZStack(alignment: .bottom) {
+                    HStack(alignment: .bottom, spacing: 0) {
+                        FriendImage(friend: .hug, width: 78).padding(.leading, 6)
+                        Spacer(minLength: 0)
+                        ZStack(alignment: .bottomTrailing) {
+                            FriendImage(friend: .tree, width: 32).saturation(0.75).brightness(-0.08).opacity(0.85).padding(.bottom, 6)
+                            FriendImage(friend: .tree, width: 46).padding(.trailing, 28)
+                        }
+                        .padding(.trailing, 6)
+                    }
+                    .padding(.bottom, 24)
+                    SnowWave().fill(Palette.page).frame(height: 56)
+                    SantaAvatar(size: 172, mood: .draw).padding(.bottom, 20)
+                }
+            }
         }
-        .frame(height: 200 + topInset)
-        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 34, bottomTrailingRadius: 34, style: .continuous))
+        .frame(height: 326 + topInset)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -281,160 +269,160 @@ private struct NextDrawCard: View {
             let days = Int(remaining) / 86_400
             let hours = Int(remaining) % 86_400 / 3_600
             let minutes = Int(remaining) % 3_600 / 60
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 1) {
                     Text(t.nextDraw)
-                        .font(AppFont.body(12, .black))
-                        .tracking(1.6)
+                        .font(AppFont.body(10.5, .black))
+                        .tracking(1.5)
                         .textCase(.uppercase)
                         .foregroundStyle(Palette.brandText)
-                    Spacer()
-                    StatusChip(title: draw.status.title(t), foreground: draw.status.foreground, background: draw.status.background)
+                    Text(draw.displayName)
+                        .font(AppFont.display(16))
+                        .foregroundStyle(Palette.text)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    if let date = draw.drawDate {
+                        Text(DrawDateFormat.short(date, language: settings.language))
+                            .font(AppFont.body(12.5, .semibold))
+                            .foregroundStyle(Palette.sub)
+                    }
                 }
-                Text(draw.drawDate.map { "\(draw.displayName) · \(DrawDateFormat.short($0, language: settings.language))" } ?? draw.displayName)
-                    .font(AppFont.display(20))
-                    .foregroundStyle(Palette.brandText)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                HStack(spacing: 8) {
-                    box(days, t.daysUnit)
-                    box(hours, t.hoursUnit)
-                    box(minutes, t.minutesUnit)
-                }
+                Spacer(minLength: 0)
+                if days > 0 { box(days, t.daysUnit) }
+                box(hours, t.hoursUnit)
+                if days == 0 { box(minutes, t.minutesUnit) }
             }
-            .padding(18)
-            .foilCard(radius: 24)
+            .padding(.vertical, 12)
+            .padding(.leading, 16)
+            .padding(.trailing, 12)
+            .background(Palette.card2, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
         }
         .accessibilityElement(children: .combine)
     }
 
     private func box(_ value: Int, _ unit: String) -> some View {
         VStack(spacing: 0) {
-            Text(String(format: "%02d", value)).font(AppFont.display(24))
-            Text(unit).font(AppFont.body(11, .bold)).opacity(0.9)
+            Text(String(format: "%02d", value)).font(AppFont.display(20))
+            Text(unit).font(AppFont.body(10, .bold)).opacity(0.9)
         }
-        .foregroundStyle(Palette.snow)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
-        .background(Palette.cranberry, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .foregroundStyle(Palette.goldLight)
+        .frame(width: 50, height: 50)
+        .background(Palette.cranberryDark, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .contentTransition(.numericText())
     }
 }
 
-/// "Yeni bir sürpriz?" – each mode card is itself the button that starts that flow.
+/// "Yeni bir çekiliş başlat": the invite mode is the star (it is what makes
+/// the app special), the manual mode a smaller second option.
 private struct NewDrawPicker: View {
     var onInvite: () -> Void
     var onManual: () -> Void
     @Environment(\.strings) private var t
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(t.newSurprise).font(AppFont.script(30)).foregroundStyle(Color(hex: 0xB8892B))
-                Text(t.howToDraw).font(AppFont.display(22)).foregroundStyle(Palette.brandText)
-            }
-            .padding(.horizontal, 2)
+        VStack(spacing: 12) {
+            Text(t.newDrawTitle)
+                .font(AppFont.display(26))
+                .foregroundStyle(Palette.brandText)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 2)
 
-            inviteCard
-            manualCard
-        }
-    }
-
-    private var inviteCard: some View {
-        Button(action: onInvite) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .center) {
-                    GiftTag(title: t.inviteModeTitle, size: 19)
-                    Spacer()
-                    arrow(light: true)
-                }
-                Text(t.inviteModeDesc)
-                    .font(AppFont.body(14, .semibold))
-                    .foregroundStyle(Palette.snow.opacity(0.92))
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-                steps(t.inviteSteps, light: true)
-                HStack(spacing: 6) {
-                    Text(t.inviteCta)
+            Button(action: onInvite) {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 5) {
+                            Image(systemName: "star.fill").font(.system(size: 9, weight: .bold))
+                            Text(t.favTag).font(AppFont.body(10.5, .black)).tracking(1.2)
+                        }
+                        .foregroundStyle(Palette.goldText)
+                        .padding(.horizontal, 10)
+                        .frame(height: 22)
+                        .background(Palette.goldGradient, in: Capsule())
+                        Text(t.inviteHeroTitle)
+                            .font(AppFont.display(27))
+                            .foregroundStyle(Palette.goldLight)
+                            .shadow(color: Color(hex: 0x3C0000, alpha: 0.35), radius: 0, y: 2)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                        Text(t.inviteHeroDesc)
+                            .font(AppFont.body(13.5, .bold))
+                            .foregroundStyle(Palette.snow.opacity(0.96))
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text(t.inviteHeroFeatures)
+                            .font(AppFont.body(11.5, .black))
+                            .foregroundStyle(Palette.goldLight)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .padding(.top, 1)
+                    }
+                    Spacer(minLength: 0)
                     Image(systemName: "arrow.right")
+                        .font(.system(size: 18, weight: .heavy))
+                        .foregroundStyle(Palette.goldText)
+                        .frame(width: 52, height: 52)
+                        .background(Palette.goldGradient, in: Circle())
+                        .overlay(Circle().strokeBorder(.white.opacity(0.55), lineWidth: 2))
+                        .background(Circle().fill(Palette.goldDark).offset(y: 3))
                 }
-                .font(AppFont.body(15, .black))
-                .foregroundStyle(Palette.goldLight)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 18)
+                .frame(maxWidth: .infinity, minHeight: 134, alignment: .leading)
+                .background(giftBackground([Color(hex: 0xD0282F), Palette.cranberry, Palette.cranberryDark], edge: Color(hex: 0x4A080C), halo: true))
+                .padding(.bottom, 6)
             }
-            .padding(18)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Palette.card2Brand, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Palette.gold, lineWidth: 2))
-            .shadow(color: Color(hex: 0x6E0D12, alpha: 0.28), radius: 15, y: 12)
-        }
-        .buttonStyle(ModeCardStyle())
-        .accessibilityIdentifier("home.invite")
-    }
+            .buttonStyle(ModeCardStyle())
+            .accessibilityIdentifier("home.invite")
 
-    private var manualCard: some View {
-        Button(action: onManual) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .center, spacing: 10) {
-                    Image(systemName: "person.3.fill")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundStyle(Palette.greenText)
+            Button(action: onManual) {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(t.manualHeroTitle)
+                            .font(AppFont.display(19))
+                            .foregroundStyle(Palette.goldLight)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                        Text(t.manualHeroDesc)
+                            .font(AppFont.body(13, .bold))
+                            .foregroundStyle(Palette.snow.opacity(0.96))
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 15, weight: .heavy))
+                        .foregroundStyle(Palette.pine)
                         .frame(width: 38, height: 38)
-                        .background(Palette.greenSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    Text(t.manualModeTitle).font(AppFont.display(20)).foregroundStyle(Palette.brandText)
-                    Spacer()
-                    arrow(light: false)
+                        .background(Palette.snow, in: Circle())
+                        .background(Circle().fill(.black.opacity(0.3)).offset(y: 3))
                 }
-                Text(t.manualModeDesc)
-                    .font(AppFont.body(14, .medium))
-                    .foregroundStyle(Palette.sub)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-                steps(t.manualSteps, light: false)
-                HStack(spacing: 6) {
-                    Text(t.manualCta)
-                    Image(systemName: "arrow.right")
-                }
-                .font(AppFont.body(15, .black))
-                .foregroundStyle(Palette.greenText)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity, minHeight: 68, alignment: .leading)
+                .background(giftBackground([Color(hex: 0x2F8A5A), Palette.pine, Palette.pineEdge], edge: Color(hex: 0x0C2A1C), halo: false))
+                .padding(.bottom, 6)
             }
-            .padding(18)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Palette.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
-            .shadow(color: Palette.pine.opacity(0.1), radius: 12, y: 8)
+            .buttonStyle(ModeCardStyle())
+            .accessibilityIdentifier("home.manual")
         }
-        .buttonStyle(ModeCardStyle())
-        .accessibilityIdentifier("home.manual")
     }
 
-    private func arrow(light: Bool) -> some View {
-        Image(systemName: "arrow.right")
-            .font(.system(size: 14, weight: .heavy))
-            .foregroundStyle(light ? Palette.cranberryDark : .white)
-            .frame(width: 34, height: 34)
-            .background(light ? Palette.goldLight : Palette.pine, in: Circle())
-    }
-
-    private func steps(_ items: [String], light: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-                HStack(spacing: 8) {
-                    Text("\(index + 1)")
-                        .font(AppFont.body(12, .black))
-                        .foregroundStyle(light ? Palette.cranberryDark : .white)
-                        .frame(width: 22, height: 22)
-                        .background(light ? Palette.goldLight : Palette.pine, in: Circle())
-                    Text(item)
-                        .font(AppFont.body(13, .bold))
-                        .foregroundStyle(light ? Palette.snow : Palette.text)
-                        .multilineTextAlignment(.leading)
-                }
-            }
+    /// Glossy gift-wrap fill: gradient, double gold foil border, thick bottom edge.
+    private func giftBackground(_ colors: [Color], edge: Color, halo: Bool) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 26, style: .continuous)
+        return ZStack {
+            shape.fill(edge).offset(y: 6)
+            shape.fill(LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing))
+            shape.fill(LinearGradient(colors: [.white.opacity(0.16), .clear], startPoint: .topLeading, endPoint: .center))
+            shape.strokeBorder(Palette.goldLight, lineWidth: 2.5)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .strokeBorder(Palette.goldLight.opacity(0.35), lineWidth: 1)
+                .padding(6)
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(light ? Color.white.opacity(0.12) : Palette.card2, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(light ? Palette.goldLight.opacity(0.45) : Palette.cardBorder, lineWidth: 1.5))
+        .background(shape.stroke(Palette.goldLight.opacity(halo ? 0.3 : 0), lineWidth: 8))
+        .shadow(color: edge.opacity(0.35), radius: 12, y: 12)
     }
 }
 

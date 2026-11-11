@@ -16,16 +16,19 @@ struct OnboardingView: View {
                 ChristmasBackdrop(heavySnow: true)
 
                 VStack(spacing: 0) {
+                    brandPill
+                        .frame(height: compact ? 56 : 66)
+                        .padding(.top, compact ? 26 : 38)
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
                         Text("Mutlu")
                         Text("Yıllar").offset(y: 18)
                     }
-                    .font(AppFont.script(compact ? 54 : 64))
+                    .font(AppFont.script(compact ? 46 : 54))
                     .foregroundStyle(Palette.goldLight)
                     .shadow(color: Color(hex: 0x5A0A0F, alpha: 0.45), radius: 0, y: 4)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(t.happyNewYear)
-                    .padding(.top, compact ? 28 : 44)
+                    .padding(.top, 2)
 
                     // Santa fills the space between the title and the sheet and
                     // stands on the snow wave instead of sinking behind it.
@@ -68,8 +71,6 @@ struct OnboardingView: View {
 
     private func sheet(compact: Bool) -> some View {
         VStack(spacing: 0) {
-            brandPill.offset(y: -44).padding(.bottom, -40)
-
             Text(t.onbTitle)
                 .font(AppFont.display(28))
                 .foregroundStyle(Palette.brandText)
@@ -88,42 +89,15 @@ struct OnboardingView: View {
                 }
                 AppleSignInButton(title: t.appleContinue, style: .black) { authError = $0 }
                 GoogleSignInButton { authError = $0 }
-                LegalNotice().padding(.top, 4)
             }
 
-            HStack {
-                Button {
-                    path.append(.login)
-                } label: {
-                    Label(t.emailShort, systemImage: "envelope")
-                }
-                .accessibilityIdentifier("onboarding.email")
-                Spacer()
-                Button {
-                    path.append(.joinCode)
-                } label: {
-                    HStack(spacing: 6) {
-                        Text(t.joinWithCode)
-                        Image(systemName: "arrow.right")
-                    }
-                }
-                .foregroundStyle(Palette.greenText)
-                .accessibilityIdentifier("onboarding.join")
+            HStack(spacing: 8) {
+                chip(t.emailChip, "envelope.fill", AnyShapeStyle(Palette.brand), Palette.brandEdge, Palette.snow, "onboarding.email") { path.append(.login) }
+                chip(t.joinWithCode, "ticket.fill", AnyShapeStyle(Palette.pine), Palette.pineEdge, Palette.snow, "onboarding.join") { path.append(.joinCode) }
+                chip(t.guestChip, "gift.fill", AnyShapeStyle(Palette.goldGradient), Palette.goldDark, Palette.goldText, "onboarding.guest") { session.continueAsGuest() }
             }
-            .font(AppFont.body(15, .bold))
-            .foregroundStyle(Palette.brandText)
-            .frame(minHeight: 44)
-            .padding(.top, 16)
-
-            Button {
-                session.continueAsGuest()
-            } label: {
-                Text("\(t.guestStart) →")
-                    .font(AppFont.body(14, .semibold))
-                    .foregroundStyle(Palette.sub)
-                    .frame(minHeight: 36)
-            }
-            .accessibilityIdentifier("onboarding.guest")
+            .padding(.top, 14)
+            LegalNotice().padding(.top, 10)
         }
         .padding(.horizontal, 24)
         .padding(.bottom, compact ? -12 : -24)
@@ -157,11 +131,31 @@ struct OnboardingView: View {
         .allowsHitTesting(false)
     }
 
+    /// Three small Christmas-coloured buttons: e-mail, join with a code, try without an account.
+    private func chip(_ title: String, _ icon: String, _ fill: AnyShapeStyle, _ edge: Color, _ foreground: Color, _ id: String, action: @escaping () -> Void) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 14, style: .continuous)
+        return Button(action: action) {
+            HStack(spacing: 5) {
+                Image(systemName: icon).font(.system(size: 12, weight: .bold))
+                Text(title).lineLimit(1).minimumScaleFactor(0.75)
+            }
+            .font(AppFont.body(13, .black))
+            .foregroundStyle(foreground)
+            .padding(.horizontal, 6)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .background(fill, in: shape)
+            .overlay(shape.strokeBorder(Palette.goldLight.opacity(0.7), lineWidth: 2))
+            .background(edge, in: shape.offset(y: 4))
+            .padding(.bottom, 4)
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(id)
+    }
+
     private var brandPill: some View {
         Image("lockup")
             .resizable()
             .scaledToFit()
-            .frame(height: 84)
             .shadow(color: Color(hex: 0x6E0D12, alpha: 0.18), radius: 8, y: 4)
             .accessibilityLabel("Lets Raffle")
     }

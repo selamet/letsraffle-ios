@@ -15,13 +15,14 @@ struct InviteShareRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 0) {
-                target("WhatsApp", image: "share-whatsapp") { open("https://wa.me/?text=\(enc(message))") }
-                target("Telegram", image: "share-telegram") { open("https://t.me/share/url?url=\(enc(url.absoluteString))&text=\(enc(t.shareMessage))") }
-                target("Instagram", image: "share-instagram", action: shareInstagram)
-                target("X", image: "share-x") { open("https://twitter.com/intent/tweet?text=\(enc(message))") }
-                target(t.shareMessages, symbol: "message.fill", tint: Color(hex: 0x1F5C3E)) { open("sms:&body=\(enc(message))") }
-                target(t.shareMail, symbol: "envelope.fill", tint: Palette.cranberry) { open("mailto:?subject=\(enc(t.shareSubject))&body=\(enc(message))") }
+                target("WhatsApp", image: "glyph-whatsapp", style: 0) { open("https://wa.me/?text=\(enc(message))") }
+                target("Telegram", image: "glyph-telegram", style: 1) { open("https://t.me/share/url?url=\(enc(url.absoluteString))&text=\(enc(t.shareMessage))") }
+                target("Instagram", image: "glyph-instagram", style: 2, action: shareInstagram)
+                target("X", image: "glyph-x", style: 0) { open("https://twitter.com/intent/tweet?text=\(enc(message))") }
+                target(t.shareMessages, symbol: "message.fill", style: 1) { open("sms:&body=\(enc(message))") }
+                target(t.shareMail, symbol: "envelope.fill", style: 2) { open("mailto:?subject=\(enc(t.shareSubject))&body=\(enc(message))") }
             }
+            .padding(.top, 8)
             if let notice {
                 Text(notice)
                     .font(AppFont.body(12, .bold))
@@ -64,27 +65,39 @@ struct InviteShareRow: View {
         }
     }
 
-    private func target(_ label: String, image: String? = nil, symbol: String? = nil, tint: Color = .clear, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            VStack(spacing: 5) {
-                Group {
+    /// Each target is a little Christmas bauble: cranberry, pine or gold with a gold cap.
+    private func target(_ label: String, image: String? = nil, symbol: String? = nil, style: Int, action: @escaping () -> Void) -> some View {
+        let palettes: [([Color], Color, Color)] = [
+            ([Color(hex: 0xE0444A), Palette.cranberry, Palette.cranberryDark], Color(hex: 0x4A080C), Palette.snow),
+            ([Color(hex: 0x3F9A63), Palette.pine, Palette.pineEdge], Color(hex: 0x0C2A1C), Palette.snow),
+            ([Color(hex: 0xFDF0C4), Palette.gold, Palette.goldDark], Color(hex: 0x8A6A1E), Palette.goldText),
+        ]
+        let (colors, edge, foreground) = palettes[style % palettes.count]
+        return Button(action: action) {
+            VStack(spacing: 6) {
+                ZStack {
+                    Circle().fill(RadialGradient(colors: colors, center: UnitPoint(x: 0.34, y: 0.28), startRadius: 1, endRadius: 30))
+                    Circle().strokeBorder(Palette.goldLight.opacity(0.85), lineWidth: 2)
                     if let image {
-                        Image(image).resizable().scaledToFit()
+                        Image(image).renderingMode(.template).resizable().scaledToFit().frame(width: 22, height: 22)
                     } else if let symbol {
-                        Image(systemName: symbol)
-                            .font(.system(size: 19, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(tint, in: Circle())
+                        Image(systemName: symbol).font(.system(size: 17, weight: .semibold))
                     }
                 }
-                .frame(width: 42, height: 42)
-                .overlay(Circle().strokeBorder(.white.opacity(0.7), lineWidth: 1.5))
+                .foregroundStyle(foreground)
+                .frame(width: 44, height: 44)
+                .background(Circle().fill(edge).offset(y: 3))
+                .overlay(alignment: .top) {
+                    RoundedRectangle(cornerRadius: 2.5, style: .continuous)
+                        .fill(LinearGradient(colors: [Palette.goldLight, Palette.goldDark], startPoint: .top, endPoint: .bottom))
+                        .frame(width: 12, height: 8)
+                        .offset(y: -7)
+                }
                 Text(label)
-                    .font(AppFont.body(10, .bold))
-                    .foregroundStyle(Palette.snow.opacity(0.95))
+                    .font(AppFont.body(10.5, .bold))
+                    .foregroundStyle(Palette.text)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .minimumScaleFactor(0.75)
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())

@@ -80,7 +80,7 @@ extension View {
 }
 
 struct FloatingTabBar: View {
-    static let reservedHeight: CGFloat = 84
+    static let reservedHeight: CGFloat = 92
 
     @Binding var selection: MainTab
     @Environment(\.strings) private var t
@@ -128,15 +128,13 @@ struct FloatingTabBar: View {
         .padding(.top, 8)
         .padding(.bottom, 6)
         .background(
-            UnevenRoundedRectangle(topLeadingRadius: 26, topTrailingRadius: 26, style: .continuous)
+            Capsule(style: .continuous)
                 .fill(Palette.tabBar)
-                .overlay(
-                    UnevenRoundedRectangle(topLeadingRadius: 26, topTrailingRadius: 26, style: .continuous)
-                        .strokeBorder(Palette.cardBorder, lineWidth: 1)
-                )
-                .shadow(color: Color(hex: 0x6E0D12, alpha: 0.1), radius: 15, y: -6)
-                .ignoresSafeArea(edges: .bottom)
+                .overlay(Capsule(style: .continuous).strokeBorder(Palette.gold, lineWidth: 2))
+                .shadow(color: Color(hex: 0x3C0000, alpha: 0.28), radius: 14, y: 10)
         )
+        .padding(.horizontal, 18)
+        .padding(.bottom, 2)
         .animation(.spring(duration: 0.3), value: selection)
     }
 }
