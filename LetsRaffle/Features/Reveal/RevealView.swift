@@ -52,13 +52,13 @@ struct RevealView: View {
                         .padding(.top, 6)
                         .padding(.bottom, 14)
                 } else {
-                    Spacer(minLength: 0)
+                    // Hello → Santa → gift: the stage fills the space, the brand closes the page.
                     content
                         .padding(.horizontal, 24)
-                    Spacer(minLength: 0)
-                    FriendsRow()
-                        .padding(.horizontal, 8)
-                        .padding(.bottom, 4)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    brandFooter
+                        .padding(.top, 20)
+                        .padding(.bottom, 14)
                 }
             }
             ConfettiBurst(trigger: confetti).ignoresSafeArea()
@@ -102,8 +102,8 @@ struct RevealView: View {
 
     private var background: some View {
         ZStack {
-            // No mountains behind the waiting text.
-            ChristmasBackdrop(garland: true, pines: store.phase != .waiting && !isResult)
+            // A clean red scene: nothing behind the text.
+            ChristmasBackdrop(garland: true, pines: false)
             RadialGradient(colors: [Palette.goldLight.opacity(0.22), .clear], center: UnitPoint(x: 0.5, y: 0.42), startRadius: 0, endRadius: 240)
                 .ignoresSafeArea()
         }
@@ -248,82 +248,113 @@ struct RevealView: View {
 
     // MARK: Stages
 
-    private var hello: some View {
-        VStack(spacing: 8) {
-            Text(t.revealEyebrow)
-                .font(AppFont.body(12, .black)).tracking(2.6)
-                .foregroundStyle(Palette.goldLight)
-            Text(t.happyNewYear)
-                .font(AppFont.script(60))
-                .foregroundStyle(Palette.goldLight)
-                .shadow(color: Color(hex: 0x5A0A0F, alpha: 0.45), radius: 0, y: 3)
-                .minimumScaleFactor(0.7).lineLimit(1)
-            if let name = store.firstName {
-                Text("\(name)!").font(AppFont.display(28)).foregroundStyle(Palette.snow)
+    /// Shared frame of the three story stages: words at the top, the figure standing on a
+    /// little mound of snow in the middle, the action and the step dots at the bottom.
+    private func stageLayout<Figure: View, Action: View>(
+        eyebrow: String? = nil,
+        title: String,
+        script: Bool = false,
+        name: String? = nil,
+        text: String,
+        step: Int,
+        @ViewBuilder figure: () -> Figure,
+        @ViewBuilder action: () -> Action
+    ) -> some View {
+        VStack(spacing: 0) {
+            if let eyebrow {
+                Text(eyebrow)
+                    .font(AppFont.body(12, .black)).tracking(2.6)
+                    .foregroundStyle(Palette.goldLight)
+                    .padding(.bottom, 2)
             }
-            SantaAvatar(size: 170, mood: .wave)
-            Text(t.revealHelloText)
+            Text(title)
+                .font(script ? AppFont.script(58) : AppFont.display(29))
+                .foregroundStyle(script ? Palette.goldLight : Palette.snow)
+                .shadow(color: Color(hex: 0x5A0A0F, alpha: 0.45), radius: 0, y: script ? 3 : 2)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
+                .fixedSize(horizontal: false, vertical: true)
+            if let name {
+                Text("\(name)!")
+                    .font(AppFont.display(26))
+                    .foregroundStyle(Palette.snow)
+                    .padding(.top, 2)
+            }
+            Text(text)
                 .font(AppFont.body(16, .semibold))
-                .foregroundStyle(Palette.snow.opacity(0.92))
+                .foregroundStyle(Palette.snow.opacity(0.94))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: 320)
+                .padding(.top, 10)
+
+            Spacer(minLength: 10)
+            VStack(spacing: -16) {
+                figure().zIndex(1)
+                Ellipse()
+                    .fill(LinearGradient(colors: [Palette.snow, Palette.snow.opacity(0.75)], startPoint: .top, endPoint: .bottom))
+                    .frame(width: 210, height: 34)
+                    .shadow(color: Color(hex: 0x3C0000, alpha: 0.25), radius: 10, y: 8)
+            }
+            Spacer(minLength: 10)
+
+            action()
+                .frame(minHeight: 62)
+            dots(step)
+        }
+        .padding(.top, 4)
+    }
+
+    private var hello: some View {
+        stageLayout(eyebrow: t.revealEyebrow, title: t.happyNewYear, script: true, name: store.firstName, text: t.revealHelloText, step: 0) {
+            SantaAvatar(size: 176, mood: .wave)
+        } action: {
             Button { go(.santa) } label: {
                 HStack(spacing: 8) { Text(t.revealShow); Image(systemName: "arrow.right") }
             }
             .buttonStyle(.gold)
-            .frame(maxWidth: 260)
-            .padding(.top, 8)
+            .frame(maxWidth: 280)
             .accessibilityIdentifier("reveal.start")
-            dots(0)
         }
     }
 
     private var santa: some View {
-        VStack(spacing: 10) {
-            Text(t.revealSantaTitle)
-                .font(AppFont.display(28))
-                .foregroundStyle(Palette.snow)
-                .multilineTextAlignment(.center)
-            SantaAvatar(size: 200, mood: .draw)
-            Text(santaReady ? t.revealSantaFound : t.revealSantaSearching)
-                .font(AppFont.body(16, .semibold))
-                .foregroundStyle(Palette.snow.opacity(0.92))
-                .multilineTextAlignment(.center)
+        stageLayout(title: t.revealSantaTitle, text: santaReady ? t.revealSantaFound : t.revealSantaSearching, step: 1) {
+            SantaAvatar(size: 190, mood: .draw)
+        } action: {
             Button { go(.gift) } label: { Text(t.revealBringGift) }
                 .buttonStyle(.gold)
-                .frame(maxWidth: 240)
-                .padding(.top, 6)
+                .frame(maxWidth: 280)
                 .opacity(santaReady ? 1 : 0)
                 .disabled(!santaReady)
-            dots(1)
         }
     }
 
     private var gift: some View {
-        VStack(spacing: 8) {
-            Text(t.revealGiftTitle)
-                .font(AppFont.display(30))
-                .foregroundStyle(Palette.snow)
-            Text(opening ? t.revealGiftOpening : t.revealGiftText)
-                .font(AppFont.body(16, .semibold))
-                .foregroundStyle(Palette.snow.opacity(0.92))
-                .multilineTextAlignment(.center)
+        stageLayout(title: t.revealGiftTitle, text: opening ? t.revealGiftOpening : t.revealGiftText, step: 2) {
             Button(action: openGift) {
                 GiftVideo(opening: opening)
-                    .frame(maxWidth: 300)
+                    .frame(maxWidth: 250)
             }
             .buttonStyle(.plain)
             .disabled(opening)
             .sensoryFeedback(.success, trigger: opening)
             .accessibilityLabel(t.revealGiftCta)
             .accessibilityIdentifier("reveal.gift")
-            Text("\(t.revealGiftCta) 👆")
-                .font(AppFont.body(13, .black)).tracking(2.2)
-                .textCase(.uppercase)
-                .foregroundStyle(Palette.goldLight)
-                .opacity(opening ? 0 : 1)
-                .padding(.top, 10)
-            dots(2)
+        } action: {
+            HStack(spacing: 8) {
+                Image(systemName: "hand.tap.fill").font(.system(size: 15, weight: .bold))
+                Text(t.revealGiftCta)
+                    .font(AppFont.body(13, .black)).tracking(2.2)
+                    .textCase(.uppercase)
+            }
+            .foregroundStyle(Palette.goldText)
+            .padding(.horizontal, 18)
+            .frame(height: 40)
+            .background(Palette.goldGradient, in: Capsule())
+            .opacity(opening ? 0 : 1)
+            .allowsHitTesting(false)
         }
     }
 
