@@ -261,6 +261,8 @@ struct RevealView: View {
         @ViewBuilder action: () -> Action
     ) -> some View {
         VStack(spacing: 0) {
+            // Words and figure sit together in the middle of the page.
+            Spacer(minLength: 0)
             if let eyebrow {
                 Text(eyebrow)
                     .font(AppFont.body(12, .black)).tracking(2.6)
@@ -289,7 +291,6 @@ struct RevealView: View {
                 .frame(maxWidth: 320)
                 .padding(.top, 10)
 
-            Spacer(minLength: 10)
             VStack(spacing: -16) {
                 figure().zIndex(1)
                 Ellipse()
@@ -297,7 +298,8 @@ struct RevealView: View {
                     .frame(width: 210, height: 34)
                     .shadow(color: Color(hex: 0x3C0000, alpha: 0.25), radius: 10, y: 8)
             }
-            Spacer(minLength: 10)
+            .padding(.top, 22)
+            Spacer(minLength: 0)
 
             action()
                 .frame(minHeight: 62)

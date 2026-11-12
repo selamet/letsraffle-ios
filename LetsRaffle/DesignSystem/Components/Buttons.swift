@@ -184,20 +184,29 @@ struct CircleIconButton: View {
 
 /// Back button shaped like a gold Christmas bauble hanging on a string,
 /// swinging gently. Used on red headers.
+///
+/// On screens with the fairy-light garland the string is tied to the wire: whatever part of
+/// it would stick out above the wire is left out, and the bauble swings from that knot.
 struct OrnamentBackButton: View {
     var stringLength: CGFloat = 18
     var systemName = "chevron.left"
+    /// False on screens without a garland (the string then simply comes down from the top).
+    var hangsFromGarland = true
     var action: () -> Void
     @State private var swing = false
+    /// Length of string above the garland wire, not drawn.
+    @State private var hidden: CGFloat = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.strings) private var t
 
     var body: some View {
         Button(action: action) {
             VStack(spacing: 0) {
+                Color.clear.frame(width: 1.5, height: hidden)
+                VStack(spacing: 0) {
                 Rectangle()
                     .fill(Palette.goldLight.opacity(0.75))
-                    .frame(width: 1.5, height: stringLength)
+                    .frame(width: 1.5, height: stringLength - hidden)
                 Circle()
                     .strokeBorder(Palette.goldLight, lineWidth: 1.5)
                     .frame(width: 8, height: 8)
@@ -238,13 +247,21 @@ struct OrnamentBackButton: View {
                 .frame(width: 38, height: 38)
                 .padding(.top, -1)
                 .shadow(color: Color(hex: 0x3A0006, alpha: 0.35), radius: 4, y: 3)
+                }
+                .rotationEffect(.degrees(swing ? 5 : -5), anchor: .top)
             }
-            .rotationEffect(.degrees(swing ? 5 : -5), anchor: .top)
             .frame(width: 48)
             .contentShape(Rectangle())
         }
         .buttonStyle(OrnamentPressStyle())
         .accessibilityLabel(t.backLabel)
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            guard hangsFromGarland else { return }
+            // The garland sits 50pt below the top of the screen (see ChristmasBackdrop).
+            let wire = 50 + Garland.wireY(atX: frame.midX, width: UIScreen.main.bounds.width)
+            let above = min(max(0, wire - frame.minY), max(0, stringLength - 6))
+            if abs(above - hidden) > 0.5 { hidden = above }
+        }
         .onAppear {
             guard !reduceMotion else { return }
             withAnimation(.easeInOut(duration: 1.9).repeatForever(autoreverses: true)) { swing = true }

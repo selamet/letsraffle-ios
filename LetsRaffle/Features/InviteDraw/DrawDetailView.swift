@@ -58,7 +58,7 @@ struct DrawDetailView: View {
 
     private var topBar: some View {
         HStack(alignment: .bottom) {
-            OrnamentBackButton(stringLength: 50) { dismiss() }
+            OrnamentBackButton(stringLength: 50, hangsFromGarland: false) { dismiss() }
             Spacer()
             if let draw = store.draw {
                 StatusChip(title: draw.status.title(t), foreground: draw.status.foreground, background: draw.status.background)

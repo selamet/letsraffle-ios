@@ -286,6 +286,15 @@ struct SnowDots: View {
 /// (same garland as the website).
 struct Garland: View {
     var wreaths = true
+
+    /// Height of the wire below the garland's top edge at horizontal position `x`
+    /// (the same three drooping arcs that `body` draws).
+    static func wireY(atX x: CGFloat, width: CGFloat) -> CGFloat {
+        let arc = width / 3
+        guard arc > 0 else { return 10 }
+        let t = x.truncatingRemainder(dividingBy: arc) / arc
+        return 10 + 2 * t * (1 - t) * 26
+    }
     @State private var on = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
