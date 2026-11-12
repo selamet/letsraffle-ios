@@ -1,0 +1,630 @@
+import SwiftUI
+
+enum DrawsRoute: Hashable {
+    case createInvite
+    case inviteDetails
+    case manual
+    case detail(inviteCode: String)
+    case reveal(inviteCode: String)
+}
+
+/// Tab 1: hero header, draw mode cards and the organizer's draws.
+struct DrawsHomeView: View {
+    @Environment(\.strings) private var t
+    @Environment(SessionStore.self) private var session
+    @State private var store: DrawsStore?
+    @State private var path: [DrawsRoute] = []
+    @State private var inviteDraft: InviteDraft?
+    @State private var showProfile = DebugRoute.current == "tab:profile"
+    @Environment(TabBarVisibility.self) private var tabBar
+    @Environment(DeepLinkRouter.self) private var router
+    @Environment(PushManager.self) private var push
+    @Environment(ParticipationStore.self) private var participations
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            GeometryReader { geo in
+            // The winter scene stays put. The list scrolls underneath and disappears along the
+            // snow line (not a straight edge); Santa stands in front of it.
+            let heroHeight = 300 + geo.safeAreaInsets.top
+            ZStack(alignment: .top) {
+                    HomeHero(
+                        topInset: geo.safeAreaInsets.top,
+                        name: nil,
+                        activeCount: store?.draws.filter { $0.status == .active || $0.status == .inProgress }.count ?? 0,
+                        onProfile: { showProfile = true }
+                    )
+                ScrollView {
+                    VStack(spacing: 14) {
+                        NewDrawPicker(onInvite: { open(.createInvite) }, onManual: { path.append(.manual) })
+                        if let next = nextDraw {
+                            NextDrawCard(draw: next).onTapGesture {
+                                if let code = next.inviteCode { path.append(.detail(inviteCode: code)) }
+                            }
+                        }
+                        eventsShortcut
+                    }
+                    .padding(.horizontal, 18)
+                    .padding(.top, 62)
+                    .padding(.bottom, 24)
+                }
+                .floatingTabBarInset()
+                .refreshable { await store?.load(t) }
+                .mask {
+                    // The cut sits a little below the snow line so there is a band of snow
+                    // between the scene and the scrolling content, and it fades out softly.
+                    SnowTopMask(offset: 16, waveHeight: 56)
+                        .padding(.horizontal, -12)
+                        .padding(.bottom, -12)
+                        .blur(radius: 3)
+                }
+                .padding(.top, heroHeight - 56)
+
+                SantaAvatar(size: 158, mood: .draw)
+                    .padding(.bottom, 20)
+                    .frame(height: heroHeight, alignment: .bottom)
+                    .allowsHitTesting(false)
+            }
+            .background(Palette.page)
+            .ignoresSafeArea(edges: .top)
+            }
+            .toolbar(.hidden, for: .navigationBar)
+            .statusBarStyle(.lightContent)
+            .navigationDestination(for: DrawsRoute.self, destination: destination)
+            .fullScreenCover(isPresented: $showProfile) {
+                ProfileView(onClose: { showProfile = false })
+            }
+        }
+        .task(id: session.user?.id) {
+            #if DEBUG
+            if !session.isSignedIn, UserDefaults.standard.bool(forKey: "detailDemo") { applyDebugRoute() }
+            #endif
+            guard session.isSignedIn else { store = nil; return }
+            if store == nil { store = DrawsStore(api: session.api) }
+            #if DEBUG
+            applyDebugRoute()
+            #endif
+            await store?.load(t)
+        }
+        .onChange(of: path, initial: true) { _, newPath in
+            tabBar.isHidden = !newPath.isEmpty
+            // Refresh after returning from create / detail / manual flows.
+            if newPath.isEmpty { Task { await store?.load(t) } }
+        }
+        .onChange(of: router.pendingDestination, initial: true) { _, destination in
+            guard case let .drawDetail(code)? = destination, session.isSignedIn else { return }
+            router.pendingDestination = nil
+            path = [.detail(inviteCode: code)]
+        }
+    }
+
+    #if DEBUG
+    private func applyDebugRoute() {
+        guard path.isEmpty, let route = DebugRoute.current else { return }
+        if route == "invite" || route == "invite2" {
+            let demo = InviteDraft(email: session.user?.email ?? "")
+            if UserDefaults.standard.bool(forKey: "inviteAllOn") { demo.requireAddress = true; demo.requirePhone = true; demo.scheduleEnabled = true }
+            if UserDefaults.standard.bool(forKey: "inviteDateOn") { demo.scheduleEnabled = true }
+            inviteDraft = demo
+            path = route == "invite" ? [.createInvite] : [.createInvite, .inviteDetails]
+        }
+        if route == "manual" { path = [.manual] }
+        if route.hasPrefix("detail:") { path = [.detail(inviteCode: String(route.dropFirst(7)))] }
+        tabBar.isHidden = !path.isEmpty
+    }
+    #endif
+
+    private func open(_ route: DrawsRoute) {
+        if session.isSignedIn {
+            if route == .createInvite {
+                inviteDraft = InviteDraft(email: session.user?.email ?? "")
+            }
+            path.append(route)
+        } else {
+            session.exitGuestMode()
+        }
+    }
+
+    /// Closest upcoming scheduled invite draw (drives the countdown card).
+    private var nextDraw: DrawListItem? {
+        store?.draws
+            .filter { $0.status == .active && ($0.drawDate ?? .distantPast) > .now }
+            .min { ($0.drawDate ?? .distantFuture) < ($1.drawDate ?? .distantFuture) }
+    }
+
+    /// The lists live in the "Etkinliklerim" tab; this card is the way there from home.
+    @ViewBuilder
+    private var eventsShortcut: some View {
+        let count = (store?.draws.count ?? 0) + participations.items.count
+        Button { tabBar.requestedTab = .events } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "gift.fill")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Palette.goldText)
+                    .frame(width: 42, height: 42)
+                    .background(Palette.goldGradient, in: Circle())
+                    .overlay(Circle().strokeBorder(.white.opacity(0.55), lineWidth: 2))
+                    .background(Circle().fill(Palette.goldDark).offset(y: 3))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(t.tabEvents)
+                        .font(AppFont.display(18))
+                        .foregroundStyle(Palette.text)
+                    Text(t.eventsSub)
+                        .font(AppFont.body(13, .semibold))
+                        .foregroundStyle(Palette.sub)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 8)
+                if count > 0 {
+                    Text("\(count)")
+                        .font(AppFont.body(13, .black))
+                        .foregroundStyle(Palette.brandText)
+                        .padding(.horizontal, 9)
+                        .frame(minWidth: 28, minHeight: 26)
+                        .background(Palette.chip, in: Capsule())
+                }
+                Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.ter)
+            }
+            .padding(14)
+            .background(Palette.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
+        }
+        .buttonStyle(.plain)
+        .padding(.top, 8)
+        .accessibilityIdentifier("home.events")
+    }
+
+    @ViewBuilder
+    private func destination(_ route: DrawsRoute) -> some View {
+        switch route {
+        case .createInvite:
+            if let inviteDraft { InviteSettingsView(path: $path, draft: inviteDraft) }
+        case .inviteDetails:
+            if let inviteDraft {
+                InviteOrganizerView(path: $path, draft: inviteDraft) { response in
+                    // The organizer takes part too; keep their token for the in-app result.
+                    participations.add(Participation(
+                        inviteCode: response.inviteCode,
+                        participantId: nil,
+                        drawId: response.drawId,
+                        displayName: inviteDraft.firstName,
+                        drawDate: inviteDraft.scheduleEnabled ? InviteDraft.exactHour(inviteDraft.drawDate) : nil,
+                        participantToken: response.participantToken,
+                        wantsNotification: true,
+                        joinedAt: .now
+                    ))
+                    self.inviteDraft = nil
+                    path = [.detail(inviteCode: response.inviteCode)]
+                    push.promptIfAppropriate()
+                }
+            }
+        case let .detail(inviteCode):
+            DrawDetailView(inviteCode: inviteCode, api: session.api) { path.append(.reveal(inviteCode: inviteCode)) }
+        case let .reveal(inviteCode):
+            RevealView(inviteCode: inviteCode, api: session.api, participations: participations, isSignedIn: session.isSignedIn)
+        case .manual:
+            ManualDrawView { path.removeAll() }
+        }
+    }
+}
+
+/// One continuous shape (no seam): everything below a snow-wave line that starts `offset` points down.
+private struct SnowTopMask: Shape {
+    var offset: CGFloat
+    var waveHeight: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width, h = waveHeight, y0 = rect.minY + offset, x0 = rect.minX
+        var p = Path()
+        p.move(to: CGPoint(x: x0, y: y0 + h * 0.5))
+        p.addCurve(to: CGPoint(x: x0 + w * 0.54, y: y0 + h * 0.4), control1: CGPoint(x: x0 + w * 0.18, y: y0 + h * 0.1), control2: CGPoint(x: x0 + w * 0.36, y: y0 + h * 0.75))
+        p.addCurve(to: CGPoint(x: x0 + w, y: y0 + h * 0.36), control1: CGPoint(x: x0 + w * 0.72, y: y0 + h * 0.08), control2: CGPoint(x: x0 + w * 0.88, y: y0))
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        p.closeSubpath()
+        return p
+    }
+}
+
+/// Winter scene at the top of the home screen: greeting, Santa drawing from
+/// his sack on the snow with his friends, as on the website's home page.
+private struct HomeHero: View {
+    var topInset: CGFloat = 0
+    var name: String?
+    var activeCount: Int
+    var onProfile: () -> Void = {}
+    @Environment(\.strings) private var t
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            Palette.heroGradient
+            RadialGradient(colors: [.white.opacity(0.14), .clear], center: UnitPoint(x: 0.5, y: 0.3), startRadius: 0, endRadius: 280)
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                MountainRange().frame(height: 150).padding(.bottom, 36)
+            }
+            SnowDots()
+            Garland().padding(.top, topInset - 16)
+
+            HStack(alignment: .center) {
+                if let name {
+                    Text("\(t.hello) \(name),")
+                        .font(AppFont.script(34))
+                        .foregroundStyle(Palette.goldLight)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                } else {
+                    // The brand sits where the greeting would be: this is the most-seen screen.
+                    Image("lockup")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 44)
+                        .shadow(color: Color(hex: 0x3C0000, alpha: 0.25), radius: 6, y: 3)
+                        .accessibilityLabel("Lets Raffle")
+                        .overlay(alignment: .bottomLeading) {
+                            Text("\(t.hello),")
+                                .font(AppFont.script(24))
+                                .foregroundStyle(Palette.goldLight)
+                                .fixedSize()
+                                .padding(.leading, 6)
+                                .offset(y: 40)
+                        }
+                }
+                Spacer(minLength: 8)
+                // Profile lives here now (it used to be a tab).
+                Button(action: onProfile) {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Palette.goldText)
+                        .frame(width: 44, height: 44)
+                        .background(Palette.goldGradient, in: Circle())
+                        .overlay(Circle().strokeBorder(.white.opacity(0.6), lineWidth: 2))
+                        .background(Circle().fill(Palette.goldDark).offset(y: 3))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(t.profileButton)
+                .accessibilityIdentifier("home.profile")
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, topInset + 36)
+
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                ZStack(alignment: .bottom) {
+                    HStack(alignment: .bottom, spacing: 0) {
+                        FriendImage(friend: .hug, width: 78).padding(.leading, 6)
+                        Spacer(minLength: 0)
+                        ZStack(alignment: .bottomTrailing) {
+                            FriendImage(friend: .tree, width: 32).saturation(0.75).brightness(-0.08).opacity(0.85).padding(.bottom, 6)
+                            FriendImage(friend: .tree, width: 46).padding(.trailing, 28)
+                        }
+                        .padding(.trailing, 6)
+                    }
+                    .padding(.bottom, 24)
+                    SnowWave().fill(Palette.page).frame(height: 56)
+                }
+            }
+        }
+        .frame(height: 300 + topInset)
+    }
+}
+
+/// Foil card with a countdown to the next scheduled draw.
+private struct NextDrawCard: View {
+    let draw: DrawListItem
+    @Environment(\.strings) private var t
+    @Environment(AppSettings.self) private var settings
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 30)) { context in
+            let remaining = max(0, (draw.drawDate ?? context.date).timeIntervalSince(context.date))
+            let days = Int(remaining) / 86_400
+            let hours = Int(remaining) % 86_400 / 3_600
+            let minutes = Int(remaining) % 3_600 / 60
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(t.nextDraw)
+                        .font(AppFont.body(10.5, .black))
+                        .tracking(1.5)
+                        .textCase(.uppercase)
+                        .foregroundStyle(Palette.brandText)
+                    Text(draw.displayName)
+                        .font(AppFont.display(16))
+                        .foregroundStyle(Palette.text)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    if let date = draw.drawDate {
+                        Text(DrawDateFormat.short(date, language: settings.language))
+                            .font(AppFont.body(12.5, .semibold))
+                            .foregroundStyle(Palette.sub)
+                    }
+                }
+                Spacer(minLength: 0)
+                if days > 0 { box(days, t.daysUnit) }
+                box(hours, t.hoursUnit)
+                if days == 0 { box(minutes, t.minutesUnit) }
+            }
+            .padding(.vertical, 12)
+            .padding(.leading, 16)
+            .padding(.trailing, 12)
+            .background(Palette.card2, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func box(_ value: Int, _ unit: String) -> some View {
+        VStack(spacing: 0) {
+            Text(String(format: "%02d", value)).font(AppFont.display(20))
+            Text(unit).font(AppFont.body(10, .bold)).opacity(0.9)
+        }
+        .foregroundStyle(Palette.goldLight)
+        .frame(width: 50, height: 50)
+        .background(Palette.cranberryDark, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .contentTransition(.numericText())
+    }
+}
+
+/// "Yeni bir çekiliş başlat": the invite mode is the star (it is what makes
+/// the app special), the manual mode a smaller second option.
+private struct NewDrawPicker: View {
+    var onInvite: () -> Void
+    var onManual: () -> Void
+    @Environment(\.strings) private var t
+
+    var body: some View {
+        VStack(spacing: 14) {
+            Text(t.newDrawTitle)
+                .font(AppFont.display(26))
+                .foregroundStyle(Palette.brandText)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 2)
+
+            // Both modes are raffle tickets, like on the web: notched at the perforation,
+            // with a tear-off stub that carries the arrow.
+            TicketCard(
+                    action: onInvite,
+                    stub: 80,
+                    minHeight: 136,
+                    colors: [Color(hex: 0xD0282F), Palette.cranberry, Palette.cranberryDark],
+                    edge: Color(hex: 0x4A080C),
+                    stubFill: AnyShapeStyle(Palette.goldGradient),
+                    perforation: Palette.cranberryDark
+                ) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 5) {
+                            Image(systemName: "star.fill").font(.system(size: 9, weight: .bold))
+                            Text(t.favTag).font(AppFont.body(10.5, .black)).tracking(1.2)
+                        }
+                        .foregroundStyle(Palette.goldText)
+                        .padding(.horizontal, 10)
+                        .frame(height: 22)
+                        .background(Palette.goldGradient, in: Capsule())
+                        Text(t.inviteHeroTitle)
+                            .font(AppFont.display(26))
+                            .foregroundStyle(Palette.goldLight)
+                            .shadow(color: Color(hex: 0x3C0000, alpha: 0.35), radius: 0, y: 2)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                        Text(t.inviteHeroDesc)
+                            .font(AppFont.body(13.5, .bold))
+                            .foregroundStyle(Palette.snow.opacity(0.96))
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text(t.inviteHeroFeatures)
+                            .font(AppFont.body(11.5, .black))
+                            .foregroundStyle(Palette.goldLight)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                            .padding(.top, 1)
+                    }
+                    .padding(.leading, 18)
+                    .padding(.trailing, 12)
+                    .padding(.vertical, 16)
+                } arrow: {
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 18, weight: .heavy))
+                        .foregroundStyle(Palette.snow)
+                        .frame(width: 50, height: 50)
+                        .background(Palette.cranberry, in: Circle())
+                        .overlay(Circle().strokeBorder(Palette.snow.opacity(0.85), lineWidth: 2))
+                        .background(Circle().fill(Palette.cranberryDark).offset(y: 3))
+                }
+            .accessibilityIdentifier("home.invite")
+
+            TicketCard(
+                    action: onManual,
+                    stub: 80,
+                    minHeight: 72,
+                    colors: [Color(hex: 0x2F8A5A), Palette.pine, Palette.pineEdge],
+                    edge: Color(hex: 0x0C2A1C),
+                    stubFill: AnyShapeStyle(Color(hex: 0x164A31)),
+                    perforation: Palette.goldLight
+                ) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(t.manualHeroTitle)
+                            .font(AppFont.display(19))
+                            .foregroundStyle(Palette.goldLight)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                        Text(t.manualHeroDesc)
+                            .font(AppFont.body(13, .bold))
+                            .foregroundStyle(Palette.snow.opacity(0.96))
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.leading, 18)
+                    .padding(.trailing, 12)
+                    .padding(.vertical, 12)
+                } arrow: {
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 15, weight: .heavy))
+                        .foregroundStyle(Color(hex: 0x164A31))
+                        .frame(width: 40, height: 40)
+                        .background(Palette.goldGradient, in: Circle())
+                        .background(Circle().fill(.black.opacity(0.35)).offset(y: 3))
+                }
+            .accessibilityIdentifier("home.manual")
+        }
+    }
+
+}
+
+/// A raffle ticket button: glossy body on the left, tear-off stub on the right, a dashed
+/// perforation between them and a thick bottom edge. Tapping tears the stub off along the
+/// perforation, then runs the action.
+private struct TicketCard<Content: View, Arrow: View>: View {
+    var action: () -> Void
+    var stub: CGFloat
+    var minHeight: CGFloat
+    var colors: [Color]
+    var edge: Color
+    var stubFill: AnyShapeStyle
+    var perforation: Color
+    @ViewBuilder var content: () -> Content
+    @ViewBuilder var arrow: () -> Arrow
+
+    @State private var torn = TicketCard.startsTorn
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private static var startsTorn: Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "tornDemo")
+        #else
+        false
+        #endif
+    }
+
+    var body: some View {
+        Button(action: tear) {
+            ZStack {
+                // The same ticket drawn twice, each half masked, so the stub can come away.
+                face.mask(alignment: .leading) {
+                    GeometryReader { geo in
+                        Rectangle()
+                            .frame(width: geo.size.width - stub + 12, height: geo.size.height + 24)
+                            .offset(x: -12, y: -12)
+                    }
+                }
+                face.mask(alignment: .trailing) {
+                    // Exactly the stub, starting on the perforation (no gap between the halves).
+                    Rectangle().frame(width: stub + 12).offset(x: 12).padding(.vertical, -12)
+                }
+                .rotationEffect(.degrees(torn ? 4 : 0), anchor: .bottomTrailing)
+                .offset(x: 0, y: torn ? 3 : 0)
+            }
+            .shadow(color: edge.opacity(0.3), radius: 10, y: 10)
+        }
+        .buttonStyle(ModeCardStyle())
+    }
+
+    private var face: some View {
+        let shape = TicketShape(stub: stub)
+        return HStack(spacing: 0) {
+            content()
+                .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .leading)
+                .background(
+                    ZStack {
+                        LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
+                        LinearGradient(colors: [.white.opacity(0.16), .clear], startPoint: .topLeading, endPoint: .center)
+                    }
+                )
+            arrow()
+                .frame(width: stub)
+                .frame(maxHeight: .infinity)
+                .background(stubFill)
+                .overlay(alignment: .leading) {
+                    PerforationLine()
+                        .stroke(perforation.opacity(0.5), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [5, 6]))
+                        .frame(width: 2)
+                        .padding(.vertical, 20)
+                }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .clipShape(shape)
+        .overlay(shape.stroke(Palette.goldLight, lineWidth: 2.5))
+        .background(shape.fill(edge).offset(y: 6))
+        .padding(.bottom, 6)
+    }
+
+    private func tear() {
+        guard !torn else { return }
+        guard !reduceMotion else { action(); return }
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        withAnimation(.spring(duration: 0.34, bounce: 0.4)) { torn = true }
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(360))
+            action()
+            // Put the ticket back together once the next screen covers it.
+            try? await Task.sleep(for: .milliseconds(700))
+            torn = false
+        }
+    }
+}
+
+/// Rounded rectangle with a half-circle bitten out of the top and bottom edge where the stub starts.
+private struct TicketShape: Shape {
+    var stub: CGFloat
+    var radius: CGFloat = 22
+    var notch: CGFloat = 12
+
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width, h = rect.height, r = radius, n = notch
+        let nx = w - stub
+        var p = Path()
+        p.move(to: CGPoint(x: r, y: 0))
+        p.addLine(to: CGPoint(x: nx - n, y: 0))
+        p.addArc(center: CGPoint(x: nx, y: 0), radius: n, startAngle: .degrees(180), endAngle: .degrees(0), clockwise: true)
+        p.addLine(to: CGPoint(x: w - r, y: 0))
+        p.addArc(tangent1End: CGPoint(x: w, y: 0), tangent2End: CGPoint(x: w, y: r), radius: r)
+        p.addLine(to: CGPoint(x: w, y: h - r))
+        p.addArc(tangent1End: CGPoint(x: w, y: h), tangent2End: CGPoint(x: w - r, y: h), radius: r)
+        p.addLine(to: CGPoint(x: nx + n, y: h))
+        p.addArc(center: CGPoint(x: nx, y: h), radius: n, startAngle: .degrees(0), endAngle: .degrees(180), clockwise: true)
+        p.addLine(to: CGPoint(x: r, y: h))
+        p.addArc(tangent1End: CGPoint(x: 0, y: h), tangent2End: CGPoint(x: 0, y: h - r), radius: r)
+        p.addLine(to: CGPoint(x: 0, y: r))
+        p.addArc(tangent1End: CGPoint(x: 0, y: 0), tangent2End: CGPoint(x: r, y: 0), radius: r)
+        p.closeSubpath()
+        return p.offsetBy(dx: rect.minX, dy: rect.minY)
+    }
+}
+
+private struct PerforationLine: Shape {
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        p.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
+        return p
+    }
+}
+
+/// Whole-card button: presses down slightly.
+private struct ModeCardStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .brightness(configuration.isPressed ? -0.03 : 0)
+            .animation(.spring(duration: 0.2), value: configuration.isPressed)
+    }
+}
+
+struct EmptyHint: View {
+    let text: String
+
+    var body: some View {
+        VStack(spacing: 8) {
+            FriendImage(friend: .snowman, width: 84)
+            Text(text)
+                .font(AppFont.body(15, .semibold))
+                .foregroundStyle(Palette.sub)
+                .multilineTextAlignment(.center)
+        }
+            .frame(maxWidth: .infinity)
+            .padding(20)
+            .background(Palette.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
+    }
+}
