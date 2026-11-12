@@ -39,6 +39,18 @@ struct RevealView: View {
                     Spacer(minLength: 0)
                     brandFooter
                         .padding(.bottom, 18)
+                } else if isResult {
+                    // The result: Santa and the gift tag, then only the brand at the bottom.
+                    ScrollView {
+                        content
+                            .padding(.horizontal, 20)
+                            .padding(.top, 2)
+                            .padding(.bottom, 12)
+                    }
+                    .scrollBounceBehavior(.basedOnSize)
+                    brandFooter
+                        .padding(.top, 6)
+                        .padding(.bottom, 14)
                 } else {
                     Spacer(minLength: 0)
                     content
@@ -77,6 +89,12 @@ struct RevealView: View {
         }
     }
 
+    /// The last stage: who the person is gifting.
+    private var isResult: Bool {
+        if case .revealed = store.phase { return stage == .result }
+        return false
+    }
+
     private var reminderDate: Date {
         let base = store.drawDate.map { max($0, .now) } ?? .now
         return Calendar.current.date(byAdding: .day, value: 1, to: base) ?? base
@@ -85,7 +103,7 @@ struct RevealView: View {
     private var background: some View {
         ZStack {
             // No mountains behind the waiting text.
-            ChristmasBackdrop(garland: true, pines: store.phase != .waiting)
+            ChristmasBackdrop(garland: true, pines: store.phase != .waiting && !isResult)
             RadialGradient(colors: [Palette.goldLight.opacity(0.22), .clear], center: UnitPoint(x: 0.5, y: 0.42), startRadius: 0, endRadius: 240)
                 .ignoresSafeArea()
         }
@@ -322,63 +340,109 @@ struct RevealView: View {
 
     private func resultView(_ result: MatchResult) -> some View {
         VStack(spacing: 0) {
-            Image("gift-opened")
-                .resizable().scaledToFit()
-                .frame(width: 130)
-                .padding(.bottom, -22)
-                .accessibilityHidden(true)
-            receiverCard(result.receiver)
-            infoText(screenshotTaken ? t.screenshotWarning : t.revealSecret)
-                .padding(.top, 12)
-            HStack(spacing: 18) {
+            Text(t.revealResultEyebrow)
+                .font(AppFont.body(12, .black)).tracking(2.6)
+                .textCase(.uppercase)
+                .foregroundStyle(Palette.goldLight)
+            // Santa celebrates on top of the gift tag.
+            SantaAvatar(size: 100, mood: .celebrate)
+                .padding(.top, 2)
+                .zIndex(1)
+            receiverTag(result.receiver)
+                .padding(.top, -12)
+
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: screenshotTaken ? "exclamationmark.triangle.fill" : "lock.fill")
+                    .font(.system(size: 12, weight: .bold))
+                    .padding(.top, 2)
+                Text(screenshotTaken ? t.screenshotWarning : t.revealSecretNote)
+                    .font(AppFont.body(13.5, .bold))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .foregroundStyle(Palette.snow)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.white.opacity(0.3), lineWidth: 1.5))
+            .padding(.top, 16)
+
+            HStack(spacing: 10) {
                 Button { showReminder = true } label: {
                     Label(t.addReminder, systemImage: "calendar.badge.plus")
+                        .font(AppFont.body(14, .black))
+                        .foregroundStyle(Palette.goldText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity, minHeight: 46)
+                        .background(Palette.goldGradient, in: Capsule())
+                        .background(Capsule().fill(Palette.goldDark).offset(y: 3))
                 }
                 Button { go(.hello) } label: {
                     Label(t.revealReplay, systemImage: "arrow.counterclockwise")
+                        .font(AppFont.body(14, .black))
+                        .foregroundStyle(Palette.snow)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity, minHeight: 46)
+                        .background(Color.white.opacity(0.16), in: Capsule())
+                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.4), lineWidth: 1.5))
                 }
             }
-            .font(AppFont.body(14, .bold))
-            .foregroundStyle(Palette.goldLight)
-            .frame(minHeight: 44)
-            .padding(.top, 4)
+            .buttonStyle(.plain)
+            .padding(.top, 12)
+            .padding(.bottom, 3)
         }
     }
 
-    private func receiverCard(_ receiver: MatchResult.Receiver) -> some View {
-        VStack(spacing: 10) {
-            Text(t.revealResultEyebrow)
-                .font(AppFont.body(11, .black)).tracking(2.4)
-                .textCase(.uppercase)
-                .foregroundStyle(Palette.brand)
-            Text(receiver.fullName)
-                .font(AppFont.display(34))
-                .foregroundStyle(Palette.brandText)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityIdentifier("reveal.receiver")
-            CandyStripe(width: 96, height: 8)
-            if let address = receiver.address, !address.isEmpty {
-                detailRow(icon: "mappin.and.ellipse", text: address)
+    /// The name on a gift tag shaped like the invitation ticket; address and phone, when the
+    /// draw asked for them, sit on the gold stub below the perforation.
+    private func receiverTag(_ receiver: MatchResult.Receiver) -> some View {
+        let address = (receiver.address ?? "").isEmpty ? nil : receiver.address
+        let phone = (receiver.phone ?? "").isEmpty ? nil : receiver.phone
+        let hasDetails = address != nil || phone != nil
+        let nameHeight: CGFloat = 124
+        let shape: AnyShape = hasDetails
+            ? AnyShape(StoryTicketShape(split: nameHeight, radius: 28, notch: 13))
+            : AnyShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        return VStack(spacing: 0) {
+            VStack(spacing: 10) {
+                Text(receiver.fullName)
+                    .font(AppFont.display(36))
+                    .foregroundStyle(Palette.cranberryDark)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.6)
+                    .accessibilityIdentifier("reveal.receiver")
+                CandyStripe(width: 96, height: 8)
             }
-            if let phone = receiver.phone, !phone.isEmpty {
-                detailRow(icon: "phone.fill", text: phone)
-            }
-            Text(t.revealSecretNote)
-                .font(AppFont.body(14, .bold))
-                .foregroundStyle(Palette.greenText)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 14).padding(.vertical, 10)
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
+            .frame(maxWidth: .infinity)
+            .frame(height: nameHeight)
+
+            if hasDetails {
+                TagDashes()
+                    .stroke(Palette.cranberryDark.opacity(0.4), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [6, 7]))
+                    .frame(height: 2)
+                    .padding(.horizontal, 24)
+                VStack(spacing: 8) {
+                    if let address { detailRow(icon: "mappin.and.ellipse", text: address) }
+                    if let phone { detailRow(icon: "phone.fill", text: phone) }
+                }
+                .padding(.horizontal, 14)
+                .padding(.top, 14)
+                .padding(.bottom, 16)
                 .frame(maxWidth: .infinity)
-                .background(Palette.greenSoft, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .padding(.top, 2)
+                .background(Palette.goldGradient)
+            }
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 28)
-        .padding(.bottom, 20)
-        .frame(maxWidth: .infinity)
-        .foilCard(radius: 28)
+        .background(LinearGradient(colors: [Color(hex: 0xFFFBF5), Color(hex: 0xFFF3DC)], startPoint: .topLeading, endPoint: .bottomTrailing))
+        .clipShape(shape)
+        .overlay(shape.stroke(Palette.goldLight, lineWidth: 3))
+        .background(shape.fill(Color(hex: 0x4A080C)).offset(y: 6))
+        .shadow(color: Color(hex: 0x3C0000, alpha: 0.35), radius: 14, y: 10)
+        .padding(.bottom, 6)
     }
 
     private func detailRow(icon: String, text: String) -> some View {
@@ -483,6 +547,15 @@ private struct NewYearCountdown: View {
         .background(Palette.snow, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Palette.gold, lineWidth: 2))
         .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Palette.goldDark).offset(y: 4))
+    }
+}
+
+private struct TagDashes: Shape {
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: rect.minX, y: rect.midY))
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        return p
     }
 }
 
