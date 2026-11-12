@@ -25,7 +25,7 @@ final class DrawsStoreTests: XCTestCase {
         XCTAssertEqual(store.phase, .loaded)
         XCTAssertEqual(store.activeFirst.map(\.id), [2, 3])
         XCTAssertEqual(store.activeFirst.first?.displayName, "merry-star-200")
-        XCTAssertEqual(store.activeFirst.last?.displayName, "#3")
+        XCTAssertEqual(store.activeFirst.last?.displayName, "obur-mandalina-211")
     }
 
     func testLoadFailureExposesMessage() async {

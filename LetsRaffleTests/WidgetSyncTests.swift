@@ -32,7 +32,7 @@ final class WidgetSyncTests: XCTestCase {
 
         XCTAssertEqual(snapshot.nextDraw?.inviteCode, "soon-star-3")
         XCTAssertEqual(snapshot.match, .init(inviteCode: "done-bell-4", initials: "EY"))
-        XCTAssertEqual(snapshot.activeDraws.map(\.name), ["far-away-1", "past-draw-2", "#3"])
+        XCTAssertEqual(snapshot.activeDraws.map(\.name), ["far-away-1", "past-draw-2", "obur-mandalina-211"])
         XCTAssertGreaterThan(reloads, 0)
         XCTAssertFalse(String(data: try! JSONEncoder().encode(snapshot), encoding: .utf8)!.contains("Elif"), "full name must not leave the app")
     }

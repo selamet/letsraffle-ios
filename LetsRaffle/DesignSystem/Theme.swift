@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-/// Design tokens mirrored from the Claude Design file "Lets Raffle iOS"
+/// Design tokens mirrored from the "Lets Raffle iOS" design file
 /// (cranberry / gold / pine on snow). Every token resolves dynamically for
 /// light and dark appearance.
 enum Palette {

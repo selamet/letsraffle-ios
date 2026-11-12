@@ -28,6 +28,7 @@ final class InviteDrawTests: XCTestCase {
         draft.requirePhone = true
         draft.phone = "555"
         draft.address = "ignored because not required"
+        draft.scheduleEnabled = true // off by default
         draft.drawDate = Date(timeIntervalSince1970: 1_798_142_400 + 25 * 60) // 20:25Z
 
         let request = draft.makeRequest(language: .en)

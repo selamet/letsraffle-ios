@@ -52,14 +52,15 @@ final class SessionStoreTests: XCTestCase {
         XCTAssertNil(store.tokens)
     }
 
-    func testGuestModeIsRemembered() async {
+    /// Without an account the app always opens on the welcome screen, even after browsing as a guest.
+    func testGuestModeIsNotRememberedAcrossLaunches() async {
         session.continueAsGuest()
         let api = APIClient(baseURL: URL(string: "https://api.test")!, session: MockURLProtocol.makeSession(), tokenStore: InMemoryTokenStore())
         let restored = SessionStore(api: api, defaults: defaults)
 
         await restored.restore()
 
-        XCTAssertEqual(restored.state, .guest)
+        XCTAssertEqual(restored.state, .signedOut)
     }
 
     func testValidation() {
