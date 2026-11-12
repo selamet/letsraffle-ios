@@ -46,6 +46,8 @@
 	<string>1</string>
 	<key>GIDClientID</key>
 	<string>536662543605-lefv2ehup00m2nan2peh0ir0gkmsksvg.apps.googleusercontent.com</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Fraunces_700Bold.ttf</string>

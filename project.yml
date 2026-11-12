@@ -61,6 +61,9 @@ targets:
         API_BASE_URL: $(API_BASE_URL)
         WEB_BASE_URL: $(WEB_BASE_URL)
         CFBundleLocalizations: [tr, en]
+        # The app only uses the encryption built into iOS (HTTPS, Keychain), which is exempt
+        # from export documentation; this answers App Store Connect's question for every build.
+        ITSAppUsesNonExemptEncryption: false
         # Red launch screen so the app never flashes white before the logo + fairy-light loader.
         UILaunchScreen:
           UIColorName: LaunchBackground
