@@ -7,7 +7,8 @@ import Observation
 final class InviteDraft {
     var requireAddress = false
     var requirePhone = false
-    var scheduleEnabled = true
+    /// Off by default: the organizer starts the draw by hand unless they pick a date.
+    var scheduleEnabled = false
     /// Always normalized to an exact hour in the future (backend requirement).
     var drawDate: Date
 
