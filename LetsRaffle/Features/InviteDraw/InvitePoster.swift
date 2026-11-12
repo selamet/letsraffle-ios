@@ -7,6 +7,9 @@ struct InvitePosterCard: View {
     let inviteCode: String
     let url: URL
     let t: Strings
+    /// Leaves out the parts that depend on the draw (name, number, QR, code): the template
+    /// the website draws on.
+    var blank = false
 
     static let size = CGSize(width: 595, height: 842)
 
@@ -92,6 +95,7 @@ struct InvitePosterCard: View {
                             .background(Palette.goldGradient, in: Capsule())
                     }
                 }
+                .opacity(blank ? 0 : 1)
                 Text(t.storyBody)
                     .font(AppFont.body(14, .bold))
                     .foregroundStyle(Color(hex: 0x5B3A3A))
@@ -101,6 +105,7 @@ struct InvitePosterCard: View {
                     .padding(.top, 2)
                 HStack(alignment: .center, spacing: 30) {
                     QRCodeView(content: url.absoluteString)
+                        .opacity(blank ? 0 : 1)
                         .frame(width: 136, height: 136)
                         .padding(12)
                         .background(Color.white, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
@@ -138,6 +143,7 @@ struct InvitePosterCard: View {
                         in: Capsule()
                     )
                     .overlay(Capsule().strokeBorder(Palette.goldLight, lineWidth: 3))
+                    .opacity(blank ? 0 : 1)
                 Text(t.storyHow)
                     .font(AppFont.body(14, .bold))
                     .foregroundStyle(Color(hex: 0x5B3A3A))
@@ -208,8 +214,15 @@ enum InvitePoster {
     static func debugDump() {
         guard UserDefaults.standard.bool(forKey: "storyDemo") else { return }
         let code = "miskin-penguen-768"
-        let picture = image(inviteCode: code, url: AppConfig.inviteURL(for: code), t: AppLanguage.tr.strings)
-        try? picture?.pngData()?.write(to: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("poster.png"))
+        for (language, file) in [(AppLanguage.tr, "poster-tr"), (.en, "poster-en")] {
+            for blank in [false, true] {
+                let renderer = ImageRenderer(content: InvitePosterCard(inviteCode: code, url: AppConfig.inviteURL(for: code), t: language.strings, blank: blank))
+                renderer.scale = 3
+                renderer.isOpaque = true
+                let name = file + (blank ? "-blank.png" : ".png")
+                try? renderer.uiImage?.pngData()?.write(to: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(name))
+            }
+        }
     }
     #endif
 }

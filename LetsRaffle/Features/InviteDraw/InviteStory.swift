@@ -6,6 +6,9 @@ import UIKit
 struct InviteStoryCard: View {
     let inviteCode: String
     let t: Strings
+    /// Leaves out the parts that depend on the draw (name, number, code). The website draws
+    /// those itself on top of this template.
+    var blank = false
 
     static let size = CGSize(width: 360, height: 640)
 
@@ -83,6 +86,7 @@ struct InviteStoryCard: View {
                             .background(Palette.goldGradient, in: Capsule())
                     }
                 }
+                .opacity(blank ? 0 : 1)
                 Text(t.storyBody)
                     .font(AppFont.body(13, .bold))
                     .foregroundStyle(Color(hex: 0x5B3A3A))
@@ -114,6 +118,7 @@ struct InviteStoryCard: View {
                         in: Capsule()
                     )
                     .overlay(Capsule().strokeBorder(Palette.goldLight, lineWidth: 2))
+                    .opacity(blank ? 0 : 1)
                 Text(t.storyHow)
                     .font(AppFont.body(11, .bold))
                     .foregroundStyle(Color(hex: 0x5B3A3A))
@@ -239,9 +244,14 @@ enum InviteStory {
         og.scale = 3
         og.isOpaque = true
         try? og.uiImage?.pngData()?.write(to: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("og.png"))
-        for (language, file) in [(AppLanguage.tr, "story-tr.png"), (.en, "story-en.png")] {
-            let picture = image(inviteCode: "miskin-penguen-768", t: language.strings)
-            try? picture?.pngData()?.write(to: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(file))
+        for (language, file) in [(AppLanguage.tr, "story-tr"), (.en, "story-en")] {
+            for blank in [false, true] {
+                let renderer = ImageRenderer(content: InviteStoryCard(inviteCode: "miskin-penguen-768", t: language.strings, blank: blank))
+                renderer.scale = 3
+                renderer.isOpaque = true
+                let name = file + (blank ? "-blank.png" : ".png")
+                try? renderer.uiImage?.pngData()?.write(to: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(name))
+            }
         }
     }
     #endif
