@@ -34,13 +34,16 @@ final class ManualDrawModelTests: XCTestCase {
         XCTAssertEqual(model.participants[0].lastName, "Demir")
     }
 
-    func testRequiringAddressLaterBlocksIncompleteParticipants() {
+    func testAddressAndPhoneAreOptional() {
         let model = ManualDrawModel()
         ["Ayse", "Mert"].forEach { model.upsert(person($0, address: "Kadıköy")) }
         model.upsert(person("Elif"))
-        model.requireAddress = true
-        XCTAssertTrue(model.isIncomplete(model.participants[2]))
-        XCTAssertFalse(model.canRun)
+        let elif = model.participants[2]
+        XCTAssertTrue(model.error(for: elif, editing: elif.id, .en).isEmpty)
+        XCTAssertTrue(model.canRun)
+        let request = model.makeRequest(language: .tr)
+        XCTAssertFalse(request.addressRequired)
+        XCTAssertFalse(request.phoneNumberRequired)
     }
 
     func testSubmitPostsManualDrawWithoutAuth() async throws {

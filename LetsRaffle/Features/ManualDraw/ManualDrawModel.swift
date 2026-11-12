@@ -8,22 +8,16 @@ final class ManualDrawModel {
     static let minimumParticipants = 3
 
     var participants: [ParticipantInput] = []
-    var requireAddress = false
-    var requirePhone = false
     var isSubmitting = false
     var submitError: String?
     var completedDrawId: Int?
 
-    /// Participants that miss a field made mandatory after they were added.
-    func isIncomplete(_ p: ParticipantInput) -> Bool {
-        (requireAddress && (p.address ?? "").trimmed.isEmpty) || (requirePhone && (p.phone ?? "").trimmed.isEmpty)
-    }
-
     var canRun: Bool {
-        participants.count >= Self.minimumParticipants && !participants.contains(where: isIncomplete) && !isSubmitting
+        participants.count >= Self.minimumParticipants && !isSubmitting
     }
 
     /// Returns a validation error message for the add/edit sheet, if any.
+    /// Address and phone are always optional here: the organizer fills in what they know.
     func error(for candidate: ParticipantInput, editing id: UUID?, _ t: Strings) -> [ParticipantField: String] {
         var errors: [ParticipantField: String] = [:]
         if let e = Validation.requiredError(candidate.firstName, t) { errors[.firstName] = e }
@@ -33,8 +27,6 @@ final class ManualDrawModel {
         } else if participants.contains(where: { $0.id != id && $0.email.lowercased() == candidate.email.trimmed.lowercased() }) {
             errors[.email] = t.duplicateEmail
         }
-        if requireAddress, let e = Validation.requiredError(candidate.address, t) { errors[.address] = e }
-        if requirePhone, let e = Validation.requiredError(candidate.phone, t) { errors[.phone] = e }
         return errors
     }
 
@@ -58,8 +50,8 @@ final class ManualDrawModel {
 
     func makeRequest(language: AppLanguage) -> ManualDrawRequest {
         ManualDrawRequest(
-            addressRequired: requireAddress,
-            phoneNumberRequired: requirePhone,
+            addressRequired: false,
+            phoneNumberRequired: false,
             language: language.rawValue,
             participants: participants
         )

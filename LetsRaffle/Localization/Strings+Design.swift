@@ -87,6 +87,11 @@ extension Strings {
     var nextDraw: String { l("Sıradaki çekiliş", "Next draw") }
     var allEvents: String { l("Tüm etkinlikler", "All events") }
     var settingsHint: String { l("Hepsi isteğe bağlı.", "All optional.") }
+    var manualSub: String { l("İsimleri ekle, çekilişi hemen yap.", "Add the names and draw right away.") }
+    var optionalSection: String { l("İSTEĞE BAĞLI", "OPTIONAL") }
+    var optionalNote: String { l("Biliyorsan yaz, bilmiyorsan boş bırak.", "Fill these in if you know them, or leave them empty.") }
+    var removeParticipant: String { l("Katılımcıyı sil", "Remove participant") }
+    var emptyManual: String { l("Henüz kimse yok. İlk katılımcıyı ekle!", "Nobody yet. Add the first participant!") }
     var askSection: String { l("KATILIMCILARDAN İSTE", "ASK PARTICIPANTS FOR") }
     var whenSection: String { l("ÇEKİLİŞ ZAMANI", "WHEN TO DRAW") }
     var optAddressInfo: String { l("Herkes katılırken adresini yazar; hediyeler doğru adrese gider.", "Everyone enters their address when joining, so gifts reach the right door.") }

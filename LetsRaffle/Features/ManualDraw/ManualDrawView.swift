@@ -4,7 +4,7 @@ import SwiftUI
 struct ManualDrawView: View {
     var onFinish: () -> Void
 
-    @State private var model = ManualDrawModel()
+    @State private var model = ManualDrawView.makeModel()
     @State private var editing: ParticipantInput?
     @Environment(\.strings) private var t
     @Environment(\.dismiss) private var dismiss
@@ -21,123 +21,115 @@ struct ManualDrawView: View {
         }
         .background(Palette.page.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
-        .statusBarStyle(model.completedDrawId == nil ? .darkContent : .lightContent)
+        .statusBarStyle(.lightContent)
+        #if DEBUG
+        .task {
+            if UserDefaults.standard.bool(forKey: "manualSheet") { addParticipant() }
+        }
+        #endif
         .sheet(item: $editing) { participant in
             ParticipantSheet(model: model, participant: participant)
         }
     }
 
+    private static func makeModel() -> ManualDrawModel {
+        let model = ManualDrawModel()
+        #if DEBUG
+        // Visual QA: `-manualDemo YES`
+        if UserDefaults.standard.bool(forKey: "manualDemo") {
+            model.upsert(ParticipantInput(firstName: "Ayşe", lastName: "Demir", email: "ayse@example.com", address: "Kadıköy / İstanbul"))
+            model.upsert(ParticipantInput(firstName: "Mert", lastName: "Kaya", email: "mert@example.com"))
+        }
+        #endif
+        return model
+    }
+
+    private func addParticipant() {
+        editing = ParticipantInput(firstName: "", lastName: "", email: "")
+    }
+
+    /// Same frame as the invite steps: the red scene stays put, the list scrolls in the cream
+    /// sheet and the draw button is pinned to the bottom.
     private var editor: some View {
-        VStack(spacing: 0) {
-            HStack {
-                CircleIconButton { dismiss() }
-                Spacer()
-                Button { editing = ParticipantInput(firstName: "", lastName: "", email: "") } label: {
-                    Label(t.addParticipant, systemImage: "plus")
-                        .font(AppFont.body(15, .bold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 16)
-                        .frame(height: 40)
-                        .background(Palette.pine, in: Capsule())
-                        .background(Palette.pineEdge, in: Capsule().offset(y: 3))
-                        .frame(minHeight: 44)
+        StepScaffold(title: t.manageTitle, subtitle: t.manualSub, mood: .draw) {
+            Button(action: addParticipant) {
+                HStack(spacing: 10) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 15, weight: .heavy))
+                        .foregroundStyle(Palette.pine)
+                        .frame(width: 34, height: 34)
+                        .background(Palette.goldGradient, in: Circle())
+                    Text(t.addParticipant)
+                        .font(AppFont.display(19))
+                        .foregroundStyle(Palette.goldLight)
+                    Spacer(minLength: 0)
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("manual.add")
+                .padding(.horizontal, 16)
+                .frame(maxWidth: .infinity, minHeight: 62)
+                .background(
+                    LinearGradient(colors: [Color(hex: 0x2F8A5A), Palette.pine, Palette.pineEdge], startPoint: .topLeading, endPoint: .bottomTrailing),
+                    in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+                )
+                .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(Palette.goldLight, lineWidth: 2.5))
+                .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Color(hex: 0x0C2A1C)).offset(y: 5))
+                .padding(.bottom, 5)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("manual.add")
 
-            List {
-                Group {
-                    ScreenHeader(eyebrow: t.manualMode, title: t.manageTitle, titleSize: 30)
-                        .padding(.horizontal, 8)
-                    summary
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+            HStack(alignment: .firstTextBaseline) {
+                Text(t.treeTitle)
+                    .font(AppFont.display(19))
+                    .foregroundStyle(Palette.text)
+                Spacer()
+                Text(t.participantCount(model.participants.count))
+                    .font(AppFont.body(13, .black))
+                    .foregroundStyle(Palette.brandText)
+                    .padding(.horizontal, 10)
+                    .frame(height: 26)
+                    .background(Palette.chip, in: Capsule())
+                    .contentTransition(.numericText())
+            }
+            .padding(.horizontal, 6)
+            .padding(.top, 6)
 
-                Section {
-                    if model.participants.isEmpty {
-                        Button { editing = ParticipantInput(firstName: "", lastName: "", email: "") } label: {
-                            Label(t.addParticipant, systemImage: "person.badge.plus")
-                                .foregroundStyle(Palette.brandText)
-                        }
-                    }
+            if model.participants.isEmpty {
+                EmptyHint(text: t.emptyManual)
+            } else {
+                VStack(spacing: 10) {
                     ForEach(model.participants) { p in
                         Button { editing = p } label: { row(p) }
                             .buttonStyle(.plain)
-                            .swipeActions {
-                                Button(t.delete, role: .destructive) { model.remove(p.id) }
-                            }
-                    }
-                    .listRowBackground(Palette.card)
-                    .alignmentGuide(.listRowSeparatorLeading) { _ in 52 }
-                } header: {
-                    Text(t.treeTitle)
-                        .font(AppFont.display(19))
-                        .foregroundStyle(Palette.text)
-                        .textCase(nil)
-                        .padding(.horizontal, -16)
-                } footer: {
-                    if model.participants.count > 1 {
-                        Text("← \(t.swipeHint)").font(AppFont.body(12, .semibold)).foregroundStyle(Palette.ter).frame(maxWidth: .infinity)
                     }
                 }
+                .animation(.spring(duration: 0.3), value: model.participants)
             }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
-            .contentMargins(.top, 4, for: .scrollContent)
-            .safeAreaInset(edge: .bottom) { bottomBar }
+        } bottom: {
+            bottomBar
         }
-    }
-
-    private var summary: some View {
-        HStack(spacing: 10) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("\(model.participants.count)")
-                    .font(AppFont.display(30))
-                    .foregroundStyle(Palette.brandText)
-                    .contentTransition(.numericText())
-                Text(t.participants).font(AppFont.body(13, .bold)).foregroundStyle(Palette.sub)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .padding(14)
-            .background(Palette.card2, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Palette.gold.opacity(0.6), lineWidth: 2))
-
-            VStack(alignment: .leading, spacing: 6) {
-                CheckRow(title: t.addressReq, isOn: $model.requireAddress)
-                CheckRow(title: t.phoneReq, isOn: $model.requirePhone)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .padding(14)
-            .background(Palette.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
-        }
-        .fixedSize(horizontal: false, vertical: true)
-        .animation(.default, value: model.participants.count)
     }
 
     private func row(_ p: ParticipantInput) -> some View {
         HStack(spacing: 12) {
             Avatar(initials: Participant.initials(p.firstName, p.lastName))
             VStack(alignment: .leading, spacing: 2) {
-                Text(p.fullName).font(AppFont.body(16, .bold)).foregroundStyle(Palette.text)
+                Text(p.fullName).font(AppFont.body(16, .bold)).foregroundStyle(Palette.text).lineLimit(1)
                 Text([p.email, p.address].compactMap { $0 }.joined(separator: " · "))
                     .font(AppFont.body(13, .medium))
                     .foregroundStyle(Palette.sub)
                     .lineLimit(1)
             }
             Spacer(minLength: 0)
-            if model.isIncomplete(p) {
-                Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Palette.amber)
-            } else {
-                Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.ter)
-            }
+            Image(systemName: "pencil")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(Palette.brandText)
+                .frame(width: 32, height: 32)
+                .background(Palette.chip, in: Circle())
         }
-        .padding(.vertical, 4)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Palette.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
         .contentShape(Rectangle())
     }
 
@@ -148,30 +140,29 @@ struct ManualDrawView: View {
             if let error = model.submitError {
                 Banner(text: error, style: .error)
             }
-            HStack {
-                Text(t.participantCount(count))
-                Spacer()
-                Text(count >= minimum ? t.readyForDraw : t.minHint)
-                    .foregroundStyle(count >= minimum ? Palette.greenText : Palette.brandText)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-            }
-            .font(AppFont.body(13, .bold))
-            .foregroundStyle(Palette.sub)
-            GeometryReader { geo in
-                Capsule().fill(Color(light: 0xF1E3D3, dark: 0x3A2224))
-                    .overlay(alignment: .leading) {
-                        Capsule()
-                            .fill(LinearGradient(colors: [Palette.brand, Color(hex: 0xE8474C)], startPoint: .leading, endPoint: .trailing))
-                            .frame(width: geo.size.width * min(1, CGFloat(count) / CGFloat(max(minimum, 1))))
+            if count < minimum {
+                // Three baubles fill up as people are added.
+                HStack(spacing: 8) {
+                    HStack(spacing: 5) {
+                        ForEach(0..<minimum, id: \.self) { index in
+                            Circle()
+                                .fill(index < count ? AnyShapeStyle(Palette.goldGradient) : AnyShapeStyle(Palette.cardBorder))
+                                .frame(width: 12, height: 12)
+                        }
                     }
+                    Text(t.minHint)
+                        .font(AppFont.body(12.5, .bold))
+                        .foregroundStyle(Palette.sub)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
+                    Spacer(minLength: 0)
+                }
+                .animation(.spring(duration: 0.3), value: count)
             }
-            .frame(height: 10)
-            .animation(.spring(duration: 0.4), value: count)
             Button(t.runDraw) {
                 Task { await model.submit(api: session.api, language: settings.language, t) }
             }
-            .buttonStyle(.primary(loading: model.isSubmitting))
+            .buttonStyle(.festive(loading: model.isSubmitting))
             .disabled(!model.canRun)
             .accessibilityIdentifier("manual.run")
             Text(t.manualEmailNote)
@@ -179,41 +170,11 @@ struct ManualDrawView: View {
                 .foregroundStyle(Palette.sub)
                 .multilineTextAlignment(.center)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 10)
-        .background(
-            Palette.card
-                .shadow(color: Color(hex: 0x6E0D12, alpha: 0.08), radius: 15, y: -6)
-                .ignoresSafeArea(edges: .bottom)
-        )
     }
 }
 
-/// Small checkbox row used in the manual draw summary card.
-private struct CheckRow: View {
-    let title: String
-    @Binding var isOn: Bool
-
-    var body: some View {
-        Button { isOn.toggle() } label: {
-            HStack(spacing: 6) {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(isOn ? Palette.brand : .clear)
-                    .strokeBorder(isOn ? Palette.brand : Palette.fieldBorder, lineWidth: 1.5)
-                    .frame(width: 16, height: 16)
-                    .overlay {
-                        if isOn { Image(systemName: "checkmark").font(.system(size: 9, weight: .heavy)).foregroundStyle(.white) }
-                    }
-                Text(title).font(AppFont.body(13, .bold)).foregroundStyle(isOn ? Palette.text : Palette.sub)
-            }
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(isOn ? .isSelected : [])
-    }
-}
-
-/// Add / edit participant sheet with contact import.
+/// Add / edit participant sheet with contact import. Only the name and e-mail are needed;
+/// address and phone sit in their own "optional" group.
 private struct ParticipantSheet: View {
     let model: ManualDrawModel
     @State var participant: ParticipantInput
@@ -228,33 +189,68 @@ private struct ParticipantSheet: View {
         let errors = showErrors ? model.error(for: participant, editing: participant.id, t) : [:]
         NavigationStack {
             ScrollView {
-                VStack(spacing: 14) {
-                    HStack(alignment: .top, spacing: 12) {
-                        FormField(label: t.firstName, text: $participant.firstName, placeholder: t.firstNamePh, kind: .name, error: errors[.firstName])
-                        FormField(label: t.lastName, text: $participant.lastName, placeholder: t.lastNamePh, kind: .name, error: errors[.lastName])
-                    }
-                    FormField(label: t.email, text: $participant.email, placeholder: t.emailPh, kind: .email, isRequired: true, error: errors[.email])
-                    FormField(label: t.address, text: optional(\.address), placeholder: t.addressPh, isRequired: model.requireAddress, error: errors[.address])
-                    FormField(label: t.phone, text: optional(\.phone), placeholder: t.phonePh, kind: .phone, isRequired: model.requirePhone, error: errors[.phone])
-
+                VStack(alignment: .leading, spacing: 14) {
                     Button { pickingContact = true } label: {
                         Label(t.importContacts, systemImage: "person.crop.circle.badge.plus")
-                            .font(AppFont.body(15, .bold))
+                            .font(AppFont.body(14, .black))
                             .foregroundStyle(Palette.brandText)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 14)
+                            .frame(minHeight: 44)
+                            .background(Palette.chip, in: Capsule())
                     }
-                    .padding(.horizontal, 4)
+                    .buttonStyle(.plain)
+
+                    HStack(alignment: .top, spacing: 12) {
+                        FormField(label: t.firstName, text: $participant.firstName, placeholder: t.firstNamePh, kind: .name, isRequired: true, error: errors[.firstName])
+                        FormField(label: t.lastName, text: $participant.lastName, placeholder: t.lastNamePh, kind: .name, isRequired: true, error: errors[.lastName])
+                    }
+                    FormField(label: t.email, text: $participant.email, placeholder: t.emailPh, kind: .email, isRequired: true, error: errors[.email])
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(t.optionalSection)
+                                .font(AppFont.body(12, .black)).tracking(1.8)
+                                .foregroundStyle(Palette.greenText)
+                            Text(t.optionalNote)
+                                .font(AppFont.body(13, .bold))
+                                .foregroundStyle(Palette.sub)
+                        }
+                        FormField(label: t.address, text: optional(\.address), placeholder: t.addressPh, icon: "mappin.and.ellipse")
+                        FormField(label: t.phone, text: optional(\.phone), placeholder: t.phonePh, kind: .phone)
+                    }
+                    .padding(14)
+                    .background(Palette.greenSoft.opacity(0.6), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 22, style: .continuous)
+                            .strokeBorder(Palette.greenText.opacity(0.25), style: StrokeStyle(lineWidth: 1.5, dash: [6, 5]))
+                    )
+                    .padding(.top, 4)
+
+                    Button(isNew ? t.add : t.save, action: save)
+                        .buttonStyle(.festive(loading: false))
+                        .padding(.top, 4)
+
+                    if !isNew {
+                        Button(role: .destructive) {
+                            model.remove(participant.id)
+                            dismiss()
+                        } label: {
+                            Label(t.removeParticipant, systemImage: "trash")
+                                .font(AppFont.body(15, .bold))
+                                .foregroundStyle(Palette.brandText)
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
                 .padding(20)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(Palette.page)
             .navigationTitle(t.addParticipant)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(t.cancel) { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(isNew ? t.add : t.save, action: save).fontWeight(.semibold)
-                }
             }
             .background {
                 ContactPicker(isPresented: $pickingContact) { contact in

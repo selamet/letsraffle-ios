@@ -104,7 +104,7 @@ struct DrawsHomeView: View {
             inviteDraft = demo
             path = route == "invite" ? [.createInvite] : [.createInvite, .inviteDetails]
         }
-        if route == "manual" { open(.manual) }
+        if route == "manual" { path = [.manual] }
         if route == "all" { path = [.allDraws] }
         if route.hasPrefix("detail:") { path = [.detail(inviteCode: String(route.dropFirst(7)))] }
         tabBar.isHidden = !path.isEmpty
