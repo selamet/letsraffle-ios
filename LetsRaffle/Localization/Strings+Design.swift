@@ -92,6 +92,16 @@ extension Strings {
     var optionalNote: String { l("Biliyorsan yaz, bilmiyorsan boş bırak.", "Fill these in if you know them, or leave them empty.") }
     var removeParticipant: String { l("Katılımcıyı sil", "Remove participant") }
     var emptyManual: String { l("Henüz kimse yok. İlk katılımcıyı ekle!", "Nobody yet. Add the first participant!") }
+    var tabHome: String { l("Ana Sayfa", "Home") }
+    var tabEvents: String { l("Etkinliklerim", "My events") }
+    var eventsSub: String { l("Kurdukların ve katıldıkların tek yerde.", "Everything you created and joined, in one place.") }
+    var eventsCreated: String { l("Oluşturduklarım", "Created") }
+    var eventsJoined: String { l("Katıldıklarım", "Joined") }
+    var eventsEmptyCreated: String { l("Henüz çekiliş oluşturmadın.", "You haven't created a draw yet.") }
+    var eventsEmptyJoined: String { l("Henüz bir çekilişe katılmadın.", "You haven't joined a draw yet.") }
+    var eventsSeeResult: String { l("Sonucu gör", "See result") }
+    var eventsOpen: String { l("Aç", "Open") }
+    var profileButton: String { l("Profil", "Profile") }
     var askSection: String { l("KATILIMCILARDAN İSTE", "ASK PARTICIPANTS FOR") }
     var whenSection: String { l("ÇEKİLİŞ ZAMANI", "WHEN TO DRAW") }
     var optAddressInfo: String { l("Herkes katılırken adresini yazar; hediyeler doğru adrese gider.", "Everyone enters their address when joining, so gifts reach the right door.") }

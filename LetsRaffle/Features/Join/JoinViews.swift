@@ -53,7 +53,6 @@ struct JoinTabView: View {
                 ScrollView {
                     VStack(spacing: 0) {
                         codeCard
-                        joined
                     }
                     .padding(.bottom, 24)
                 }
@@ -103,43 +102,6 @@ struct JoinTabView: View {
             .padding(.horizontal, 16)
             .padding(.top, 4)
             .padding(.bottom, 20)
-    }
-
-    @ViewBuilder
-    private var joined: some View {
-        if !participations.items.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
-                Text(t.myJoinedDraws)
-                    .font(AppFont.display(19))
-                    .foregroundStyle(Palette.goldLight)
-                    .padding(.horizontal, 4)
-                ForEach(participations.items) { item in
-                    NavigationLink(value: JoinRoute.reveal(inviteCode: item.inviteCode)) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "envelope.open.fill")
-                            .foregroundStyle(Palette.brandText)
-                            .frame(width: 46, height: 46)
-                            .background(Palette.chip, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(item.inviteCode).font(AppFont.display(17)).foregroundStyle(Palette.text).lineLimit(1)
-                            Text(item.drawDate.map { DrawDateFormat.long($0, language: settings.language) } ?? t.noDrawDate)
-                                .font(AppFont.body(13, .semibold)).foregroundStyle(Palette.sub)
-                        }
-                        Spacer()
-                        Image(systemName: item.result == nil ? "gift" : "gift.fill")
-                            .foregroundStyle(Palette.brandText)
-                        Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.ter)
-                    }
-                    .padding(14)
-                    .background(Palette.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
-        }
     }
 
     /// A wrong code is reported on the card (shake + message + sad Santa); only a real draw opens the form.

@@ -1,21 +1,23 @@
 import SwiftUI
 
 enum MainTab: Hashable, CaseIterable {
-    case draws, join, profile
+    /// Home (start a draw), join with a code, and everything the person created or joined.
+    /// The profile lives behind the button in the home header.
+    case draws, join, events
 
     var icon: String {
         switch self {
-        case .draws: "gift.fill"
+        case .draws: "house.fill"
         case .join: "ticket.fill"
-        case .profile: "person.fill"
+        case .events: "gift.fill"
         }
     }
 
     func title(_ t: Strings) -> String {
         switch self {
-        case .draws: t.tabDraws
+        case .draws: t.tabHome
         case .join: t.tabJoin
-        case .profile: t.tabProfile
+        case .events: t.tabEvents
         }
     }
 }
@@ -30,7 +32,7 @@ final class TabBarVisibility {
 
 /// Root of the signed-in / guest experience with the floating capsule tab bar.
 struct MainTabView: View {
-    @State private var selection: MainTab = DebugRoute.current == "tab:join" ? .join : (DebugRoute.current == "tab:profile" ? .profile : .draws)
+    @State private var selection: MainTab = DebugRoute.current == "tab:join" ? .join : ((DebugRoute.current ?? "").hasPrefix("tab:events") ? .events : .draws)
     @State private var tabBar = TabBarVisibility()
     @Environment(DeepLinkRouter.self) private var router
 
@@ -42,8 +44,8 @@ struct MainTabView: View {
             JoinTabView()
                 .tag(MainTab.join)
                 .toolbar(.hidden, for: .tabBar)
-            ProfileView()
-                .tag(MainTab.profile)
+            EventsView()
+                .tag(MainTab.events)
                 .toolbar(.hidden, for: .tabBar)
         }
         .overlay(alignment: .bottom) {

@@ -1,7 +1,9 @@
 import SwiftUI
 
-/// Tab 3: account, preferences, about, logout and account deletion.
+/// Account, preferences, about, logout and account deletion. Opened from the profile
+/// button in the home header (`onClose` hangs a close ornament in the corner).
 struct ProfileView: View {
+    var onClose: (() -> Void)? = nil
     @Environment(\.strings) private var t
     @Environment(SessionStore.self) private var session
     @Environment(AppSettings.self) private var settings
@@ -82,7 +84,6 @@ struct ProfileView: View {
                 .padding(.top, 22)
                 .padding(.bottom, 24)
                 }
-                .floatingTabBarInset()
                 .clipShape(UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous))
                 .background(
                     UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous)
@@ -158,8 +159,16 @@ struct ProfileView: View {
             SantaAvatar(size: 76, mood: .wave)
         }
         .padding(.horizontal, 20)
-        .padding(.top, 50)
+        .padding(.top, onClose == nil ? 50 : 78)
         .padding(.bottom, 18)
+        .overlay(alignment: .topLeading) {
+            if let onClose {
+                // The string runs up behind the status bar, as if hanging from the top edge.
+                OrnamentBackButton(stringLength: 50, systemName: "xmark", action: onClose)
+                    .padding(.leading, 12)
+                    .padding(.top, -46)
+            }
+        }
     }
 
     @ViewBuilder

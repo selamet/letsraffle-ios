@@ -1,7 +1,6 @@
 import SwiftUI
 
 enum DrawsRoute: Hashable {
-    case allDraws
     case createInvite
     case inviteDetails
     case manual
@@ -16,6 +15,7 @@ struct DrawsHomeView: View {
     @State private var store: DrawsStore?
     @State private var path: [DrawsRoute] = []
     @State private var inviteDraft: InviteDraft?
+    @State private var showProfile = DebugRoute.current == "tab:profile"
     @Environment(TabBarVisibility.self) private var tabBar
     @Environment(DeepLinkRouter.self) private var router
     @Environment(PushManager.self) private var push
@@ -31,7 +31,8 @@ struct DrawsHomeView: View {
                     HomeHero(
                         topInset: geo.safeAreaInsets.top,
                         name: nil,
-                        activeCount: store?.draws.filter { $0.status == .active || $0.status == .inProgress }.count ?? 0
+                        activeCount: store?.draws.filter { $0.status == .active || $0.status == .inProgress }.count ?? 0,
+                        onProfile: { showProfile = true }
                     )
                 ScrollView {
                     VStack(spacing: 14) {
@@ -41,7 +42,7 @@ struct DrawsHomeView: View {
                                 if let code = next.inviteCode { path.append(.detail(inviteCode: code)) }
                             }
                         }
-                        draws
+                        eventsShortcut
                     }
                     .padding(.horizontal, 18)
                     .padding(.top, 62)
@@ -70,6 +71,9 @@ struct DrawsHomeView: View {
             .toolbar(.hidden, for: .navigationBar)
             .statusBarStyle(.lightContent)
             .navigationDestination(for: DrawsRoute.self, destination: destination)
+            .fullScreenCover(isPresented: $showProfile) {
+                ProfileView(onClose: { showProfile = false })
+            }
         }
         .task(id: session.user?.id) {
             #if DEBUG
@@ -105,7 +109,6 @@ struct DrawsHomeView: View {
             path = route == "invite" ? [.createInvite] : [.createInvite, .inviteDetails]
         }
         if route == "manual" { path = [.manual] }
-        if route == "all" { path = [.allDraws] }
         if route.hasPrefix("detail:") { path = [.detail(inviteCode: String(route.dropFirst(7)))] }
         tabBar.isHidden = !path.isEmpty
     }
@@ -129,63 +132,52 @@ struct DrawsHomeView: View {
             .min { ($0.drawDate ?? .distantFuture) < ($1.drawDate ?? .distantFuture) }
     }
 
+    /// The lists live in the "Etkinliklerim" tab; this card is the way there from home.
     @ViewBuilder
-    private var draws: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(t.allEvents)
-                .font(AppFont.display(19))
-                .foregroundStyle(Palette.text)
-            Spacer()
-            if let store, store.draws.count > 1 {
-                Button(t.seeAll) { path.append(.allDraws) }
-                    .font(AppFont.body(15, .bold))
-                    .foregroundStyle(Palette.brandText)
-            }
-        }
-        .padding(.horizontal, 4)
-        .padding(.top, 8)
-
-        if let store {
-            switch store.phase {
-            case .idle, .loading:
-                ChristmasLoader(label: t.loadingDraws).frame(maxWidth: .infinity).padding(.vertical, 20)
-            case let .failed(message):
-                VStack(spacing: 12) {
-                    Banner(text: message, style: .error)
-                    Button(t.retry) { Task { await store.load(t) } }
+    private var eventsShortcut: some View {
+        let count = (store?.draws.count ?? 0) + participations.items.count
+        Button { tabBar.requestedTab = .events } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "gift.fill")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Palette.goldText)
+                    .frame(width: 42, height: 42)
+                    .background(Palette.goldGradient, in: Circle())
+                    .overlay(Circle().strokeBorder(.white.opacity(0.55), lineWidth: 2))
+                    .background(Circle().fill(Palette.goldDark).offset(y: 3))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(t.tabEvents)
+                        .font(AppFont.display(18))
+                        .foregroundStyle(Palette.text)
+                    Text(t.eventsSub)
+                        .font(AppFont.body(13, .semibold))
+                        .foregroundStyle(Palette.sub)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 8)
+                if count > 0 {
+                    Text("\(count)")
+                        .font(AppFont.body(13, .black))
                         .foregroundStyle(Palette.brandText)
+                        .padding(.horizontal, 9)
+                        .frame(minWidth: 28, minHeight: 26)
+                        .background(Palette.chip, in: Capsule())
                 }
-            case .loaded where store.draws.isEmpty:
-                EmptyHint(text: t.noDraws)
-            case .loaded:
-                ForEach(store.activeFirst.prefix(1)) { draw in
-                    drawLink(draw)
-                }
+                Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.ter)
             }
-        } else {
-            VStack(spacing: 12) {
-                EmptyHint(text: t.guestDrawsHint)
-                Button(t.loginBtn) { session.exitGuestMode() }
-                    .buttonStyle(.primary)
-            }
+            .padding(14)
+            .background(Palette.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
         }
-    }
-
-    @ViewBuilder
-    func drawLink(_ draw: DrawListItem) -> some View {
-        if let code = draw.inviteCode, draw.drawType == .dynamic {
-            NavigationLink(value: DrawsRoute.detail(inviteCode: code)) { DrawRow(draw: draw) }
-                .buttonStyle(.plain)
-        } else {
-            DrawRow(draw: draw)
-        }
+        .buttonStyle(.plain)
+        .padding(.top, 8)
+        .accessibilityIdentifier("home.events")
     }
 
     @ViewBuilder
     private func destination(_ route: DrawsRoute) -> some View {
         switch route {
-        case .allDraws:
-            AllDrawsView(store: store, rowLink: drawLink)
         case .createInvite:
             if let inviteDraft { InviteSettingsView(path: $path, draft: inviteDraft) }
         case .inviteDetails:
@@ -241,6 +233,7 @@ private struct HomeHero: View {
     var topInset: CGFloat = 0
     var name: String?
     var activeCount: Int
+    var onProfile: () -> Void = {}
     @Environment(\.strings) private var t
 
     var body: some View {
@@ -279,16 +272,19 @@ private struct HomeHero: View {
                         }
                 }
                 Spacer(minLength: 8)
-                HStack(spacing: 6) {
-                    Circle().fill(Color(hex: 0x7BE0A0)).frame(width: 8, height: 8)
-                    Text(String(format: t.activeCount, activeCount))
+                // Profile lives here now (it used to be a tab).
+                Button(action: onProfile) {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Palette.goldText)
+                        .frame(width: 44, height: 44)
+                        .background(Palette.goldGradient, in: Circle())
+                        .overlay(Circle().strokeBorder(.white.opacity(0.6), lineWidth: 2))
+                        .background(Circle().fill(Palette.goldDark).offset(y: 3))
                 }
-                .font(AppFont.body(13, .black))
-                .foregroundStyle(Palette.snow)
-                .padding(.horizontal, 14)
-                .frame(height: 36)
-                .background(Color.white.opacity(0.16), in: Capsule())
-                .overlay(Capsule().strokeBorder(Color.white.opacity(0.4), lineWidth: 1.5))
+                .buttonStyle(.plain)
+                .accessibilityLabel(t.profileButton)
+                .accessibilityIdentifier("home.profile")
             }
             .padding(.horizontal, 20)
             .padding(.top, topInset + 36)
@@ -311,7 +307,6 @@ private struct HomeHero: View {
             }
         }
         .frame(height: 300 + topInset)
-        .accessibilityElement(children: .combine)
     }
 }
 
@@ -631,67 +626,5 @@ struct EmptyHint: View {
             .padding(20)
             .background(Palette.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Palette.cardBorder, lineWidth: 2))
-    }
-}
-
-/// Full list behind "See all": fixed red header with the logo, the events scroll in the cream sheet.
-struct AllDrawsView<Row: View>: View {
-    let store: DrawsStore?
-    let rowLink: (DrawListItem) -> Row
-    @Environment(\.strings) private var t
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        VStack(spacing: 0) {
-            header
-            ScrollView {
-                LazyVStack(spacing: 10) {
-                    let draws = store?.activeFirst ?? []
-                    if draws.isEmpty {
-                        EmptyHint(text: t.noDraws)
-                    } else {
-                        ForEach(draws) { rowLink($0) }
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 22)
-                .padding(.bottom, 24)
-            }
-            .refreshable { await store?.load(t) }
-            .clipShape(UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous))
-            .background(
-                UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous)
-                    .fill(Palette.page)
-                    .shadow(color: Color(hex: 0x320000, alpha: 0.3), radius: 18, y: -8)
-                    .ignoresSafeArea(edges: .bottom)
-            )
-        }
-        .background(alignment: .top) {
-            ChristmasBackdrop(garland: true, pines: false).frame(height: 420)
-        }
-        .background(Palette.page.ignoresSafeArea())
-        .toolbar(.hidden, for: .navigationBar)
-        .statusBarStyle(.lightContent)
-    }
-
-    private var header: some View {
-        ZStack(alignment: .topLeading) {
-            VStack(spacing: 0) {
-                Image("lockup")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 62)
-                    .shadow(color: Color(hex: 0x3C0000, alpha: 0.25), radius: 6, y: 3)
-                    .accessibilityLabel("Lets Raffle")
-                Text(t.allEvents)
-                    .font(AppFont.script(28))
-                    .foregroundStyle(Palette.goldLight)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.top, 48)
-            OrnamentBackButton(stringLength: 50) { dismiss() }
-                .padding(.leading, 16)
-        }
-        .padding(.bottom, 14)
     }
 }
