@@ -1,11 +1,15 @@
 import SwiftUI
 
-/// Common layout for multi-step forms: back button + step label, title, scrolling
-/// content and a pinned bottom action.
+/// Common layout for the two "create a draw" steps: the red winter scene stays put at the
+/// top (hanging back ornament, title in script, step pills, Santa); the cream sheet below
+/// scrolls and keeps its action pinned to the bottom.
 struct StepScaffold<Content: View, Bottom: View>: View {
     var step: String?
+    /// 1-based position of this step (out of two), drawn as gold pills.
+    var stepIndex: Int = 1
     let title: String
     var subtitle: String?
+    var mood: SantaMood = .list
     @ViewBuilder var content: Content
     @ViewBuilder var bottom: Bottom
 
@@ -13,82 +17,120 @@ struct StepScaffold<Content: View, Bottom: View>: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                CircleIconButton { dismiss() }
-                Spacer()
-                if let step {
-                    Text(step)
-                        .font(.eyebrow)
-                        .tracking(2.4)
-                        .textCase(.uppercase)
-                        .foregroundStyle(Palette.brandText)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Palette.chip, in: Capsule())
+            header
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 14) {
+                        content
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 22)
+                    .padding(.bottom, 20)
                 }
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 4)
-            .overlay(alignment: .bottom) { Rectangle().fill(Palette.cardBorder).frame(height: 1) }
+                .scrollDismissesKeyboard(.interactively)
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    ScreenHeader(title: title, subtitle: subtitle, titleSize: 30)
-                        .padding(.horizontal, 8)
-                    content
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 14)
-                .padding(.bottom, 24)
+                bottom
+                    .padding(.horizontal, 20)
+                    .padding(.top, 10)
+                    .padding(.bottom, 8)
             }
-            .scrollDismissesKeyboard(.interactively)
-
-            bottom
-                .padding(.horizontal, 20)
-                .padding(.top, 14)
-                .padding(.bottom, 8)
-                .background(
-                    Palette.card
-                        .shadow(color: Color(hex: 0x6E0D12, alpha: 0.08), radius: 15, y: -6)
-                        .ignoresSafeArea(edges: .bottom)
-                )
+            .clipShape(UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous))
+            .background(
+                UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34, style: .continuous)
+                    .fill(Palette.page)
+                    .shadow(color: Color(hex: 0x320000, alpha: 0.3), radius: 18, y: -8)
+                    .ignoresSafeArea(edges: .bottom)
+            )
+        }
+        .background(alignment: .top) {
+            ChristmasBackdrop(garland: true, pines: false).frame(height: 420)
         }
         .background(Palette.page.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
-        .statusBarStyle(.darkContent)
+        .statusBarStyle(.lightContent)
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                // The string runs up behind the status bar, as if hanging from the top edge.
+                OrnamentBackButton(stringLength: 50) { dismiss() }
+                Spacer()
+            }
+            .padding(.leading, 12)
+            .padding(.top, -46)
+            HStack(alignment: .bottom, spacing: 0) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(title)
+                        .font(AppFont.script(40))
+                        .foregroundStyle(Palette.goldLight)
+                        .shadow(color: Color(hex: 0x5A0A0F, alpha: 0.4), radius: 0, y: 2)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                    if let subtitle {
+                        Text(subtitle)
+                            .font(AppFont.body(14, .bold))
+                            .foregroundStyle(Palette.snow.opacity(0.92))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    if let step {
+                        HStack(spacing: 6) {
+                            ForEach(1...2, id: \.self) { index in
+                                Capsule()
+                                    .fill(index <= stepIndex ? AnyShapeStyle(Palette.goldGradient) : AnyShapeStyle(Color.white.opacity(0.28)))
+                                    .frame(width: 30, height: 6)
+                            }
+                            Text(step)
+                                .font(AppFont.body(11, .black)).tracking(1.4)
+                                .textCase(.uppercase)
+                                .foregroundStyle(Palette.snow.opacity(0.9))
+                                .padding(.leading, 4)
+                        }
+                        .padding(.top, 4)
+                    }
+                }
+                .padding(.bottom, 18)
+                Spacer(minLength: 0)
+                SantaAvatar(size: 100, mood: mood)
+            }
+            .padding(.leading, 22)
+            .padding(.trailing, 6)
+            .padding(.top, 2)
+        }
     }
 }
 
-/// Step 1/2 — optional settings and schedule.
+/// Step 1/2 — what to ask the participants for, and when to draw. Three switches, one line
+/// each; the date opens its pickers inside its own card.
 struct InviteSettingsView: View {
     @Binding var path: [DrawsRoute]
     @Bindable var draft: InviteDraft
     @Environment(\.strings) private var t
     @Environment(AppSettings.self) private var settings
 
-    private var hours: [Int] { Array(0..<24) }
+    private var hour: Binding<Int> {
+        Binding(
+            get: { Calendar.current.component(.hour, from: draft.drawDate) },
+            set: { draft.drawDate = Calendar.current.date(bySettingHour: $0, minute: 0, second: 0, of: draft.drawDate) ?? draft.drawDate }
+        )
+    }
+
+    private var day: Binding<Date> {
+        Binding(
+            get: { draft.drawDate },
+            set: { newDay in
+                let h = Calendar.current.component(.hour, from: draft.drawDate)
+                draft.drawDate = Calendar.current.date(bySettingHour: h, minute: 0, second: 0, of: newDay) ?? newDay
+            }
+        )
+    }
 
     var body: some View {
-        StepScaffold(step: t.step1of2, title: t.settingsTitle, subtitle: t.settingsOptional) {
-            CardSection {
-                IconRow(icon: "mappin.and.ellipse", iconTint: Palette.amberText, iconBackground: Palette.amberSoft,
-                        title: t.requireAddress, subtitle: t.requireAddressDesc, showsSeparator: true) {
-                    Toggle(t.requireAddress, isOn: $draft.requireAddress).labelsHidden().toggleStyle(CandyToggleStyle())
-                }
-                IconRow(icon: "phone.fill", iconTint: Palette.amberText, iconBackground: Palette.amberSoft,
-                        title: t.requirePhone, subtitle: t.requirePhoneDesc, showsSeparator: true) {
-                    Toggle(t.requirePhone, isOn: $draft.requirePhone).labelsHidden().toggleStyle(CandyToggleStyle())
-                }
-                IconRow(icon: "calendar", iconTint: Palette.brandText, iconBackground: Palette.chip,
-                        title: t.enableDrawDate, subtitle: t.drawDateEnabledDesc) {
-                    Toggle(t.enableDrawDate, isOn: $draft.scheduleEnabled.animation()).labelsHidden().toggleStyle(CandyToggleStyle())
-                }
-            }
-
-            if draft.scheduleEnabled {
-                ScheduleEditor(date: $draft.drawDate)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+        StepScaffold(step: t.step1of2, stepIndex: 1, title: t.settingsTitle, subtitle: t.settingsHint) {
+            option(icon: "mappin.and.ellipse", tone: 0, title: t.optAddress, isOn: $draft.requireAddress)
+            option(icon: "phone.fill", tone: 1, title: t.optPhone, isOn: $draft.requirePhone)
+            option(icon: "calendar", tone: 2, title: t.optDate, isOn: $draft.scheduleEnabled) {
+                schedule
             }
         } bottom: {
             Button {
@@ -99,9 +141,94 @@ struct InviteSettingsView: View {
                     Image(systemName: "arrow.right")
                 }
             }
-                .buttonStyle(.primary)
-                .accessibilityIdentifier("invite.continue")
+            .buttonStyle(.festive(loading: false))
+            .accessibilityIdentifier("invite.continue")
         }
+    }
+
+    /// Date and hour side by side, then one line saying what will happen.
+    private var schedule: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                DatePicker("", selection: day, in: Calendar.current.startOfDay(for: .now)..., displayedComponents: .date)
+                    .labelsHidden()
+                    .tint(Palette.brand)
+                    .accessibilityLabel(t.dateLabel)
+                Spacer(minLength: 0)
+                Picker("", selection: hour) {
+                    ForEach(0..<24, id: \.self) { h in
+                        Text(String(format: "%02d:00", h)).tag(h)
+                    }
+                }
+                .labelsHidden()
+                .tint(Palette.brandText)
+                .padding(.horizontal, 4)
+                .frame(minHeight: 36)
+                .background(Palette.chip, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .accessibilityLabel(t.timeLabel)
+            }
+            let past = draft.drawDate <= .now
+            HStack(spacing: 6) {
+                Image(systemName: past ? "exclamationmark.triangle.fill" : "sparkles")
+                    .font(.system(size: 12, weight: .bold))
+                Text(past ? t.pastDate : String(format: t.autoDrawOn, DrawDateFormat.long(draft.drawDate, language: settings.language)))
+                    .font(AppFont.body(13, .bold))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .foregroundStyle(past ? Palette.brandText : Palette.greenText)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.horizontal, 14)
+        .padding(.bottom, 14)
+    }
+
+    private func option(icon: String, tone: Int, title: String, isOn: Binding<Bool>) -> some View {
+        option(icon: icon, tone: tone, title: title, isOn: isOn) { EmptyView() }
+    }
+
+    /// One switch per card: bauble icon, a short title, the candy toggle. Tapping anywhere on
+    /// the row flips it; `extra` appears inside the card while it is on.
+    private func option<Extra: View>(icon: String, tone: Int, title: String, isOn: Binding<Bool>, @ViewBuilder extra: () -> Extra) -> some View {
+        let palettes: [([Color], Color, Color)] = [
+            ([Color(hex: 0xE0444A), Palette.cranberry, Palette.cranberryDark], Color(hex: 0x4A080C), Palette.snow),
+            ([Color(hex: 0x3F9A63), Palette.pine, Palette.pineEdge], Color(hex: 0x0C2A1C), Palette.snow),
+            ([Color(hex: 0xFDF0C4), Palette.gold, Palette.goldDark], Color(hex: 0x8A6A1E), Palette.goldText),
+        ]
+        let (colors, edge, foreground) = palettes[tone % palettes.count]
+        let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
+        return VStack(spacing: 0) {
+            HStack(spacing: 14) {
+                Image(systemName: icon)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(foreground)
+                    .frame(width: 42, height: 42)
+                    .background(Circle().fill(RadialGradient(colors: colors, center: UnitPoint(x: 0.34, y: 0.28), startRadius: 1, endRadius: 30)))
+                    .overlay(Circle().strokeBorder(Palette.goldLight.opacity(0.85), lineWidth: 2))
+                    .background(Circle().fill(edge).offset(y: 3))
+                Text(title)
+                    .font(AppFont.display(19))
+                    .foregroundStyle(Palette.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Spacer(minLength: 8)
+                Toggle(isOn: isOn.animation(.spring(duration: 0.3))) { EmptyView() }
+                    .toggleStyle(CandyToggleStyle())
+                    .accessibilityLabel(title)
+            }
+            .padding(.horizontal, 14)
+            .frame(minHeight: 70)
+            .contentShape(Rectangle())
+            .onTapGesture { withAnimation(.spring(duration: 0.3)) { isOn.wrappedValue.toggle() } }
+
+            if isOn.wrappedValue {
+                extra()
+                    .transition(.opacity)
+            }
+        }
+        .background(Palette.card, in: shape)
+        .overlay(shape.strokeBorder(isOn.wrappedValue ? Palette.gold : Palette.cardBorder, lineWidth: 2))
+        .background(shape.fill(isOn.wrappedValue ? Palette.goldDark.opacity(0.55) : Palette.cardBorder).offset(y: 4))
+        .padding(.bottom, 4)
     }
 }
 
@@ -190,7 +317,7 @@ struct InviteOrganizerView: View {
 
     var body: some View {
         let errors = showErrors ? draft.validationErrors(t) : [:]
-        StepScaffold(step: t.step2of2, title: t.yourDetails, subtitle: t.yourDetailsSub) {
+        StepScaffold(step: t.step2of2, stepIndex: 2, title: t.yourDetails, subtitle: t.yourDetailsSub, mood: .invite) {
             VStack(spacing: 12) {
                 if let serverError {
                     Banner(text: serverError, style: .error)

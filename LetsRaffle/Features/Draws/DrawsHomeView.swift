@@ -97,8 +97,10 @@ struct DrawsHomeView: View {
     #if DEBUG
     private func applyDebugRoute() {
         guard path.isEmpty, let route = DebugRoute.current else { return }
-        if route == "invite" { open(.createInvite) }
-        if route == "invite2" { open(.createInvite); path.append(.inviteDetails) }
+        if route == "invite" || route == "invite2" {
+            inviteDraft = InviteDraft(email: session.user?.email ?? "")
+            path = route == "invite" ? [.createInvite] : [.createInvite, .inviteDetails]
+        }
         if route == "manual" { open(.manual) }
         if route == "all" { path = [.allDraws] }
         if route.hasPrefix("detail:") { path = [.detail(inviteCode: String(route.dropFirst(7)))] }

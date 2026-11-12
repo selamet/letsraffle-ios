@@ -86,6 +86,11 @@ extension Strings {
     var myDraws: String { l("Çekilişlerim", "My draws") }
     var nextDraw: String { l("Sıradaki çekiliş", "Next draw") }
     var allEvents: String { l("Tüm etkinlikler", "All events") }
+    var settingsHint: String { l("Hepsi isteğe bağlı.", "All optional.") }
+    var optAddress: String { l("Adres iste", "Ask for address") }
+    var optPhone: String { l("Telefon iste", "Ask for phone") }
+    var optDate: String { l("Tarih belirle", "Set a date") }
+    var autoDrawOn: String { l("Otomatik çekiliş: %@", "Automatic draw: %@") }
     var newYearEyebrow: String { l("YILBAŞINA KALAN", "UNTIL NEW YEAR") }
     var unitDays: String { l("gün", "days") }
     var unitHours: String { l("saat", "hours") }
