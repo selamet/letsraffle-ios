@@ -127,9 +127,12 @@ struct InviteSettingsView: View {
 
     var body: some View {
         StepScaffold(step: t.step1of2, stepIndex: 1, title: t.settingsTitle, subtitle: t.settingsHint) {
-            option(icon: "mappin.and.ellipse", tone: 0, title: t.optAddress, isOn: $draft.requireAddress)
-            option(icon: "phone.fill", tone: 1, title: t.optPhone, isOn: $draft.requirePhone)
-            option(icon: "calendar", tone: 2, title: t.optDate, isOn: $draft.scheduleEnabled) {
+            sectionTitle(t.askSection)
+            option(icon: "mappin.and.ellipse", tone: 0, title: t.optAddress, isOn: $draft.requireAddress, info: t.optAddressInfo)
+            option(icon: "phone.fill", tone: 1, title: t.optPhone, isOn: $draft.requirePhone, info: t.optPhoneInfo)
+
+            sectionTitle(t.whenSection).padding(.top, 6)
+            option(icon: "calendar", tone: 2, title: t.optDate, isOn: $draft.scheduleEnabled, info: nil, offInfo: t.optDateOff) {
                 schedule
             }
         } bottom: {
@@ -146,49 +149,87 @@ struct InviteSettingsView: View {
         }
     }
 
-    /// Date and hour side by side, then one line saying what will happen.
+    private func sectionTitle(_ text: String) -> some View {
+        Text(text)
+            .font(AppFont.body(12, .black)).tracking(1.8)
+            .foregroundStyle(Palette.sub)
+            .padding(.horizontal, 8)
+            .padding(.bottom, -4)
+    }
+
+    /// Two labelled fields (date, hour) and a summary of what will happen.
     private var schedule: some View {
-        VStack(spacing: 10) {
+        let past = draft.drawDate <= .now
+        return VStack(spacing: 10) {
             HStack(spacing: 10) {
-                DatePicker("", selection: day, in: Calendar.current.startOfDay(for: .now)..., displayedComponents: .date)
+                pickerField(label: t.dateLabel, icon: "calendar") {
+                    DatePicker("", selection: day, in: Calendar.current.startOfDay(for: .now)..., displayedComponents: .date)
+                        .labelsHidden()
+                        .tint(Palette.brand)
+                        .accessibilityLabel(t.dateLabel)
+                }
+                pickerField(label: t.timeLabel, icon: "clock.fill") {
+                    Picker("", selection: hour) {
+                        ForEach(0..<24, id: \.self) { h in
+                            Text(String(format: "%02d:00", h)).tag(h)
+                        }
+                    }
                     .labelsHidden()
-                    .tint(Palette.brand)
-                    .accessibilityLabel(t.dateLabel)
-                Spacer(minLength: 0)
-                Picker("", selection: hour) {
-                    ForEach(0..<24, id: \.self) { h in
-                        Text(String(format: "%02d:00", h)).tag(h)
+                    .tint(Palette.brandText)
+                    .accessibilityLabel(t.timeLabel)
+                }
+            }
+
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: past ? "exclamationmark.triangle.fill" : "sparkles")
+                    .font(.system(size: 15, weight: .bold))
+                    .padding(.top, 2)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(past ? t.pastDate : DrawDateFormat.long(draft.drawDate, language: settings.language))
+                        .font(AppFont.display(16))
+                        .fixedSize(horizontal: false, vertical: true)
+                    if !past {
+                        Text(t.optDateInfo)
+                            .font(AppFont.body(12.5, .bold))
+                            .opacity(0.85)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .labelsHidden()
-                .tint(Palette.brandText)
-                .padding(.horizontal, 4)
-                .frame(minHeight: 36)
-                .background(Palette.chip, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                .accessibilityLabel(t.timeLabel)
-            }
-            let past = draft.drawDate <= .now
-            HStack(spacing: 6) {
-                Image(systemName: past ? "exclamationmark.triangle.fill" : "sparkles")
-                    .font(.system(size: 12, weight: .bold))
-                Text(past ? t.pastDate : String(format: t.autoDrawOn, DrawDateFormat.long(draft.drawDate, language: settings.language)))
-                    .font(AppFont.body(13, .bold))
-                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
             }
             .foregroundStyle(past ? Palette.brandText : Palette.greenText)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(past ? Palette.chip : Palette.greenSoft, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .padding(.horizontal, 14)
         .padding(.bottom, 14)
     }
 
-    private func option(icon: String, tone: Int, title: String, isOn: Binding<Bool>) -> some View {
-        option(icon: icon, tone: tone, title: title, isOn: isOn) { EmptyView() }
+    private func pickerField<Control: View>(label: String, icon: String, @ViewBuilder control: () -> Control) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 5) {
+                Image(systemName: icon).font(.system(size: 10, weight: .bold))
+                Text(label).font(AppFont.body(11, .black)).tracking(1.2).textCase(.uppercase)
+            }
+            .foregroundStyle(Palette.sub)
+            control()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Palette.field, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Palette.fieldBorder, lineWidth: 2))
+    }
+
+    private func option(icon: String, tone: Int, title: String, isOn: Binding<Bool>, info: String?) -> some View {
+        option(icon: icon, tone: tone, title: title, isOn: isOn, info: info, offInfo: nil) { EmptyView() }
     }
 
     /// One switch per card: bauble icon, a short title, the candy toggle. Tapping anywhere on
-    /// the row flips it; `extra` appears inside the card while it is on.
-    private func option<Extra: View>(icon: String, tone: Int, title: String, isOn: Binding<Bool>, @ViewBuilder extra: () -> Extra) -> some View {
+    /// the row flips it. While it is on, `extra` and a short note (`info`) open inside the
+    /// card; `offInfo` is the note for the off state, when that needs saying.
+    private func option<Extra: View>(icon: String, tone: Int, title: String, isOn: Binding<Bool>, info: String?, offInfo: String?, @ViewBuilder extra: () -> Extra) -> some View {
         let palettes: [([Color], Color, Color)] = [
             ([Color(hex: 0xE0444A), Palette.cranberry, Palette.cranberryDark], Color(hex: 0x4A080C), Palette.snow),
             ([Color(hex: 0x3F9A63), Palette.pine, Palette.pineEdge], Color(hex: 0x0C2A1C), Palette.snow),
@@ -196,6 +237,7 @@ struct InviteSettingsView: View {
         ]
         let (colors, edge, foreground) = palettes[tone % palettes.count]
         let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
+        let on = isOn.wrappedValue
         return VStack(spacing: 0) {
             HStack(spacing: 14) {
                 Image(systemName: icon)
@@ -205,6 +247,7 @@ struct InviteSettingsView: View {
                     .background(Circle().fill(RadialGradient(colors: colors, center: UnitPoint(x: 0.34, y: 0.28), startRadius: 1, endRadius: 30)))
                     .overlay(Circle().strokeBorder(Palette.goldLight.opacity(0.85), lineWidth: 2))
                     .background(Circle().fill(edge).offset(y: 3))
+                    .saturation(on ? 1 : 0.55)
                 Text(title)
                     .font(AppFont.display(19))
                     .foregroundStyle(Palette.text)
@@ -220,14 +263,32 @@ struct InviteSettingsView: View {
             .contentShape(Rectangle())
             .onTapGesture { withAnimation(.spring(duration: 0.3)) { isOn.wrappedValue.toggle() } }
 
-            if isOn.wrappedValue {
-                extra()
-                    .transition(.opacity)
+            if on {
+                extra().transition(.opacity)
+            }
+            if let note = on ? info : offInfo {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: on ? "checkmark.seal.fill" : "info.circle.fill")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(on ? Palette.greenText : Palette.ter)
+                        .padding(.top, 1)
+                    Text(note)
+                        .font(AppFont.body(13, .bold))
+                        .foregroundStyle(on ? Palette.greenText : Palette.sub)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 9)
+                .background(on ? Palette.greenSoft : Palette.page, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .padding(.horizontal, 14)
+                .padding(.bottom, 14)
+                .transition(.opacity)
             }
         }
         .background(Palette.card, in: shape)
-        .overlay(shape.strokeBorder(isOn.wrappedValue ? Palette.gold : Palette.cardBorder, lineWidth: 2))
-        .background(shape.fill(isOn.wrappedValue ? Palette.goldDark.opacity(0.55) : Palette.cardBorder).offset(y: 4))
+        .overlay(shape.strokeBorder(on ? Palette.gold : Palette.cardBorder, lineWidth: 2))
+        .background(shape.fill(on ? Palette.goldDark.opacity(0.55) : Palette.cardBorder).offset(y: 4))
         .padding(.bottom, 4)
     }
 }

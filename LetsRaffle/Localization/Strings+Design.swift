@@ -87,6 +87,12 @@ extension Strings {
     var nextDraw: String { l("Sıradaki çekiliş", "Next draw") }
     var allEvents: String { l("Tüm etkinlikler", "All events") }
     var settingsHint: String { l("Hepsi isteğe bağlı.", "All optional.") }
+    var askSection: String { l("KATILIMCILARDAN İSTE", "ASK PARTICIPANTS FOR") }
+    var whenSection: String { l("ÇEKİLİŞ ZAMANI", "WHEN TO DRAW") }
+    var optAddressInfo: String { l("Herkes katılırken adresini yazar; hediyeler doğru adrese gider.", "Everyone enters their address when joining, so gifts reach the right door.") }
+    var optPhoneInfo: String { l("Herkes katılırken telefonunu yazar; kargo ve iletişim kolaylaşır.", "Everyone enters their phone number when joining; handy for delivery.") }
+    var optDateInfo: String { l("O saat gelince çekiliş kendiliğinden yapılır.", "The draw runs by itself at that time.") }
+    var optDateOff: String { l("Kapalıyken çekilişi istediğin zaman sen başlatırsın.", "While off, you start the draw yourself whenever you like.") }
     var optAddress: String { l("Adres iste", "Ask for address") }
     var optPhone: String { l("Telefon iste", "Ask for phone") }
     var optDate: String { l("Tarih belirle", "Set a date") }
