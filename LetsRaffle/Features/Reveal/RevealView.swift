@@ -70,6 +70,11 @@ struct RevealView: View {
             #if DEBUG
             if UserDefaults.standard.bool(forKey: "revealOpen") { stage = .result }
             if UserDefaults.standard.string(forKey: "revealStage") != nil, let debugStage = Stage(rawValue: UserDefaults.standard.integer(forKey: "revealStage")) { stage = debugStage }
+            if UserDefaults.standard.bool(forKey: "revealAutoOpen") {
+                stage = .gift
+                try? await Task.sleep(for: .seconds(6))
+                openGift()
+            }
             #endif
         }
         .task(id: stage) {
@@ -340,7 +345,8 @@ struct RevealView: View {
                     .frame(maxWidth: 250)
             }
             .buttonStyle(.plain)
-            .disabled(opening)
+            // Not `.disabled`: that dims the label, which made the box see-through while it opened.
+            .allowsHitTesting(!opening)
             .sensoryFeedback(.success, trigger: opening)
             .accessibilityLabel(t.revealGiftCta)
             .accessibilityIdentifier("reveal.gift")
