@@ -40,7 +40,12 @@ enum API {
         Endpoint(
             method: .post,
             path: "auth/apple",
-            body: AppleSignInRequest(identityToken: credential.identityToken, firstName: credential.firstName, lastName: credential.lastName)
+            body: AppleSignInRequest(
+                identityToken: credential.identityToken,
+                authorizationCode: credential.authorizationCode,
+                firstName: credential.firstName,
+                lastName: credential.lastName
+            )
         )
     }
 

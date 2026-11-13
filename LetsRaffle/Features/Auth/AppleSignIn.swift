@@ -4,6 +4,9 @@ import SwiftUI
 /// Result of a successful Apple authorization.
 struct AppleCredential: Equatable {
     let identityToken: String
+    /// One-time code the backend exchanges for the refresh token it revokes
+    /// when the account is deleted (App Store guideline 5.1.1(v)).
+    var authorizationCode: String? = nil
     let firstName: String?
     let lastName: String?
 }
@@ -29,9 +32,11 @@ final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate,
     nonisolated func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         let credential = authorization.credential as? ASAuthorizationAppleIDCredential
         let token = credential?.identityToken.flatMap { String(data: $0, encoding: .utf8) }
+        let code = credential?.authorizationCode.flatMap { String(data: $0, encoding: .utf8) }
         let result = token.map {
             AppleCredential(
                 identityToken: $0,
+                authorizationCode: code,
                 firstName: credential?.fullName?.givenName,
                 lastName: credential?.fullName?.familyName
             )
