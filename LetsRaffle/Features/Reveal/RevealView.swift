@@ -83,6 +83,11 @@ struct RevealView: View {
             try? await Task.sleep(for: .seconds(reduceMotion ? 0.3 : 3.4))
             if !Task.isCancelled { withAnimation(.easeOut(duration: 0.4)) { santaReady = true } }
         }
+        .task(id: isResult) {
+            // Once the match is on screen, line up the "have you bought the gift?" nudge.
+            guard isResult, settings.notificationsEnabled else { return }
+            await GiftReminder.schedule(inviteCode: store.inviteCode, t: t)
+        }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.userDidTakeScreenshotNotification)) { _ in
             if stage == .result { screenshotTaken = true }
         }

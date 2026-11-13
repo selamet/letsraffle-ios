@@ -26,6 +26,10 @@ extension Strings {
     var tryWithoutAccount: String { l("Hesap açmadan dene:", "Try without an account:") }
     var manualDraw: String { l("Manuel çekiliş", "Manual draw") }
 
+    // Local gift reminder (no names: a lock screen must not spoil the surprise)
+    var giftReminderTitle: String { l("Yılbaşına 3 gün kaldı 🎁", "3 days until New Year's Eve 🎁") }
+    var giftReminderBody: String { l("Hediyeni aldın mı? Kime alacağını görmek için dokun.", "Got your gift yet? Tap to see who you're buying for.") }
+
     // Reveal (same steps and copy as the website)
     var revealLoading: String { l("Sürprizin hazırlanıyor…", "Getting your surprise ready…") }
     var revealEyebrow: String { l("ÇEKİLİŞ YAPILDI!", "THE DRAW IS DONE!") }

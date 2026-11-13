@@ -3,11 +3,15 @@ import Observation
 import UIKit
 import UserNotifications
 
-/// Push payload `type` values sent by letsraffle-api.
+/// Notification `type` values: the ones sent by letsraffle-api plus the local gift reminder.
 enum PushKind: String {
     case matchRevealed = "match_revealed"
     case participantJoined = "participant_joined"
     case drawReminder = "draw_reminder"
+    /// A scheduled draw could not run because fewer than 3 people joined (organizer only).
+    case drawNotRun = "draw_not_run"
+    /// Local notification scheduled by `GiftReminder`.
+    case giftReminder = "gift_reminder"
 }
 
 /// Owns notification permission, APNs registration and backend device sync.
@@ -72,6 +76,7 @@ final class PushManager {
                 await refreshAuthorization()
             }
         } else {
+            GiftReminder.cancelAll()
             await unregister()
         }
     }
@@ -107,8 +112,8 @@ final class PushManager {
         guard let raw = userInfo["type"] as? String, let kind = PushKind(rawValue: raw),
               let code = userInfo["inviteCode"] as? String else { return nil }
         switch kind {
-        case .matchRevealed: return .reveal(inviteCode: code)
-        case .participantJoined, .drawReminder: return .drawDetail(inviteCode: code)
+        case .matchRevealed, .giftReminder: return .reveal(inviteCode: code)
+        case .participantJoined, .drawReminder, .drawNotRun: return .drawDetail(inviteCode: code)
         }
     }
 
