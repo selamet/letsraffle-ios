@@ -46,7 +46,7 @@ final class RevealStore {
         if UserDefaults.standard.bool(forKey: "revealDemo") {
             phase = .revealed(MatchResult(
                 drawId: 7, inviteCode: inviteCode,
-                receiver: .init(firstName: "Mehmet", lastName: "Kaya", address: "Bağdat Cad. No:12 D:5, Kadıköy / İstanbul", phone: "+90 532 123 45 67")
+                receiver: .init(firstName: UserDefaults.standard.string(forKey: "revealDemoFirst") ?? "Mehmet", lastName: UserDefaults.standard.string(forKey: "revealDemoLast") ?? "Kaya", address: "Bağdat Cad. No:12 D:5, Kadıköy / İstanbul", phone: "+90 532 123 45 67")
             ))
             return
         }
