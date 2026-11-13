@@ -93,5 +93,23 @@ final class AppleSignInSessionTests: XCTestCase {
         XCTAssertEqual(json["identity_token"] as? String, "jwt")
         XCTAssertEqual(json["first_name"] as? String, "Ayşe")
         XCTAssertNil(json["last_name"])
+        XCTAssertNil(json["authorization_code"], "omitted when Apple returns no code")
+    }
+
+    /// The backend needs the code to revoke the user's Apple tokens on account deletion.
+    func testAppleSignInSendsAuthorizationCode() async throws {
+        MockURLProtocol.reset()
+        MockURLProtocol.handler = { _ in .init(status: 200, body: Fixtures.tokenResponse(access: "a", refresh: "r")) }
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+        let api = APIClient(baseURL: URL(string: "https://api.test/api/v1")!, session: MockURLProtocol.makeSession(), tokenStore: InMemoryTokenStore())
+        let session = SessionStore(api: api, defaults: defaults)
+
+        try await session.signInWithApple(AppleCredential(identityToken: "jwt", authorizationCode: "one-time-code", firstName: nil, lastName: nil))
+
+        let request = try XCTUnwrap(MockURLProtocol.requests.first)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: request.httpBody!) as? [String: Any])
+        XCTAssertEqual(json["identity_token"] as? String, "jwt")
+        XCTAssertEqual(json["authorization_code"] as? String, "one-time-code")
     }
 }
