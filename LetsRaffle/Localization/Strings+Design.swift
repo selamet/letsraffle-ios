@@ -98,7 +98,8 @@ extension Strings {
     var emptyManual: String { l("Henüz kimse yok. İlk katılımcıyı ekle!", "Nobody yet. Add the first participant!") }
     var tabHome: String { l("Ana Sayfa", "Home") }
     var tabEvents: String { l("Etkinliklerim", "My events") }
-    var eventsSub: String { l("Kurdukların ve katıldıkların tek yerde.", "Everything you created and joined, in one place.") }
+    var codePlaceholder: String { l("miskin-penguen-53", "jolly-reindeer-742") }
+    var eventsSub: String { l("Kurdukların ve katıldıkların tek yerde.", "Created and joined, in one place.") }
     var eventsCreated: String { l("Oluşturduklarım", "Created") }
     var eventsJoined: String { l("Katıldıklarım", "Joined") }
     var eventsEmptyCreated: String { l("Henüz çekiliş oluşturmadın.", "You haven't created a draw yet.") }

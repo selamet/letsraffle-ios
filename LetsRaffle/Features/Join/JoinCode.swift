@@ -29,7 +29,7 @@ struct JoinCodeCard: View {
                 .font(.fieldLabel)
                 .foregroundStyle(Color(light: 0x5B3A3A, dark: 0xE8D2C8))
                 .padding(.top, 4)
-            TextField("", text: $code, prompt: Text("miskin-penguen-53").foregroundStyle(Palette.ter))
+            TextField("", text: $code, prompt: Text(t.codePlaceholder).foregroundStyle(Palette.ter))
                 .font(AppFont.display(22, black: false))
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Palette.brandText)
