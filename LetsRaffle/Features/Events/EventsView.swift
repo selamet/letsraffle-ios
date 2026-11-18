@@ -16,6 +16,7 @@ struct EventsView: View {
     @Environment(ParticipationStore.self) private var participations
     @Environment(TabBarVisibility.self) private var tabBar
     @Environment(AppSettings.self) private var settings
+    @Environment(PushManager.self) private var push
 
     @State private var store: DrawsStore?
     @State private var path: [EventsRoute] = []
@@ -78,6 +79,9 @@ struct EventsView: View {
             if store == nil { store = DrawsStore(api: session.api) }
             await store?.load(t)
             pickDefaultSegment()
+            // Organizers who created their draws on the web have never been asked for notification
+            // permission in the app; ask once, so they hear when people join.
+            if !(store?.draws.isEmpty ?? true) { push.promptIfAppropriate() }
         }
         .onAppear { Task { await store?.load(t) } }
         .onChange(of: path) { _, newPath in

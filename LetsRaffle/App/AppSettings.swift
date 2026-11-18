@@ -40,6 +40,11 @@ final class AppSettings {
         didSet { defaults.set(notificationsEnabled, forKey: Keys.notifications) }
     }
 
+    /// Every-other-evening New Year countdown notifications (local, on this device).
+    var countdownEnabled: Bool {
+        didSet { defaults.set(countdownEnabled, forKey: Keys.countdown) }
+    }
+
     var strings: Strings { language.strings }
 
     init(defaults: UserDefaults = .standard) {
@@ -47,11 +52,13 @@ final class AppSettings {
         language = defaults.string(forKey: Keys.language).flatMap(AppLanguage.init) ?? .deviceDefault
         appearance = defaults.string(forKey: Keys.appearance).flatMap(AppearancePreference.init) ?? .system
         notificationsEnabled = defaults.object(forKey: Keys.notifications) as? Bool ?? true
+        countdownEnabled = defaults.object(forKey: Keys.countdown) as? Bool ?? true
     }
 
     private enum Keys {
         static let language = "settings.language"
         static let appearance = "settings.appearance"
         static let notifications = "settings.notifications"
+        static let countdown = "settings.countdown"
     }
 }

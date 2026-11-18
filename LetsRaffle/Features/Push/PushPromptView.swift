@@ -39,7 +39,8 @@ struct PushPromptView: View {
                     CardSection {
                         item("gift.fill", Palette.brand, t.pushItem1, separator: true)
                         item("person.2.fill", Palette.pine, t.pushItem2, separator: true)
-                        item("alarm.fill", Palette.goldDark, t.pushItem3)
+                        item("alarm.fill", Palette.goldDark, t.pushItem3, separator: true)
+                        item("sparkles", Palette.cranberryDark, t.pushItem4)
                     }
                     .padding(.top, 4)
 

@@ -9,6 +9,7 @@ struct LetsRaffleApp: App {
     @State private var participations = ParticipationStore()
     @State private var router = DeepLinkRouter()
     @State private var push = PushManager()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -43,6 +44,10 @@ struct LetsRaffleApp: App {
                     WidgetSync.shared.update(language: language)
                     Task { await push.sync() }
                 }
+                // The New Year countdown follows the switches, the language and the permission.
+                .task(id: countdownKey) {
+                    await SeasonCountdown.reschedule(enabled: settings.notificationsEnabled && settings.countdownEnabled, t: settings.strings)
+                }
                 .onChange(of: session.isSignedIn) { _, signedIn in
                     if !signedIn { WidgetSync.shared.update(draws: []) }
                 }
@@ -51,6 +56,10 @@ struct LetsRaffleApp: App {
                         .environment(\.strings, settings.strings)
                 }
         }
+    }
+
+    private var countdownKey: String {
+        "\(settings.notificationsEnabled)-\(settings.countdownEnabled)-\(settings.language.rawValue)-\(push.authorization.rawValue)-\(scenePhase == .active)"
     }
 
     @MainActor

@@ -26,6 +26,38 @@ extension Strings {
     var tryWithoutAccount: String { l("Hesap açmadan dene:", "Try without an account:") }
     var manualDraw: String { l("Manuel çekiliş", "Manual draw") }
 
+    // New Year countdown (local notifications every other evening; "{d}" = days left)
+    var countdownSetting: String { l("Yılbaşı geri sayımı", "New Year countdown") }
+    var pushItem4: String { l("Yılbaşına kadar iki günde bir geri sayım", "A New Year countdown every other evening") }
+    var countdownEveTitle: String { l("Mutlu yıllar! 🎆", "Happy New Year! 🎆") }
+    var countdownEveBody: String { l("Yeni yılın sağlık, mutluluk ve güzel hediyelerle gelsin. Lets Raffle'dan sevgiler!", "Wishing you a year full of joy and good gifts. Love from Lets Raffle!") }
+    var countdownMessages: [(title: String, body: String)] {
+        isTR ? [
+            ("Yılbaşına {d} gün kaldı 🎄", "Çekilişini kurdun mu? Linki paylaş, herkes katılsın."),
+            ("{d} gün sonra yeni yıl! 🎁", "Noel Baba torbasını hazırlıyor. Senin hediye listen hazır mı?"),
+            ("Geri sayım sürüyor ✨", "Yılbaşına {d} gün var. Ofis çekilişi için QR'lı afişi duvara as."),
+            ("Noel Baba listeyi kontrol ediyor 🎅", "Yılbaşına {d} gün kaldı. Bu yıl kimin hediyesini alacaksın?"),
+            ("Kar yağsın, çekiliş başlasın ❄️", "Yılbaşına {d} gün kaldı. Sıcak bir içecek, güzel bir çekiliş."),
+            ("Hediye avı zamanı 🛍️", "Yılbaşına {d} gün kaldı. Eşleşmeni gördüysen hediyeni seçmeye başla."),
+        ] : [
+            ("{d} days until New Year 🎄", "Have you set up your Secret Santa? Share the link and let everyone join."),
+            ("New Year in {d} days! 🎁", "Santa is packing his sack. Is your gift list ready?"),
+            ("The countdown is on ✨", "{d} days to go. Pin the QR poster up for the office draw."),
+            ("Santa is checking his list 🎅", "{d} days until New Year. Who are you buying for this year?"),
+            ("Let it snow ❄️", "{d} days until New Year. A warm drink and a good draw."),
+            ("Time to go gift hunting 🛍️", "{d} days to go. Seen your match? Start picking the gift."),
+        ]
+    }
+    var countdownFinal: [(title: String, body: String)] {
+        isTR ? [
+            ("Son düzlük! ⏰", "Yılbaşına {d} gün kaldı. Çekilişini daha yapmadıysan tam zamanı."),
+            ("Hediyeler paketlendi mi? 🎀", "Yılbaşına {d} gün kaldı. Kurdeleyi unutma!"),
+        ] : [
+            ("Final stretch! ⏰", "{d} days until New Year. If you haven't drawn names yet, now is the time."),
+            ("Gifts wrapped yet? 🎀", "{d} days to go. Don't forget the ribbon!"),
+        ]
+    }
+
     // Local gift reminder (no names: a lock screen must not spoil the surprise)
     var giftReminderTitle: String { l("Yılbaşına 3 gün kaldı 🎁", "3 days until New Year's Eve 🎁") }
     var giftReminderBody: String { l("Hediyeni aldın mı? Kime alacağını görmek için dokun.", "Got your gift yet? Tap to see who you're buying for.") }

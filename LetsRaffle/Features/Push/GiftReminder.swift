@@ -24,7 +24,7 @@ enum GiftReminder {
         let content = UNMutableNotificationContent()
         content.title = t.giftReminderTitle
         content.body = t.giftReminderBody
-        content.sound = .default
+        content.sound = UNNotificationSound(named: UNNotificationSoundName(SeasonCountdown.soundName))
         content.userInfo = ["type": PushKind.giftReminder.rawValue, "inviteCode": inviteCode]
         return content
     }

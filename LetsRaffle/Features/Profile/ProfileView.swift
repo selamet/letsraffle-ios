@@ -40,6 +40,11 @@ struct ProfileView: View {
                         row(icon: .symbol("bell.fill"), tint: Palette.goldDark, title: t.notifications, separator: true) {
                             Toggle(isOn: $settings.notificationsEnabled) { EmptyView() }.toggleStyle(CandyToggleStyle()).accessibilityLabel(t.notifications)
                         }
+                        if settings.notificationsEnabled {
+                            row(icon: .symbol("sparkles"), tint: Palette.pine, title: t.countdownSetting, separator: true) {
+                                Toggle(isOn: $settings.countdownEnabled) { EmptyView() }.toggleStyle(CandyToggleStyle()).accessibilityLabel(t.countdownSetting)
+                            }
+                        }
                         Button { showWidgetHelp = true } label: {
                             row(icon: .symbol("square.grid.2x2.fill"), tint: Palette.brand, title: t.widgets) { chevron }
                         }
