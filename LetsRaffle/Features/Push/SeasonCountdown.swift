@@ -1,7 +1,7 @@
 import Foundation
 import UserNotifications
 
-/// Kind New Year wishes as local notifications, every other evening from November until New Year's Eve.
+/// Kind New Year wishes as local notifications, every evening from November until New Year's Eve.
 /// They are words of hope and encouragement, not advertising for the app.
 ///
 /// Scheduled on the device (no server involved) with the festive `jingle.caf` sound. The dates are
@@ -21,8 +21,12 @@ enum SeasonCountdown {
         let isNewYearsEve: Bool
     }
 
-    /// Every other day from 1 November (same parity every year) until 30 December at 19:30,
-    /// plus 31 December at 20:00. Only moments still ahead of `now` are returned.
+    /// iOS keeps at most 64 pending local notifications per app; leave room for the gift reminders.
+    static let maxPending = 45
+
+    /// Every evening from 1 November until 30 December at 19:30, plus 31 December at 20:00.
+    /// Only moments still ahead of `now` are returned, at most `maxPending` evenings plus New Year's Eve
+    /// (the rest are added when the app is opened again).
     static func schedule(now: Date = .now, calendar: Calendar = .current) -> [Item] {
         let year = calendar.component(.year, from: now)
         guard calendar.component(.month, from: now) >= 11,
@@ -32,7 +36,7 @@ enum SeasonCountdown {
 
         var items: [Item] = []
         var day = seasonStart
-        while let next = calendar.date(byAdding: .day, value: 2, to: day), day < eve {
+        while let next = calendar.date(byAdding: .day, value: 1, to: day), day < eve {
             if let fire = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: day),
                fire > now, calendar.component(.day, from: day) != 31 {
                 let left = calendar.dateComponents([.day], from: calendar.startOfDay(for: day), to: newYear).day ?? 0
@@ -40,6 +44,7 @@ enum SeasonCountdown {
             }
             day = next
         }
+        items = Array(items.prefix(maxPending))
         if eve > now { items.append(Item(date: eve, daysLeft: 1, isNewYearsEve: true)) }
         return items
     }

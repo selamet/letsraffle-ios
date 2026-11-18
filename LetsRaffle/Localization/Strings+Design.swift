@@ -28,7 +28,7 @@ extension Strings {
 
     // New Year wishes: local notifications every other evening, kind words rather than ads ("{d}" = days left)
     var countdownSetting: String { l("Yeni yıl dilekleri", "New Year wishes") }
-    var pushItem4: String { l("Yılbaşına kadar iki günde bir güzel dilekler", "Kind words every other evening until New Year") }
+    var pushItem4: String { l("Yılbaşına kadar her akşam güzel dilekler", "Kind words every evening until New Year") }
     var countdownEveTitle: String { l("Mutlu yıllar! 🎆", "Happy New Year! 🎆") }
     var countdownEveBody: String { l("Yeni yılın umutla, sağlıkla ve sevdiklerinle dolu olsun. İyi ki varsın.", "May your new year be full of hope, health and the people you love. We're glad you're here.") }
     var countdownMessages: [(title: String, body: String)] {
@@ -45,6 +45,18 @@ extension Strings {
             ("Paylaştıkça çoğalır 🎁", "En güzel hediye birine ayırdığın zaman. Bu hafta sevdiğin birine vakit ayır."),
             ("Hafifle 🍂", "Taşıması ağır gelenleri bu yılda bırakabilirsin. Yeni yıl hafif başlasın."),
             ("Gece en karanlıkken 🌙", "Sabah yakındır. Zor günler de geçer; sen onlardan daha güçlüsün."),
+            ("Bugün için bir iyilik 🌼", "Bugün kendin için küçük bir iyilik yap: bir çay, kısa bir yürüyüş ya da sevdiğin bir şarkı."),
+            ("Yeni yıla {d} gün 💫", "Geçen yıl bu zamanlar seni üzen şeylerin çoğu artık geride. Bugünküler de geçecek."),
+            ("Minnet listesi 📝", "Bugün minnettar olduğun üç şeyi düşün. Küçük olmaları hiç sorun değil."),
+            ("Yanında olanlar 💛", "Seni olduğun gibi seven insanlar var. Bugün onlardan birini hatırla."),
+            ("Dinlenmek de bir adım 😴", "Durmak geride kalmak değildir. Bazen en iyi ilerleme biraz dinlenmektir."),
+            ("Hayallerin seni bekliyor 🎈", "Ertelediğin o hayal için yeni yılda küçük bir adım at."),
+            ("Yeni yıla {d} gün 🌸", "Kendinle konuşurken, en sevdiğin arkadaşınla konuşur gibi konuş."),
+            ("Işığını kısma 🔆", "Varlığın birilerinin gününü aydınlatıyor, sen farkında olmasan bile."),
+            ("Bir adım yeter 👣", "Bütün merdiveni görmek zorunda değilsin. İlk basamağa adım atman yeter."),
+            ("Gülümse 😊", "Bugün seni gülümseten küçük bir şeyi fark et ve biraz daha uzun gülümse."),
+            ("Kendine zaman tanı ⏳", "Bazı şeyler zaman ister. O zamanı kendine de tanı."),
+            ("Yeni yıla {d} gün 🍀", "Şans biraz da cesaret demek. Yeni yılda kendine bir şans ver."),
         ] : [
             ("{d} days to the new year 🌱", "However hard this year was, it made you stronger. Take a moment to thank yourself."),
             ("A small reminder ✨", "You don't have to finish everything. What you managed today is enough."),
@@ -58,6 +70,18 @@ extension Strings {
             ("It grows when shared 🎁", "The best gift is your time. Spend some with someone you love this week."),
             ("Travel light 🍂", "You can leave what feels heavy in this year. Let the new one start light."),
             ("When the night is darkest 🌙", "Morning is close. Hard days pass, and you are stronger than them."),
+            ("A kindness for today 🌼", "Do something small and kind for yourself today: a cup of tea, a short walk or a favourite song."),
+            ("{d} days to the new year 💫", "Most of what worried you this time last year is behind you now. Today's worries will pass too."),
+            ("A gratitude list 📝", "Think of three things you're grateful for today. It's fine if they're small."),
+            ("The people beside you 💛", "There are people who love you just as you are. Think of one of them today."),
+            ("Rest is a step too 😴", "Pausing isn't falling behind. Sometimes the best progress is a little rest."),
+            ("Your dreams are waiting 🎈", "Take one small step next year towards the dream you keep putting off."),
+            ("{d} days to the new year 🌸", "Talk to yourself the way you'd talk to your best friend."),
+            ("Don't dim your light 🔆", "You brighten someone's day just by being you, even when you don't notice."),
+            ("One step is enough 👣", "You don't have to see the whole staircase. Just take the first step."),
+            ("Smile 😊", "Notice one small thing that makes you smile today, and smile a little longer."),
+            ("Give yourself time ⏳", "Some things take time. Give that time to yourself too."),
+            ("{d} days to the new year 🍀", "Luck is partly courage. Give yourself a chance next year."),
         ]
     }
     var countdownFinal: [(title: String, body: String)] {

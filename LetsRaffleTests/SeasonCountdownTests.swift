@@ -12,15 +12,18 @@ final class SeasonCountdownTests: XCTestCase {
         calendar.date(from: DateComponents(year: y, month: m, day: d, hour: h, minute: min))!
     }
 
-    func testEveryOtherEveningUntilNewYearsEve() {
+    func testEveryEveningUntilNewYearsEve() {
         let items = SeasonCountdown.schedule(now: date(2026, 11, 18), calendar: calendar)
 
-        XCTAssertEqual(items.first?.date, date(2026, 11, 19, 19, 30))
-        XCTAssertEqual(items.first?.daysLeft, 43)
+        XCTAssertEqual(items.first?.date, date(2026, 11, 18, 19, 30))
+        XCTAssertEqual(items.first?.daysLeft, 44)
         let gaps = zip(items.dropLast(), items.dropLast().dropFirst()).map { calendar.dateComponents([.day], from: $0.date, to: $1.date).day }
-        XCTAssertTrue(gaps.allSatisfy { $0 == 2 })
+        XCTAssertTrue(gaps.allSatisfy { $0 == 1 })
         XCTAssertEqual(items.last, .init(date: date(2026, 12, 31, 20, 0), daysLeft: 1, isNewYearsEve: true))
-        XCTAssertLessThan(items.count, 40, "iOS keeps at most 64 pending local notifications")
+        XCTAssertEqual(items.count, 44, "18 Nov → 30 Dec, plus New Year's Eve")
+        let early = SeasonCountdown.schedule(now: date(2026, 11, 1, 8), calendar: calendar)
+        XCTAssertEqual(early.count, SeasonCountdown.maxPending + 1, "stays under the 64 pending notifications iOS allows")
+        XCTAssertTrue(early.last!.isNewYearsEve)
     }
 
     func testRescheduleDoesNotShiftTheDates() {
@@ -29,7 +32,7 @@ final class SeasonCountdownTests: XCTestCase {
         XCTAssertEqual(Array(monday.drop { $0 < tuesday[0] }), tuesday)
         // already past this evening's time: starts with the next one
         let lateEvening = SeasonCountdown.schedule(now: date(2026, 11, 19, 21), calendar: calendar)
-        XCTAssertEqual(lateEvening.first?.date, date(2026, 11, 21, 19, 30))
+        XCTAssertEqual(lateEvening.first?.date, date(2026, 11, 20, 19, 30))
     }
 
     func testNothingOutsideTheSeason() {
@@ -42,7 +45,7 @@ final class SeasonCountdownTests: XCTestCase {
         let items = SeasonCountdown.schedule(now: date(2026, 11, 18), calendar: calendar)
         let first = SeasonCountdown.message(for: items[0], index: 0, t: .tr)
         let second = SeasonCountdown.message(for: items[1], index: 1, t: .tr)
-        XCTAssertEqual(first.title, "Yeni yıla 43 gün 🌱")
+        XCTAssertEqual(first.title, "Yeni yıla 44 gün 🌱")
         XCTAssertNotEqual(first.title, second.title)
         for (index, item) in items.enumerated() {
             for t in [Strings.tr, Strings.en] {
