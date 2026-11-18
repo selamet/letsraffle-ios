@@ -16,13 +16,22 @@ struct Participation: Codable, Identifiable, Equatable, Hashable {
     let joinedAt: Date
     /// Cached once revealed so the result (and widget) work offline.
     var result: MatchResult?
+    /// The account that joined on this device; `nil` for a join made without an account.
+    var ownerId: Int?
 }
 
 /// Persists joined draws in the Keychain (they contain participant tokens).
+///
+/// One device can be used with several accounts, so every entry remembers the account that
+/// joined, and only the signed-in account's entries are visible (`items`). Joins made without an
+/// account belong to whoever signs in next on this device.
 @MainActor
 @Observable
 final class ParticipationStore {
-    private(set) var items: [Participation] = []
+    /// Every entry on this device, for all accounts.
+    private var all: [Participation] = []
+    /// The signed-in account, or `nil` when using the app without one.
+    private(set) var ownerId: Int?
     private let service: String
     private let account = "participations"
 
@@ -31,9 +40,30 @@ final class ParticipationStore {
         load()
     }
 
+    /// The current account's draws (or, without an account, the draws joined without one).
+    var items: [Participation] { all.filter { $0.ownerId == ownerId } }
+
+    /// Switches to another account. Entries without an owner (joined without an account, or saved
+    /// before entries had owners) are handed to the account that signs in.
+    func setOwner(_ id: Int?) {
+        var changed = false
+        if let id {
+            for index in all.indices where all[index].ownerId == nil {
+                if all.contains(where: { $0.ownerId == id && $0.inviteCode == all[index].inviteCode }) { continue }
+                all[index].ownerId = id
+                changed = true
+            }
+        }
+        guard changed || ownerId != id else { return }
+        ownerId = id
+        changed ? save() : WidgetSync.shared.update(participations: items)
+    }
+
     func add(_ participation: Participation) {
-        items.removeAll { $0.inviteCode == participation.inviteCode }
-        items.insert(participation, at: 0)
+        var participation = participation
+        participation.ownerId = ownerId
+        all.removeAll { $0.inviteCode == participation.inviteCode && $0.ownerId == ownerId }
+        all.insert(participation, at: 0)
         save()
     }
 
@@ -42,31 +72,32 @@ final class ParticipationStore {
     }
 
     func storeResult(_ result: MatchResult, for inviteCode: String) {
-        guard let index = items.firstIndex(where: { $0.inviteCode == inviteCode }) else { return }
-        items[index].result = result
+        guard let index = all.firstIndex(where: { $0.inviteCode == inviteCode && $0.ownerId == ownerId }) else { return }
+        all[index].result = result
         save()
     }
 
     func remove(_ inviteCode: String) {
-        items.removeAll { $0.inviteCode == inviteCode }
+        all.removeAll { $0.inviteCode == inviteCode && $0.ownerId == ownerId }
         save()
     }
 
+    /// Removes the current account's entries; other accounts on this device keep theirs.
     func removeAll() {
-        items = []
+        all.removeAll { $0.ownerId == ownerId }
         save()
     }
 
     private func load() {
         guard let data = Keychain.read(service: service, account: account),
               let decoded = try? JSONCoding.decoder.decode([Participation].self, from: data) else { return }
-        items = decoded
+        all = decoded
         WidgetSync.shared.update(participations: items)
     }
 
     private func save() {
         WidgetSync.shared.update(participations: items)
-        if let data = try? JSONCoding.encoder.encode(items) {
+        if let data = try? JSONCoding.encoder.encode(all) {
             Keychain.write(data, service: service, account: account)
         }
     }

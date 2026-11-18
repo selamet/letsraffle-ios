@@ -32,7 +32,12 @@ struct LetsRaffleApp: App {
                 .preferredColorScheme(settings.appearance.colorScheme)
                 .tint(Palette.brand)
                 .task { await setUpPush() }
-                .onChange(of: session.state) { _, _ in Task { await push.sync() } }
+                .onChange(of: session.state, initial: true) { _, state in
+                    // Each account only sees the draws it joined on this device; wait for the
+                    // stored session to be restored before deciding whose draws to show.
+                    if state != .restoring { participations.setOwner(session.user?.id) }
+                    Task { await push.sync() }
+                }
                 .onChange(of: settings.notificationsEnabled) { _, enabled in Task { await push.setEnabled(enabled) } }
                 .onChange(of: settings.language, initial: true) { _, language in
                     WidgetSync.shared.update(language: language)
