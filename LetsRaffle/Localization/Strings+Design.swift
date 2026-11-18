@@ -26,35 +26,49 @@ extension Strings {
     var tryWithoutAccount: String { l("Hesap açmadan dene:", "Try without an account:") }
     var manualDraw: String { l("Manuel çekiliş", "Manual draw") }
 
-    // New Year countdown (local notifications every other evening; "{d}" = days left)
-    var countdownSetting: String { l("Yılbaşı geri sayımı", "New Year countdown") }
-    var pushItem4: String { l("Yılbaşına kadar iki günde bir geri sayım", "A New Year countdown every other evening") }
+    // New Year wishes: local notifications every other evening, kind words rather than ads ("{d}" = days left)
+    var countdownSetting: String { l("Yeni yıl dilekleri", "New Year wishes") }
+    var pushItem4: String { l("Yılbaşına kadar iki günde bir güzel dilekler", "Kind words every other evening until New Year") }
     var countdownEveTitle: String { l("Mutlu yıllar! 🎆", "Happy New Year! 🎆") }
-    var countdownEveBody: String { l("Yeni yılın sağlık, mutluluk ve güzel hediyelerle gelsin. Lets Raffle'dan sevgiler!", "Wishing you a year full of joy and good gifts. Love from Lets Raffle!") }
+    var countdownEveBody: String { l("Yeni yılın umutla, sağlıkla ve sevdiklerinle dolu olsun. İyi ki varsın.", "May your new year be full of hope, health and the people you love. We're glad you're here.") }
     var countdownMessages: [(title: String, body: String)] {
         isTR ? [
-            ("Yılbaşına {d} gün kaldı 🎄", "Çekilişini kurdun mu? Linki paylaş, herkes katılsın."),
-            ("{d} gün sonra yeni yıl! 🎁", "Noel Baba torbasını hazırlıyor. Senin hediye listen hazır mı?"),
-            ("Geri sayım sürüyor ✨", "Yılbaşına {d} gün var. Ofis çekilişi için QR'lı afişi duvara as."),
-            ("Noel Baba listeyi kontrol ediyor 🎅", "Yılbaşına {d} gün kaldı. Bu yıl kimin hediyesini alacaksın?"),
-            ("Kar yağsın, çekiliş başlasın ❄️", "Yılbaşına {d} gün kaldı. Sıcak bir içecek, güzel bir çekiliş."),
-            ("Hediye avı zamanı 🛍️", "Yılbaşına {d} gün kaldı. Eşleşmeni gördüysen hediyeni seçmeye başla."),
+            ("Yeni yıla {d} gün 🌱", "Bu yıl ne kadar zorlandıysan o kadar güçlendin. Kendine bunun için bir teşekkür et."),
+            ("Küçük bir hatırlatma ✨", "Her şeyi bitirmek zorunda değilsin. Bugün yapabildiklerin de yeterli."),
+            ("Bir nefes al 🕯️", "Yılın kalan {d} gününde kendine biraz yavaşlama izni ver."),
+            ("Güzel şeyler yolda 🌟", "Yeni yıl, yeni bir sayfa demek. Kalem hâlâ senin elinde."),
+            ("Kendine iyi bak 🤍", "Bugün sevdiğin birine bir mesaj at. Bazen iyi gelen tek şey kısa bir merhabadır."),
+            ("Bu yıldan bir anı 📸", "Bu yıl seni gülümseten bir anı düşün. Yeni yıla onu da yanında götür."),
+            ("Umut da bir alışkanlık ☀️", "Yarın için küçük bir şey dile. Büyük değişimler küçük dileklerle başlar."),
+            ("Yeni yıla {d} gün ❄️", "Mükemmel olmak zorunda değilsin; olduğun hâlinle değerlisin."),
+            ("Kendine bir söz ver 🌿", "Yeni yılda kendine biraz daha sabırlı ve şefkatli olacağına söz ver."),
+            ("Paylaştıkça çoğalır 🎁", "En güzel hediye birine ayırdığın zaman. Bu hafta sevdiğin birine vakit ayır."),
+            ("Hafifle 🍂", "Taşıması ağır gelenleri bu yılda bırakabilirsin. Yeni yıl hafif başlasın."),
+            ("Gece en karanlıkken 🌙", "Sabah yakındır. Zor günler de geçer; sen onlardan daha güçlüsün."),
         ] : [
-            ("{d} days until New Year 🎄", "Have you set up your Secret Santa? Share the link and let everyone join."),
-            ("New Year in {d} days! 🎁", "Santa is packing his sack. Is your gift list ready?"),
-            ("The countdown is on ✨", "{d} days to go. Pin the QR poster up for the office draw."),
-            ("Santa is checking his list 🎅", "{d} days until New Year. Who are you buying for this year?"),
-            ("Let it snow ❄️", "{d} days until New Year. A warm drink and a good draw."),
-            ("Time to go gift hunting 🛍️", "{d} days to go. Seen your match? Start picking the gift."),
+            ("{d} days to the new year 🌱", "However hard this year was, it made you stronger. Take a moment to thank yourself."),
+            ("A small reminder ✨", "You don't have to finish everything. What you managed today is enough."),
+            ("Take a breath 🕯️", "Give yourself permission to slow down a little in the {d} days left this year."),
+            ("Good things are coming 🌟", "A new year is a new page, and the pen is still in your hand."),
+            ("Be gentle with yourself 🤍", "Send a message to someone you love today. Sometimes a simple hello is all it takes."),
+            ("A memory from this year 📸", "Think of a moment that made you smile this year. Take it with you into the next one."),
+            ("Hope is a habit ☀️", "Wish for one small thing for tomorrow. Big changes start with small wishes."),
+            ("{d} days to the new year ❄️", "You don't have to be perfect. You are enough just as you are."),
+            ("Make yourself a promise 🌿", "Promise to be a little more patient and kind with yourself next year."),
+            ("It grows when shared 🎁", "The best gift is your time. Spend some with someone you love this week."),
+            ("Travel light 🍂", "You can leave what feels heavy in this year. Let the new one start light."),
+            ("When the night is darkest 🌙", "Morning is close. Hard days pass, and you are stronger than them."),
         ]
     }
     var countdownFinal: [(title: String, body: String)] {
         isTR ? [
-            ("Son düzlük! ⏰", "Yılbaşına {d} gün kaldı. Çekilişini daha yapmadıysan tam zamanı."),
-            ("Hediyeler paketlendi mi? 🎀", "Yılbaşına {d} gün kaldı. Kurdeleyi unutma!"),
+            ("Yeni yıla {d} gün kaldı 🎇", "Bu yıl nelere dayandığını hatırla. Yeni yılı fazlasıyla hak ediyorsun."),
+            ("Bir dilek tut 🌠", "Yeni yıl için kalbinden geçen dileği bir kâğıda yaz ve sakla."),
+            ("Teşekkür zamanı 🙏", "Öğrettikleri için bu yıla, dayandığın için kendine teşekkür et."),
         ] : [
-            ("Final stretch! ⏰", "{d} days until New Year. If you haven't drawn names yet, now is the time."),
-            ("Gifts wrapped yet? 🎀", "{d} days to go. Don't forget the ribbon!"),
+            ("{d} days left 🎇", "Remember everything you got through this year. You more than deserve the new one."),
+            ("Make a wish 🌠", "Write down the wish in your heart for the new year and keep it somewhere safe."),
+            ("Time to say thank you 🙏", "Thank this year for what it taught you, and yourself for getting through it."),
         ]
     }
 

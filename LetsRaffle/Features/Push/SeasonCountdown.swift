@@ -1,7 +1,8 @@
 import Foundation
 import UserNotifications
 
-/// Local "New Year is coming" notifications, every other evening from November until New Year's Eve.
+/// Kind New Year wishes as local notifications, every other evening from November until New Year's Eve.
+/// They are words of hope and encouragement, not advertising for the app.
 ///
 /// Scheduled on the device (no server involved) with the festive `jingle.caf` sound. The dates are
 /// tied to the calendar, not to when the app was last opened, so rescheduling on every launch never

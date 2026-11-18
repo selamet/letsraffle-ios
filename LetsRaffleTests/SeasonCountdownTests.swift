@@ -42,7 +42,7 @@ final class SeasonCountdownTests: XCTestCase {
         let items = SeasonCountdown.schedule(now: date(2026, 11, 18), calendar: calendar)
         let first = SeasonCountdown.message(for: items[0], index: 0, t: .tr)
         let second = SeasonCountdown.message(for: items[1], index: 1, t: .tr)
-        XCTAssertEqual(first.title, "Yılbaşına 43 gün kaldı 🎄")
+        XCTAssertEqual(first.title, "Yeni yıla 43 gün 🌱")
         XCTAssertNotEqual(first.title, second.title)
         for (index, item) in items.enumerated() {
             for t in [Strings.tr, Strings.en] {
