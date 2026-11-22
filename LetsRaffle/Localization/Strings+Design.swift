@@ -28,6 +28,15 @@ extension Strings {
 
     // New Year wishes: local notifications every other evening, kind words rather than ads ("{d}" = days left)
     var countdownSetting: String { l("Yeni yıl dilekleri", "New Year wishes") }
+    // First-launch notification welcome
+    var welcomeEyebrow: String { l("Mutlu Yıllar", "Happy New Year") }
+    var welcomeTitle: String { l("Sana güzel\u{00A0}dileklerimiz var\u{00A0}💌", "We have kind wishes for\u{00A0}you\u{00A0}💌") }
+    var welcomeBody: String { l("Yılbaşına kadar her akşam sana küçük bir umut, tatlı bir dilek göndermek istiyoruz.",
+                                "Every evening until New Year, we'd love to send you a little hope and a kind wish.") }
+    var welcomeItem1: String { l("Her akşam 19.30'da güzel bir dilek", "A kind wish every evening at 7:30") }
+    var welcomeItem2: String { l("Eşleşmen açıklandığı an", "The moment your match is revealed") }
+    var welcomeItem3: String { l("Hediye ve çekiliş hatırlatmaları", "Gift and draw reminders") }
+    var welcomeFootnote: String { l("İstediğin zaman Profil'den kapatabilirsin.", "You can turn them off anytime in Profile.") }
     var pushItem4: String { l("Yılbaşına kadar her akşam güzel dilekler", "Kind words every evening until New Year") }
     var countdownEveTitle: String { l("Mutlu yıllar! 🎆", "Happy New Year! 🎆") }
     var countdownEveBody: String { l("Yeni yılın umutla, sağlıkla ve sevdiklerinle dolu olsun. İyi ki varsın.", "May your new year be full of hope, health and the people you love. We're glad you're here.") }

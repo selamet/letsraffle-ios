@@ -21,6 +21,10 @@ final class PushManager {
     private(set) var authorization: UNAuthorizationStatus = .notDetermined
     /// Presents the pre-permission screen.
     var isPromptPresented = false
+    /// Which pre-permission screen is shown: the first-launch welcome or the in-context reminder.
+    private(set) var promptStyle: PromptStyle = .contextual
+
+    enum PromptStyle { case welcome, contextual }
 
     private let defaults: UserDefaults
     private var deviceToken: String?
@@ -47,15 +51,31 @@ final class PushManager {
         }
     }
 
+    /// On the very first launch, asks for permission with the New Year wishes screen.
+    func presentWelcomeIfNeeded() {
+        #if DEBUG
+        if DebugRoute.current == "welcome" { promptStyle = .welcome; isPromptPresented = true; return }
+        // Screenshot and QA launches use launch arguments; keep them free of the welcome screen.
+        if DebugRoute.current != nil || ProcessInfo.processInfo.arguments.contains(where: { $0.hasPrefix("-debug") || $0.hasSuffix("Demo") }) { return }
+        #endif
+        guard authorization == .notDetermined, !defaults.bool(forKey: Keys.welcomeSeen),
+              settings?.notificationsEnabled == true else { return }
+        promptStyle = .welcome
+        isPromptPresented = true
+    }
+
     /// Shows our pre-permission screen once, at a meaningful moment (after creating or joining a draw).
+    /// Someone who said "not now" on the welcome screen gets this one more chance.
     func promptIfAppropriate() {
         guard authorization == .notDetermined, !defaults.bool(forKey: Keys.promptDismissed),
-              settings?.notificationsEnabled == true else { return }
+              settings?.notificationsEnabled == true, !isPromptPresented else { return }
+        promptStyle = .contextual
         isPromptPresented = true
     }
 
     func allow() async {
         isPromptPresented = false
+        defaults.set(true, forKey: Keys.welcomeSeen)
         defaults.set(true, forKey: Keys.promptDismissed)
         let granted = (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound])) ?? false
         await refreshAuthorization()
@@ -64,7 +84,7 @@ final class PushManager {
 
     func later() {
         isPromptPresented = false
-        defaults.set(true, forKey: Keys.promptDismissed)
+        defaults.set(true, forKey: promptStyle == .welcome ? Keys.welcomeSeen : Keys.promptDismissed)
     }
 
     /// Reacts to the Profile switch.
@@ -119,6 +139,7 @@ final class PushManager {
 
     private enum Keys {
         static let promptDismissed = "push.promptDismissed"
+        static let welcomeSeen = "push.welcomeSeen"
     }
 }
 

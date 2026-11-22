@@ -52,8 +52,14 @@ struct LetsRaffleApp: App {
                     if !signedIn { WidgetSync.shared.update(draws: []) }
                 }
                 .fullScreenCover(isPresented: $push.isPromptPresented) {
-                    PushPromptView(push: push)
-                        .environment(\.strings, settings.strings)
+                    Group {
+                        if push.promptStyle == .welcome {
+                            NotificationWelcomeView(push: push)
+                        } else {
+                            PushPromptView(push: push)
+                        }
+                    }
+                    .environment(\.strings, settings.strings)
                 }
         }
     }
@@ -68,5 +74,6 @@ struct LetsRaffleApp: App {
         appDelegate.onDeviceToken = { [push] token in push.didRegister(deviceToken: token) }
         appDelegate.onOpen = { [router] destination in router.pendingDestination = destination }
         await push.refreshAuthorization()
+        push.presentWelcomeIfNeeded()
     }
 }
