@@ -44,7 +44,8 @@ final class DrawDetailStore {
         // Visual QA without a backend: `-detailDemo YES`
         if UserDefaults.standard.bool(forKey: "detailDemo") {
             draw = DrawDetail(id: 7, drawType: .dynamic, status: .active, inviteCode: inviteCode, requireAddress: false,
-                              requirePhone: false, drawDate: nil, createdAt: .now, language: "TR", participants: [])
+                              requirePhone: false, drawDate: UserDefaults.standard.bool(forKey: "confirmDemoScheduled") ? .now.addingTimeInterval(86_400) : nil,
+                              createdAt: .now, language: "TR", participants: Self.demoParticipants(UserDefaults.standard.integer(forKey: "confirmDemo")))
             phase = .loaded
             return
         }
@@ -83,6 +84,15 @@ final class DrawDetailStore {
             return false
         }
     }
+
+    #if DEBUG
+    private static func demoParticipants(_ count: Int) -> [Participant] {
+        let names = [("Ayşe", "Yılmaz"), ("Mehmet", "Demir"), ("Zeynep", "Kaya"), ("Can", "Öztürk"), ("Elif", "Şahin"), ("Burak", "Çelik"), ("Selin", "Arslan")]
+        return (0..<min(count, names.count)).map { i in
+            Participant(id: i + 1, firstName: names[i].0, lastName: names[i].1, email: "demo\(i)@letsraffle.co", address: nil, phone: nil, createdAt: .now)
+        }
+    }
+    #endif
 
     func execute(_ t: Strings) async -> Bool {
         guard let draw, canExecute else { return false }

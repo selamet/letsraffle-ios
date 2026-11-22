@@ -28,7 +28,12 @@ struct DrawDetailView: View {
         .background(Palette.page.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .statusBarStyle(.darkContent)
-        .task { await store.load(t) }
+        .task {
+            await store.load(t)
+            #if DEBUG
+            if UserDefaults.standard.integer(forKey: "confirmDemo") > 0 { confirmExecute = true }
+            #endif
+        }
         .fullScreenCover(isPresented: $showDrawing) {
             ManualSuccessView { showDrawing = false }
                 .statusBarStyle(.lightContent)
@@ -38,17 +43,17 @@ struct DrawDetailView: View {
             ScheduleSheet(store: store)
                 .presentationDetents([.medium])
         }
-        .confirmationDialog(t.runDrawConfirmTitle, isPresented: $confirmExecute, titleVisibility: .visible) {
-            Button(t.runDraw) {
-                Task {
-                    executed = await store.execute(t)
-                    if executed { showDrawing = true }
+        .overlay {
+            if confirmExecute, let draw = store.draw {
+                DrawConfirmPopup(draw: draw) {
+                    confirmExecute = false
+                    Task {
+                        executed = await store.execute(t)
+                        if executed { showDrawing = true }
+                    }
+                } onCancel: {
+                    confirmExecute = false
                 }
-            }
-            Button(t.cancel, role: .cancel) {}
-        } message: {
-            if let draw = store.draw {
-                Text(t.runDrawConfirmMessage(count: draw.participants.count, scheduled: draw.drawDate != nil))
             }
         }
         .alert(t.genericError, isPresented: Binding(get: { store.actionError != nil }, set: { if !$0 { store.actionError = nil } })) {

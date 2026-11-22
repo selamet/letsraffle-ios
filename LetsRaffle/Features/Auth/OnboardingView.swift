@@ -73,6 +73,8 @@ struct OnboardingView: View {
         VStack(spacing: 0) {
             Text(t.onbTitle)
                 .font(AppFont.display(28))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .foregroundStyle(Palette.brandText)
                 .multilineTextAlignment(.center)
             Text(t.onbBody)

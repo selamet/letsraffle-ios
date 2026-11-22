@@ -30,14 +30,13 @@ extension Strings {
     var countdownSetting: String { l("Yeni yıl dilekleri", "New Year wishes") }
     // Run-the-draw confirmation (organizer)
     var runDrawConfirmTitle: String { l("Çekilişi şimdi yapalım mı?", "Run the draw now?") }
-    func runDrawConfirmMessage(count: Int, scheduled: Bool) -> String {
-        var parts = [l("\(count) kişi eşleşecek; herkese bildirim ve e-posta gidecek. Çekiliş yapıldıktan sonra geri alınamaz ve yeni katılımcı eklenemez.",
-                       "\(count) people will be matched and everyone gets a push and an e-mail. Once the draw runs it can't be undone and no one else can join.")]
-        if scheduled { parts.append(l("Planlanan tarih beklenmeden şimdi yapılır.", "It runs now instead of on the scheduled date.")) }
-        if count == 3 { parts.append(l("Sadece 3 kişi varken herkes kimin kime çıktığını tahmin edebilir; birkaç kişi daha beklemek isteyebilirsin.",
-                                       "With only 3 people everyone can work out who got whom; you may want to wait for a few more.")) }
-        return parts.joined(separator: "\n\n")
-    }
+    func runConfirmPeople(_ n: Int) -> String { l("\(n) kişi eşleşecek", "\(n) people will be matched") }
+    var runConfirmNotify: String { l("Herkese bildirim ve e-posta gidecek", "Everyone gets a push and an e-mail") }
+    var runConfirmFinal: String { l("Geri alınamaz, sonradan kimse katılamaz", "It can't be undone and no one can join after") }
+    var runConfirmScheduled: String { l("Planlanan tarih beklenmeden şimdi yapılır", "It runs now instead of on the scheduled date") }
+    var runConfirmThree: String { l("Sadece 3 kişi varken herkes kimin kime çıktığını tahmin edebilir. Birkaç kişi daha beklemek isteyebilirsin.",
+                                    "With only 3 people everyone can work out who got whom. You may want to wait for a few more.") }
+    var runConfirmCancel: String { l("Vazgeç", "Not yet") }
 
     // First-launch notification welcome
     var welcomeEyebrow: String { l("Mutlu Yıllar", "Happy New Year") }
