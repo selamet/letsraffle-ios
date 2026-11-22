@@ -38,7 +38,7 @@ struct DrawDetailView: View {
             ScheduleSheet(store: store)
                 .presentationDetents([.medium])
         }
-        .confirmationDialog(t.runDraw, isPresented: $confirmExecute, titleVisibility: .visible) {
+        .confirmationDialog(t.runDrawConfirmTitle, isPresented: $confirmExecute, titleVisibility: .visible) {
             Button(t.runDraw) {
                 Task {
                     executed = await store.execute(t)
@@ -47,7 +47,9 @@ struct DrawDetailView: View {
             }
             Button(t.cancel, role: .cancel) {}
         } message: {
-            Text(t.minHint)
+            if let draw = store.draw {
+                Text(t.runDrawConfirmMessage(count: draw.participants.count, scheduled: draw.drawDate != nil))
+            }
         }
         .alert(t.genericError, isPresented: Binding(get: { store.actionError != nil }, set: { if !$0 { store.actionError = nil } })) {
             Button(t.ok) {}

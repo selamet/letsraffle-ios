@@ -28,6 +28,17 @@ extension Strings {
 
     // New Year wishes: local notifications every other evening, kind words rather than ads ("{d}" = days left)
     var countdownSetting: String { l("Yeni yıl dilekleri", "New Year wishes") }
+    // Run-the-draw confirmation (organizer)
+    var runDrawConfirmTitle: String { l("Çekilişi şimdi yapalım mı?", "Run the draw now?") }
+    func runDrawConfirmMessage(count: Int, scheduled: Bool) -> String {
+        var parts = [l("\(count) kişi eşleşecek; herkese bildirim ve e-posta gidecek. Çekiliş yapıldıktan sonra geri alınamaz ve yeni katılımcı eklenemez.",
+                       "\(count) people will be matched and everyone gets a push and an e-mail. Once the draw runs it can't be undone and no one else can join.")]
+        if scheduled { parts.append(l("Planlanan tarih beklenmeden şimdi yapılır.", "It runs now instead of on the scheduled date.")) }
+        if count == 3 { parts.append(l("Sadece 3 kişi varken herkes kimin kime çıktığını tahmin edebilir; birkaç kişi daha beklemek isteyebilirsin.",
+                                       "With only 3 people everyone can work out who got whom; you may want to wait for a few more.")) }
+        return parts.joined(separator: "\n\n")
+    }
+
     // First-launch notification welcome
     var welcomeEyebrow: String { l("Mutlu Yıllar", "Happy New Year") }
     var welcomeTitle: String { l("Sana güzel\u{00A0}dileklerimiz var\u{00A0}💌", "We have kind wishes for\u{00A0}you\u{00A0}💌") }
