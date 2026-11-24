@@ -13,6 +13,18 @@ final class APIClientTests: XCTestCase {
         client = APIClient(baseURL: baseURL, session: MockURLProtocol.makeSession(), tokenStore: store)
     }
 
+    // MARK: Client identification
+
+    func testEveryRequestIdentifiesTheIOSApp() async throws {
+        MockURLProtocol.handler = { _ in .init(status: 200, body: Fixtures.tokenResponse(access: "a1", refresh: "r1")) }
+
+        _ = try await client.send(API.login(email: "test.user@example.com", password: "secret1"))
+
+        let header = try XCTUnwrap(MockURLProtocol.requests.first?.value(forHTTPHeaderField: "X-Client"))
+        XCTAssertTrue(header.hasPrefix("ios/"), header)
+        XCTAssertEqual(header, AppConfig.clientHeader)
+    }
+
     // MARK: Decoding real response shapes
 
     func testLoginDecodesSnakeCaseTokenResponse() async throws {
