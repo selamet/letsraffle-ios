@@ -1,5 +1,6 @@
 import EventKit
 import EventKitUI
+import StoreKit
 import SwiftUI
 
 /// The reveal, staged like the website: "Mutlu Yıllar" → Santa draws a name →
@@ -19,6 +20,7 @@ struct RevealView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AppSettings.self) private var settings
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.requestReview) private var requestReview
 
     init(inviteCode: String, api: APIClient, participations: ParticipationStore, isSignedIn: Bool) {
         _store = State(initialValue: RevealStore(inviteCode: inviteCode, api: api, participations: participations, isSignedIn: isSignedIn))
@@ -82,6 +84,15 @@ struct RevealView: View {
             santaReady = false
             try? await Task.sleep(for: .seconds(reduceMotion ? 0.3 : 3.4))
             if !Task.isCancelled { withAnimation(.easeOut(duration: 0.4)) { santaReady = true } }
+        }
+        .task(id: isResult) {
+            // Once the match has sunk in, ask for a rating (at most once per app version).
+            guard isResult else { return }
+            try? await Task.sleep(for: .seconds(2.5))
+            let prompt = ReviewPrompt()
+            guard !Task.isCancelled, prompt.shouldAsk else { return }
+            prompt.markAsked()
+            requestReview()
         }
         .task(id: isResult) {
             // Once the match is on screen, line up the "have you bought the gift?" nudge.

@@ -21,11 +21,13 @@ enum AppConfig {
         return id.isEmpty ? nil : id
     }
 
-    /// Sent as `X-Client` so the API can record that a draw, sign-up or join came from the app.
-    static var clientHeader: String {
-        let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
-        return "ios/\(short)"
+    /// Marketing version, e.g. "1.0.2".
+    static var shortVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     }
+
+    /// Sent as `X-Client` so the API can record that a draw, sign-up or join came from the app.
+    static var clientHeader: String { "ios/\(shortVersion)" }
 
     static var version: String {
         let info = Bundle.main.infoDictionary
